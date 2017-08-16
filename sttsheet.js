@@ -5,14 +5,37 @@
 // Star Trek Timelines content and materials are trademarks and copyrights of Disruptor Beam: https://www.disruptorbeam.com/games/star-trek-timelines/
 // I have no affiliation with Disruptor Beam or any of its partners.
 
-var regedit = require('regedit')
 var request = require('request');
+
+var regedit = null;
+try
+{
+	regedit = require('regedit');
+}
+catch(err)
+{
+	regedit = null;
+}
 
 function getAccessToken(callback)
 {
 	if (process.argv.length <= 2)
 	{
+		if (!regedit)
+		{
+			console.log('RegEdit module not found. Pass the access token as a parameter!');
+			callback(null);
+			return;
+		}
+
 		regedit.list('HKCU\\Software\\DisruptorBeam\\Star Trek', function(err, result) {
+			if (!result)
+			{
+				console.log('Registry key not found! Make sure you installed the Steam app and logged in, or pass the access token as a parameter!');
+				callback(null);
+				return;
+			}
+
 			for (var prop in result['HKCU\\Software\\DisruptorBeam\\Star Trek'].values)
 			{
 				if (prop.includes('access_token'))
@@ -25,7 +48,15 @@ function getAccessToken(callback)
 
 					// We have the token, return
 					callback(reg.token);
+					return;
 				}
+			}
+
+			if (!result)
+			{
+				console.log('Access token not found in the registry! Make sure you installed the Steam app and logged in, or pass the access token as a parameter!');
+				callback(null);
+				return;
 			}
 		});
 	}
@@ -102,6 +133,9 @@ function finishedLoading()
 
 getAccessToken(function(token)
 {
+	if (!token)
+		return;
+
 	const options = { method: 'GET', qs: { client_api: 7, access_token: token } };
 
 	options.uri = 'https://stt.disruptorbeam.com/player';
