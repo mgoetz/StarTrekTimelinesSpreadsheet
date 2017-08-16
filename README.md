@@ -20,15 +20,14 @@ First, you need to obtain an access token. If you're running on a Windows PC, in
 
 If you're not running on a Windows PC or don't want to install the Steam application, you need to follow the steps below for obtaining an access token:
 
-1. Open Chrome and navigate to Facebook
-2. Hit F12 and switch to the Network tab in the debug pane that opens
-3. Now navigate to Star Trek Timelines on the page and wait until you get the "Play >>" link
-4. Back in the debug page, enter "stt.disruptorbeam.com/player" in the Filter input. Select the first item in the list of requests.
-5. On the right, you should see something like this:
+1. Open Chrome and hit F12 and switch to the Network tab in the debug pane that opens
+2. Now navigate to [Star Trek Timelines](https://apps.facebook.com/sttimelines) on the page and wait until you get the "Play >>" link
+3. Back in the debug page, enter "stt.disruptorbeam.com/player" in the Filter input. Select the first item in the list of requests.
+4. On the right, you should see something like this:
 
 ![Screenshot](/screenshot.png "Screenshot")
 
-6. Copy the access_token, which should be in this format: "123e4567-e89b-12d3-a456-426655440000"
+5. Copy the access_token, which should be in this format: "123e4567-e89b-12d3-a456-426655440000"
 
 *NOTE*: you need to repeat this process about once every 2 weeks, as the access token expires after a set period of time.
 
