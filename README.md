@@ -17,6 +17,9 @@ If you're not running on a Windows PC or don't want to install the Steam applica
 6. Copy the access_token, which should be in this format: "123e4567-e89b-12d3-a456-426655440000"
 
 ## Generating the spreadsheet
-Once you got the access token, you can generate a spreadsheet by invoking the script with `node sttsheet.js [access_token]`.
+Once you got the access token, you can generate a spreadsheet by invoking the script with:
+```
+node sttsheet.js [access_token]
+```
 
-If you have the Steam app installed, you don't need to pass a parameter; if you don't, replace [[access_token]] with the value you copied from Chrome.
+If you have the Steam app installed, you don't need to pass a parameter; if you don't, replace [access_token] with the value you copied from Chrome.
