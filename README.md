@@ -18,7 +18,7 @@ npm install regedit
 ## Get an access token
 First, you need to obtain an access token. If you're running on a Windows PC, install the free Star Trek Timelines [Steam application](http://store.steampowered.com/app/600750/Star_Trek_Timelines/), then open it at least once to log in.
 
-If you're not running on a Windows PC or don't want to install the Steam application, you need to follow the steps below for obtaining an access token:
+If you're not running on a Windows PC or don't want to install the Steam application, you can use the Facebook application through your browser. Please follow the steps below for obtaining an access token:
 
 1. Open Chrome and hit F12 and switch to the Network tab in the debug pane that opens
 2. Now navigate to [Star Trek Timelines](https://apps.facebook.com/sttimelines) on the page and wait until you get the "Play >>" link
