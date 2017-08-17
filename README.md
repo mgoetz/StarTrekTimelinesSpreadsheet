@@ -7,12 +7,13 @@ A tool to ease with crew management in Star Trek Timelines
 
 Star Trek Timelines content and materials are trademarks and copyrights of [Disruptor Beam](https://www.disruptorbeam.com/games/star-trek-timelines/); I have no affiliation with Disruptor Beam or any of its partners.
 
-## Install node.js
+## Installation
+Clone or download and extract the repository in a folder on your device.
+
 Download and install [node.js](https://nodejs.org/) on your computer.
 Install a few needed npm packages:
 ```
-npm install request
-npm install regedit
+npm install
 ```
 
 ## Get an access token

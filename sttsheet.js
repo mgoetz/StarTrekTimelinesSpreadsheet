@@ -5,9 +5,15 @@
 // Star Trek Timelines content and materials are trademarks and copyrights of Disruptor Beam: https://www.disruptorbeam.com/games/star-trek-timelines/
 // I have no affiliation with Disruptor Beam or any of its partners.
 
+// We need the request module for making the HTTP requests to retireve the data
 var request = require('request');
 
-var regedit = null;
+// Use the json2csv module for generating a nice comma separated file out of the array without all the manual string concatenations
+var json2csv = require('json2csv');
+
+// If the regedit module is available, load it. We use the regedit module to retrieve the access token from registry
+// on Windows machines that have the Steam Star Trek Timelines app installed
+var regedit;
 try
 {
 	regedit = require('regedit');
@@ -17,6 +23,7 @@ catch(err)
 	regedit = null;
 }
 
+// Function attempts to retrieve the access token, either from registry or from the argument list
 function getAccessToken(callback)
 {
 	if (process.argv.length <= 2)
@@ -74,63 +81,65 @@ var allcrew = null;
 
 function matchCrew(crew_avatars, character)
 {
-	var allItems = new Object();
-
-	crew_avatars.forEach(function (crew)
+	function getDefaults(id)
 	{
-		allItems[crew.id] = {
+		var crew = crew_avatars.find(function (archetype) { return archetype.id === id; });
+		return {
 			id: crew.id, name: crew.name, short_name: crew.short_name, max_rarity: crew.max_rarity,
-			level: 0, rarity: 0, frozen: 0, buyback: false, traits: '""',
+			level: 0, rarity: 0, frozen: 0, buyback: false, traits: '',
 			command_skill: { 'core': 0, 'min': 0, 'max': 0 }, science_skill: { 'core': 0, 'min': 0, 'max': 0 },
 			security_skill: { 'core': 0, 'min': 0, 'max': 0 }, engineering_skill: { 'core': 0, 'min': 0, 'max': 0 },
 			diplomacy_skill: { 'core': 0, 'min': 0, 'max': 0 }, medicine_skill: { 'core': 0, 'min': 0, 'max': 0 }
 		};
-	});
+	}
 
-	character.stored_immortals.forEach(function (crew)
-	{
-		allItems[crew.id].frozen = crew.quantity;
-	});
+	var roster = [];
 
+	// Add all the crew in the active roster
 	character.crew.forEach(function (crew)
 	{
-		allItems[crew.archetype_id].level = crew.level;
-		allItems[crew.archetype_id].rarity = crew.rarity;
-		allItems[crew.archetype_id].buyback = crew.in_buy_back_state;
+		rosterEntry = getDefaults(crew.archetype_id);
+		rosterEntry.level = crew.level;
+		rosterEntry.rarity = crew.rarity;
+		rosterEntry.buyback = crew.in_buy_back_state;
 
 		for (var skill in crew.skills)
 		{
-			allItems[crew.archetype_id][skill].core = crew.skills[skill].core;
-			allItems[crew.archetype_id][skill].min = crew.skills[skill].range_min;
-			allItems[crew.archetype_id][skill].max = crew.skills[skill].range_max;
+			rosterEntry[skill].core = crew.skills[skill].core;
+			rosterEntry[skill].min = crew.skills[skill].range_min;
+			rosterEntry[skill].max = crew.skills[skill].range_max;
 		}
 
-		allItems[crew.archetype_id].traits = '"' + crew.traits.concat(crew.traits_hidden).join() + '"';
+		rosterEntry.traits = crew.traits.concat(crew.traits_hidden).join();
+		roster.push(rosterEntry);
 	});
 
-	return allItems;
+	// Now add all the frozen crew (note: for these, we don't actually get the stats)
+	character.stored_immortals.forEach(function (crew) {
+		rosterEntry = getDefaults(crew.id);
+		rosterEntry.frozen = crew.quantity;
+		rosterEntry.level = 100;
+		rosterEntry.rarity = rosterEntry.max_rarity;
+		roster.push(rosterEntry);
+	});
+
+	return roster;
 }
 
+// Function gets called when we're done downloading all the data we need
 function finishedLoading()
 {
-	var AllItems = matchCrew(allcrew.crew_avatars, player.player.character);
+	var allItems = matchCrew(allcrew.crew_avatars, player.player.character);
 
-	console.log('id,name,short_name,max_rarity,rarity,level,frozen,buyback,command,command_min,command_max,diplomacy,diplomacy_min,diplomacy_max,engineering,engineering_min,engineering_max,medicine,medicine_min,medicine_max,science,science_min,science_max,security,security_min,security_max,traits');
+	var fields = ['id', 'name', 'short_name', 'max_rarity', 'rarity', 'level', 'frozen', 'buyback', 'command_skill.core', 'command_skill.min', 'command_skill.max', 'diplomacy_skill.core',
+		'diplomacy_skill.min', 'diplomacy_skill.max', 'engineering_skill.core', 'engineering_skill.min', 'engineering_skill.max', 'medicine_skill.core', 'medicine_skill.min', 'medicine_skill.max',
+		'science_skill.core', 'science_skill.min', 'science_skill.max', 'security_skill.core', 'security_skill.min', 'security_skill.max', 'traits'];
 
-	for (var item in AllItems)
-	{
-		console.log(AllItems[item].id + ',"' + AllItems[item].name + '",' + AllItems[item].short_name + ',' + AllItems[item].max_rarity + ',' + AllItems[item].rarity + ',' + AllItems[item].level
-			+ ',' + AllItems[item].frozen + ',' + AllItems[item].buyback + ','
-			+ AllItems[item].command_skill.core + ',' + AllItems[item].command_skill.min + ',' + AllItems[item].command_skill.max + ','
-			+ AllItems[item].diplomacy_skill.core + ',' + AllItems[item].diplomacy_skill.min + ',' + AllItems[item].diplomacy_skill.max + ','
-			+ AllItems[item].engineering_skill.core + ',' + AllItems[item].engineering_skill.min + ',' + AllItems[item].engineering_skill.max + ','
-			+ AllItems[item].medicine_skill.core + ',' + AllItems[item].medicine_skill.min + ',' + AllItems[item].medicine_skill.max + ','
-			+ AllItems[item].science_skill.core + ',' + AllItems[item].science_skill.min + ',' + AllItems[item].science_skill.max + ','
-			+ AllItems[item].security_skill.core + ',' + AllItems[item].security_skill.min + ',' + AllItems[item].security_skill.max + ','
-			+ AllItems[item].traits);
-	}
+	var csv = json2csv({ data: allItems, fields: fields });
+	console.log(csv);
 }
 
+// main code of the tool
 getAccessToken(function(token)
 {
 	if (!token)

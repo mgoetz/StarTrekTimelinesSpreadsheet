@@ -1,0 +1,23 @@
+{
+  "name": "startrektimelines-spreadsheet",
+  "version": "0.0.2",
+  "description": "A tool to ease with crew management in Star Trek Timelines",
+  "main": "sttsheet.js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/IAmPicard/StarTrekTimelinesSpreadsheet.git"
+  },
+  "author": "IAmPicard",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/IAmPicard/StarTrekTimelinesSpreadsheet/issues"
+  },
+  "homepage": "https://github.com/IAmPicard/StarTrekTimelinesSpreadsheet",
+  "dependencies": {
+    "json2csv": "^3.0.0",
+    "request": "^2.0.0"
+  },
+  "optionalDependencies": {
+    "regedit": "^2.0.0"
+  }
+}
