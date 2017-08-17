@@ -15,7 +15,8 @@
   "homepage": "https://github.com/IAmPicard/StarTrekTimelinesSpreadsheet",
   "dependencies": {
     "json2csv": "^3.0.0",
-    "request": "^2.0.0"
+    "request": "^2.0.0",
+    "command-line-args" : "^4.0.0"
   },
   "optionalDependencies": {
     "regedit": "^2.0.0"

@@ -11,6 +11,9 @@ var request = require('request');
 // Use the json2csv module for generating a nice comma separated file out of the array without all the manual string concatenations
 var json2csv = require('json2csv');
 
+// Easier to parse command line arguments with this module
+const commandLineArgs = require('command-line-args')
+
 // If the regedit module is available, load it. We use the regedit module to retrieve the access token from registry
 // on Windows machines that have the Steam Star Trek Timelines app installed
 var regedit;
@@ -23,10 +26,19 @@ catch(err)
 	regedit = null;
 }
 
+const optionDefinitions = [
+	{ name: 'crew', alias: 'c', type: Boolean, defaultValue: true },
+	{ name: 'items', alias: 'i', type: Boolean, defaultValue: false },
+	{ name: 'ships', alias: 's', type: Boolean, defaultValue: false },
+	{ name: 'accesstoken', type: String, defaultOption: true }
+];
+
+const options = commandLineArgs(optionDefinitions);
+
 // Function attempts to retrieve the access token, either from registry or from the argument list
 function getAccessToken(callback)
 {
-	if (process.argv.length <= 2)
+	if (!options.accesstoken)
 	{
 		if (!regedit)
 		{
@@ -79,7 +91,7 @@ var player = null;
 var config = null;
 var allcrew = null;
 
-function matchCrew(crew_avatars, character)
+function matchCrew(crew_avatars, character, trait_names)
 {
 	function getDefaults(id)
 	{
@@ -110,7 +122,7 @@ function matchCrew(crew_avatars, character)
 			rosterEntry[skill].max = crew.skills[skill].range_max;
 		}
 
-		rosterEntry.traits = crew.traits.concat(crew.traits_hidden).join();
+		rosterEntry.traits = crew.traits.concat(crew.traits_hidden).map(function (trait) { return trait_names[trait] ? trait_names[trait] : trait; }).join();
 		roster.push(rosterEntry);
 	});
 
@@ -129,14 +141,71 @@ function matchCrew(crew_avatars, character)
 // Function gets called when we're done downloading all the data we need
 function finishedLoading()
 {
-	var allItems = matchCrew(allcrew.crew_avatars, player.player.character);
+	if (options.items)
+	{
+		// Return details about the items
+		var fields = [
+			{
+				label: 'id',
+				value: 'archetype_id'
+			},
+			'name',
+			'quantity',
+			'rarity',
+			{
+				label: 'type',
+				value: function (row, field, data) {
+					return row.icon.file.replace("/items","").split("/")[1];
+				}
+			},
+			{
+				label: 'symbol',
+				value: function (row, field, data) {
+					return row.icon.file.replace("/items", "").split("/")[2];
+				}
+			},
+			{
+				label: 'details',
+				value: 'flavor'
+			}];
 
-	var fields = ['id', 'name', 'short_name', 'max_rarity', 'rarity', 'level', 'frozen', 'buyback', 'command_skill.core', 'command_skill.min', 'command_skill.max', 'diplomacy_skill.core',
-		'diplomacy_skill.min', 'diplomacy_skill.max', 'engineering_skill.core', 'engineering_skill.min', 'engineering_skill.max', 'medicine_skill.core', 'medicine_skill.min', 'medicine_skill.max',
-		'science_skill.core', 'science_skill.min', 'science_skill.max', 'security_skill.core', 'security_skill.min', 'security_skill.max', 'traits'];
+		var csv = json2csv({ data: player.player.character.items, fields: fields });
+		console.log(csv);
+	}
+	else if (options.ships)
+	{
+		// Return details about the ships
+		var fields = [
+			{
+				label: 'id',
+				value: 'archetype_id'
+			},
+			'name',
+			'level',
+			'max_level',
+			'rarity',
+			'shields',
+			'hull',
+			'attack',
+			'accuracy',
+			'evasion'
+			];
 
-	var csv = json2csv({ data: allItems, fields: fields });
-	console.log(csv);
+		var csv = json2csv({ data: player.player.character.ships, fields: fields });
+		console.log(csv);
+	}
+	else
+	{
+		// Return details about the crew (default)
+		var allItems = matchCrew(allcrew.crew_avatars, player.player.character, config.config.trait_names);
+
+		var fields = ['id', 'name', 'short_name', 'max_rarity', 'rarity', 'level', 'frozen', 'buyback', 'command_skill.core', 'command_skill.min', 'command_skill.max', 'diplomacy_skill.core',
+			'diplomacy_skill.min', 'diplomacy_skill.max', 'engineering_skill.core', 'engineering_skill.min', 'engineering_skill.max', 'medicine_skill.core', 'medicine_skill.min', 'medicine_skill.max',
+			'science_skill.core', 'science_skill.min', 'science_skill.max', 'security_skill.core', 'security_skill.min', 'security_skill.max', 'traits'];
+
+		var csv = json2csv({ data: allItems, fields: fields });
+		console.log(csv);
+	}
 }
 
 // main code of the tool

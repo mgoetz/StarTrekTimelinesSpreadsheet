@@ -33,7 +33,7 @@ If you're not running on a Windows PC or don't want to install the Steam applica
 *NOTE*: you need to repeat this process about once every 2 weeks, as the access token expires after a set period of time.
 
 ## Generating the spreadsheet
-Once you got the access token, you can generate a spreadsheet by invoking the script with:
+Once you got the access token, you can generate a spreadsheet of your crew by invoking the script with:
 ```
 node sttsheet.js [access_token] > filename.csv
 ```
@@ -43,3 +43,14 @@ If you have the Steam app installed you don't need to pass the `[access_token]` 
 If you don't have the Steam app installed, replace `[access_token]` with the value you copied from Chrome's debug pane.
 
 Open `filename.csv` with your spreadsheet application of choice and enjoy.
+
+### Other options
+If you want to generate a spreadsheet of your item stats instead, invoke the script with:
+```
+node sttsheet.js [-i|--items] [access_token] > filename.csv
+```
+
+Similarly, if you want to generate a spreadsheet of your ship stats, invoke the script with:
+```
+node sttsheet.js [-s|--ships] [access_token] > filename.csv
+```
