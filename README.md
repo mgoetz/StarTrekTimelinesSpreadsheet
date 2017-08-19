@@ -11,10 +11,6 @@ Star Trek Timelines content and materials are trademarks and copyrights of [Disr
 Clone or download and extract the repository in a folder on your device.
 
 Download and install [node.js](https://nodejs.org/) on your computer.
-Install a few needed npm packages:
-```
-npm install
-```
 
 ## Get an access token
 First, you need to obtain an access token. If you're running on a Windows PC, install the free Star Trek Timelines [Steam application](http://store.steampowered.com/app/600750/Star_Trek_Timelines/), then open it at least once to log in.
@@ -31,6 +27,22 @@ If you're not running on a Windows PC or don't want to install the Steam applica
 5. Copy the access_token, which should be in this format: "123e4567-e89b-12d3-a456-426655440000"
 
 *NOTE*: you need to repeat this process about once every 2 weeks, as the access token expires after a set period of time.
+
+## Before running the script
+
+On a Windows machine, open "Node.js command prompt" from the Start menu, and navigate to the folder wher you cloned or downloaded the tool. For example, if you extracted the zip in "D:\tool", you'd issue these commands:
+
+```
+Your environment has been set up for using Node.js 6.11.2 (x64) and npm.
+C:\Users\user>d:
+D:\Program Files\nodejs>cd d:\tool
+D:\tool>
+```
+
+If this is the first time using the tool, or you recently downloaded a new version, make sure you install its needed dependencies by running this command:
+```
+npm install
+```
 
 ## Generating the spreadsheet
 Once you got the access token, you can generate a spreadsheet of your crew by invoking the script with:
