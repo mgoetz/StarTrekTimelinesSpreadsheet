@@ -86,20 +86,56 @@ function getAccessToken(callback)
 	}
 }
 
+function queue(name) {
+	queue.q[name]++ || (queue.q[name] = 1);
+	return function (err) {
+		if (err && queue.e[name]) queue.e[name](err);
+		else if (err) throw err;
+		process.nextTick(function () {
+			queue.q[name]--;
+			queue.check(name);
+		});
+	}
+}
+queue.__proto__ = {
+	q: {},
+	c: {},
+	e: {},
+	check: function (name) { queue.q[name] == 0 && queue.c[name](); },
+	done: function (name, fn) { queue.c[name] = fn; },
+	err: function (name, fn) { queue.e[name] = fn; }
+}
+
 var waiting = 3;
 
 var player = null;
 var config = null;
 var allcrew = null;
 
-function matchCrew(crew_avatars, character, trait_names)
+function rosterFromCrew(rosterEntry, crew)
+{
+	rosterEntry.level = crew.level;
+	rosterEntry.rarity = crew.rarity;
+	rosterEntry.buyback = crew.in_buy_back_state;
+
+	for (var skill in crew.skills) {
+		rosterEntry[skill].core = crew.skills[skill].core;
+		rosterEntry[skill].min = crew.skills[skill].range_min;
+		rosterEntry[skill].max = crew.skills[skill].range_max;
+	}
+
+	rosterEntry.traits = crew.traits.concat(crew.traits_hidden).map(function (trait) { return config.config.trait_names[trait] ? config.config.trait_names[trait] : trait; }).join();
+	rosterEntry.rawTraits = crew.traits;
+}
+
+function matchCrew(crew_avatars, character, token, callback)
 {
 	function getDefaults(id)
 	{
 		var crew = crew_avatars.find(function (archetype) { return archetype.id === id; });
 		return {
-			id: crew.id, name: crew.name, short_name: crew.short_name, max_rarity: crew.max_rarity,
-			level: 0, rarity: 0, frozen: 0, buyback: false, traits: '', rawTraits: [],
+			id: crew.id, name: crew.name, short_name: crew.short_name, max_rarity: crew.max_rarity, symbol: crew.symbol,
+			level: 0, rarity: 0, frozen: 0, buyback: false, traits: '', rawTraits: [], portrait: crew.portrait.file,
 			command_skill: { 'core': 0, 'min': 0, 'max': 0 }, science_skill: { 'core': 0, 'min': 0, 'max': 0 },
 			security_skill: { 'core': 0, 'min': 0, 'max': 0 }, engineering_skill: { 'core': 0, 'min': 0, 'max': 0 },
 			diplomacy_skill: { 'core': 0, 'min': 0, 'max': 0 }, medicine_skill: { 'core': 0, 'min': 0, 'max': 0 }
@@ -112,19 +148,7 @@ function matchCrew(crew_avatars, character, trait_names)
 	character.crew.forEach(function (crew)
 	{
 		rosterEntry = getDefaults(crew.archetype_id);
-		rosterEntry.level = crew.level;
-		rosterEntry.rarity = crew.rarity;
-		rosterEntry.buyback = crew.in_buy_back_state;
-
-		for (var skill in crew.skills)
-		{
-			rosterEntry[skill].core = crew.skills[skill].core;
-			rosterEntry[skill].min = crew.skills[skill].range_min;
-			rosterEntry[skill].max = crew.skills[skill].range_max;
-		}
-
-		rosterEntry.traits = crew.traits.concat(crew.traits_hidden).map(function (trait) { return trait_names[trait] ? trait_names[trait] : trait; }).join();
-		rosterEntry.rawTraits = crew.traits;
+		rosterFromCrew(rosterEntry, crew);
 		roster.push(rosterEntry);
 	});
 
@@ -135,9 +159,38 @@ function matchCrew(crew_avatars, character, trait_names)
 		rosterEntry.level = 100;
 		rosterEntry.rarity = rosterEntry.max_rarity;
 		roster.push(rosterEntry);
+
+		loadFrozen(rosterEntry, token, queue('frozen'));
 	});
 
-	return roster;
+	queue.done('frozen', function () {
+		callback(roster);
+	});
+}
+
+function loadFrozen(rosterEntry, token, callback)
+{
+	const reqOptions = {
+		method: 'POST',
+		uri : 'https://stt.disruptorbeam.com/stasis_vault/immortal_restore_info',
+		qs: {
+			symbol: rosterEntry.symbol,
+			client_api: 7
+		},
+		headers: {
+			'Content-Type': 'application/x-www-form-urlencoded',
+			'Authorization': 'Bearer ' + new Buffer(token).toString('base64')
+		}
+	};
+	
+	request(reqOptions, function (error, response, body) {
+		if (!error && response.statusCode == 200) {
+			var crewJson = JSON.parse(body);
+
+			rosterFromCrew(rosterEntry, crewJson.crew);
+		}
+		callback();
+	});
 }
 
 // Function gets called when we're done downloading all the data we need
@@ -163,78 +216,78 @@ function finishedLoading(token)
 				console.log('Featured skill: ' + currentGauntlet.contest_data.featured_skill);
 				console.log('Traits: ' + currentGauntlet.contest_data.traits.join());
 
-				var allItems = matchCrew(allcrew.crew_avatars, player.player.character, config.config.trait_names);
+				matchCrew(allcrew.crew_avatars, player.player.character, token, function (roster) {
 
-				// TODO: magical numbers below; tune these (or get them as parameters for customization)
-				var featuredSkillBonus = 1.1;
-				var critBonusDivider = 3;
+					// TODO: magical numbers below; tune these (or get them as parameters for customization)
+					var featuredSkillBonus = 1.1;
+					var critBonusDivider = 3;
 
-				const skillList = [
-					'command_skill',
-					'science_skill',
-					'security_skill',
-					'engineering_skill',
-					'diplomacy_skill',
-					'medicine_skill'];
+					const skillList = [
+						'command_skill',
+						'science_skill',
+						'security_skill',
+						'engineering_skill',
+						'diplomacy_skill',
+						'medicine_skill'];
 
-				var gauntletCrew = allItems.map(function (crew) {
-					var newCrew = { id: crew.id, name: crew.name, crit: 5 };
+					var gauntletCrew = roster.map(function (crew) {
+						var newCrew = { id: crew.id, name: crew.name, crit: 5 };
+
+						skillList.forEach(function (skill) {
+							newCrew[skill] = crew[skill].min + crew[skill].max;
+						});
+
+						newCrew[currentGauntlet.contest_data.featured_skill] = newCrew[currentGauntlet.contest_data.featured_skill] * featuredSkillBonus;
+
+						currentGauntlet.contest_data.traits.forEach(function (trait) {
+							if (crew.rawTraits.includes(trait))
+								newCrew.crit += currentGauntlet.contest_data.crit_chance_per_trait;
+						});
+
+						skillList.forEach(function (skill) {
+							newCrew[skill] = newCrew[skill] * (100 + newCrew.crit / critBonusDivider) / 100;
+						});
+
+						return newCrew;
+					});
+
+					var sortedCrew = [];
+
+					function getScore(gauntletCrewItem, maxSkill) {
+						score = gauntletCrewItem[maxSkill]; // double account for preferred skill
+						skillList.forEach(function (skill) {
+							score += gauntletCrewItem[skill];
+						});
+
+						return score;
+					}
 
 					skillList.forEach(function (skill) {
-						newCrew[skill] = crew[skill].min + crew[skill].max;
+						gauntletCrew.sort(function (a, b) {
+							return b[skill] - a[skill];
+						});
+						console.log('Best overall for ' + skill + ' : ' + gauntletCrew[0].name)
+
+						// Get the first 2 in the final score sheet
+						sortedCrew.push({ 'id': gauntletCrew[0].id, 'name': gauntletCrew[0].name, 'score': getScore(gauntletCrew[0], skill) });
+						sortedCrew.push({ 'id': gauntletCrew[1].id, 'name': gauntletCrew[1].name, 'score': getScore(gauntletCrew[1], skill) });
 					});
 
-					newCrew[currentGauntlet.contest_data.featured_skill] = newCrew[currentGauntlet.contest_data.featured_skill] * featuredSkillBonus;
-
-					currentGauntlet.contest_data.traits.forEach(function (trait) {
-						if (crew.rawTraits.includes(trait))
-							newCrew.crit += currentGauntlet.contest_data.crit_chance_per_trait;
+					sortedCrew.sort(function (a, b) {
+						return b.score - a.score;
 					});
 
-					skillList.forEach(function (skill) {
-						newCrew[skill] = newCrew[skill] * (100 + newCrew.crit / critBonusDivider) / 100;
+					// Remove duplicates
+					var seen = {};
+					sortedCrew = sortedCrew.filter(function (item) {
+						return seen.hasOwnProperty(item.id) ? false : (seen[item.id] = true);
 					});
 
-					return newCrew;
+					// Get the first 5
+					sortedCrew = sortedCrew.slice(0, 5);
+
+					console.log('Based on the probabilistic algorithm my recommended selection is: ' + sortedCrew.map(function (crew) { return crew.name }).join(', '));
 				});
-
-				var sortedCrew = [];
-
-				function getScore(gauntletCrewItem, maxSkill)
-				{
-					score = gauntletCrewItem[maxSkill]; // double account for preferred skill
-					skillList.forEach(function (skill) {
-						score += gauntletCrewItem[skill];
-					});
-
-					return score;
-				}
-
-				skillList.forEach(function (skill) {
-					gauntletCrew.sort(function (a, b) {
-						return b[skill] - a[skill];
-					});
-					console.log('Best overall for ' + skill + ' : ' + gauntletCrew[0].name)
-
-					// Get the first 2 in the final score sheet
-					sortedCrew.push({ 'id': gauntletCrew[0].id, 'name': gauntletCrew[0].name, 'score': getScore(gauntletCrew[0], skill) });
-					sortedCrew.push({ 'id': gauntletCrew[1].id, 'name': gauntletCrew[1].name, 'score': getScore(gauntletCrew[1], skill) });
-				});
-
-				sortedCrew.sort(function (a, b) {
-					return b.score - a.score;
-				});
-
-				// Remove duplicates
-				var seen = {};
-				sortedCrew = sortedCrew.filter(function (item) {
-					return seen.hasOwnProperty(item.id) ? false : (seen[item.id] = true);
-				});
-
-				// Get the first 5
-				sortedCrew = sortedCrew.slice(0, 5);
-
-				console.log('Based on the probabilistic algorithm my recommended selection is: ' + sortedCrew.map(function (crew) { return crew.name }).join(', '));
 			}
 		});
 	}
@@ -294,14 +347,15 @@ function finishedLoading(token)
 	else
 	{
 		// Return details about the crew (default)
-		var allItems = matchCrew(allcrew.crew_avatars, player.player.character, config.config.trait_names);
+		matchCrew(allcrew.crew_avatars, player.player.character, token, function (roster) {
 
-		var fields = ['id', 'name', 'short_name', 'max_rarity', 'rarity', 'level', 'frozen', 'buyback', 'command_skill.core', 'command_skill.min', 'command_skill.max', 'diplomacy_skill.core',
-			'diplomacy_skill.min', 'diplomacy_skill.max', 'engineering_skill.core', 'engineering_skill.min', 'engineering_skill.max', 'medicine_skill.core', 'medicine_skill.min', 'medicine_skill.max',
-			'science_skill.core', 'science_skill.min', 'science_skill.max', 'security_skill.core', 'security_skill.min', 'security_skill.max', 'traits'];
+			var fields = ['id', 'name', 'short_name', 'max_rarity', 'rarity', 'level', 'frozen', 'buyback', 'command_skill.core', 'command_skill.min', 'command_skill.max', 'diplomacy_skill.core',
+				'diplomacy_skill.min', 'diplomacy_skill.max', 'engineering_skill.core', 'engineering_skill.min', 'engineering_skill.max', 'medicine_skill.core', 'medicine_skill.min', 'medicine_skill.max',
+				'science_skill.core', 'science_skill.min', 'science_skill.max', 'security_skill.core', 'security_skill.min', 'security_skill.max', 'traits'];
 
-		var csv = json2csv({ data: allItems, fields: fields });
-		console.log(csv);
+			var csv = json2csv({ data: roster, fields: fields });
+			console.log(csv);
+		});
 	}
 }
 
@@ -311,10 +365,10 @@ getAccessToken(function(token)
 	if (!token)
 		return;
 
-	const options = { method: 'GET', qs: { client_api: 7, access_token: token } };
+	const reqOptions = { method: 'GET', qs: { client_api: 7, access_token: token } };
 
-	options.uri = 'https://stt.disruptorbeam.com/player';
-	request(options, function(error, response, body) {
+	reqOptions.uri = 'https://stt.disruptorbeam.com/player';
+	request(reqOptions, function(error, response, body) {
 		if (!error && response.statusCode == 200)
 		{
 			player = JSON.parse(body);
@@ -323,8 +377,8 @@ getAccessToken(function(token)
 		}
 	});
 
-	options.uri = 'https://stt.disruptorbeam.com/config/platform';
-	request(options, function(error, response, body) {
+	reqOptions.uri = 'https://stt.disruptorbeam.com/config/platform';
+	request(reqOptions, function(error, response, body) {
 		if (!error && response.statusCode == 200)
 		{
 			config = JSON.parse(body);
@@ -333,8 +387,8 @@ getAccessToken(function(token)
 		}
 	});
 
-	options.uri = 'https://stt.disruptorbeam.com/character/get_avatar_crew_archetypes';
-	request(options, function(error, response, body) {
+	reqOptions.uri = 'https://stt.disruptorbeam.com/character/get_avatar_crew_archetypes';
+	request(reqOptions, function(error, response, body) {
 		if (!error && response.statusCode == 200)
 		{
 			allcrew = JSON.parse(body);
