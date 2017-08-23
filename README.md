@@ -67,6 +67,12 @@ Similarly, if you want to generate a spreadsheet of your ship stats, invoke the 
 node sttsheet.js [-s|--ships] [access_token] > filename.csv
 ```
 
+### Excel format
+If your spreadsheet application can open Excel files (.xlsx), you can export a single Excel workbook with all the stats. For this option, invoke the script with:
+```
+node sttsheet.js -e|--excel filename.xlsx [access_token]
+```
+
 ### Gauntlet crew recommendations
 The tool can recommend an optimal list of crew to use for your next gauntlet; it tries to compute the list of crew with the highest statistical score. It only works if you haven't already joined the gauntlet. To use this option, invoke the script with:
 ```

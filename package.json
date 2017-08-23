@@ -16,9 +16,10 @@
   "dependencies": {
     "json2csv": "^3.0.0",
     "request": "^2.0.0",
-    "command-line-args" : "^4.0.0"
+    "command-line-args": "^4.0.0"
   },
   "optionalDependencies": {
-    "regedit": "^2.0.0"
+    "regedit": "^2.0.0",
+    "exceljs": "^0.5.1"
   }
 }
