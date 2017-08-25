@@ -5,6 +5,8 @@ A tool to ease with crew management in Star Trek Timelines
 
 Star Trek Timelines content and materials are trademarks and copyrights of [Disruptor Beam](https://www.disruptorbeam.com/games/star-trek-timelines/); I have no affiliation with Disruptor Beam or any of its partners.
 
+![Screenshot tool](/Screenshot-Tool.png "Tool screenshot")
+
 ## Get an access token
 First, you need to obtain an access token. If you're running on a Windows PC, install the free Star Trek Timelines [Steam application](http://store.steampowered.com/app/600750/Star_Trek_Timelines/), then open it at least once to log in.
 
