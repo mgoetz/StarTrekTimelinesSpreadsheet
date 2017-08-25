@@ -1,8 +1,6 @@
 # Star Trek Timelines Spreadsheet Tool
 A tool to ease with crew management in Star Trek Timelines
 
-# How to use
-
 **DISCLAIMER** This tool is provided "as is", without warranty of any kind. Use at your own risk! Make sure you read and understand [Disruptor Beam's Terms of Service](https://www.disruptorbeam.com/tos/); review the functionality of this tool and their TOS carefully before determining its compliance.
 
 Star Trek Timelines content and materials are trademarks and copyrights of [Disruptor Beam](https://www.disruptorbeam.com/games/star-trek-timelines/); I have no affiliation with Disruptor Beam or any of its partners.
