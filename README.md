@@ -5,9 +5,11 @@ A tool to ease with crew management in Star Trek Timelines
 
 Star Trek Timelines content and materials are trademarks and copyrights of [Disruptor Beam](https://www.disruptorbeam.com/games/star-trek-timelines/); I have no affiliation with Disruptor Beam or any of its partners.
 
+## Install and run the tool
+
 I recommend you install the development environment and play with the source code yourself; make improvements and submit PRs to help your fellow players!
 
-However, if you're only interested in installing and running the tool, head on to the [releases](/releases) page and pick a recent release to install.
+However, if you're only interested in installing and running the tool, head on to the [releases](https://github.com/IAmPicard/StarTrekTimelinesSpreadsheet/releases) page and pick a recent release to install.
 
 ![Screenshot tool](/Screenshot-Tool.png "Tool screenshot")
 
