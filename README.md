@@ -7,11 +7,6 @@ A tool to ease with crew management in Star Trek Timelines
 
 Star Trek Timelines content and materials are trademarks and copyrights of [Disruptor Beam](https://www.disruptorbeam.com/games/star-trek-timelines/); I have no affiliation with Disruptor Beam or any of its partners.
 
-## Installation
-Clone or download and extract the repository in a folder on your device.
-
-Download and install [node.js](https://nodejs.org/) on your computer.
-
 ## Get an access token
 First, you need to obtain an access token. If you're running on a Windows PC, install the free Star Trek Timelines [Steam application](http://store.steampowered.com/app/600750/Star_Trek_Timelines/), then open it at least once to log in.
 
@@ -27,6 +22,11 @@ If you're not running on a Windows PC or don't want to install the Steam applica
 5. Copy the access_token, which should be in this format: "123e4567-e89b-12d3-a456-426655440000"
 
 *NOTE*: you need to repeat this process about once every 2 weeks, as the access token expires after a set period of time.
+
+## Installation
+Clone or download and extract the repository in a folder on your device.
+
+Download and install [node.js](https://nodejs.org/) on your computer.
 
 ## Before running the script
 
