@@ -23,5 +23,8 @@ If you're not running on a Windows PC or don't want to install the Steam applica
 
 *NOTE*: you need to repeat this process about once every 2 weeks, as the access token expires after a set period of time.
 
-[For the command line version of the tool](CLI.MD)
-[For the GUI version of the tool](gui\README.md)
+## Command line version of the tool
+[See details here for the command line version of the tool](CLI.MD)
+
+## GUI version of the tool
+[See details here for the GUI version of the tool](gui/README.md)
