@@ -23,7 +23,7 @@ import { loadStuff, loadCrewImageUrl, matchCrew, exportCsv, exportExcel, loadGau
 var regedit;
 try { regedit = require('electron').remote.require('regedit'); } catch (err) { regedit = null; }
 
-export class DialogBlockingExample extends React.Component {
+export class AccessTokenDialog extends React.Component {
 
 	constructor(props) {
 		super(props);
@@ -836,7 +836,7 @@ class App extends React.Component {
 					</Pivot>
 				)}
 
-				<DialogBlockingExample ref='loginDialog' onAccessToken={this._onAccessToken} />
+				<AccessTokenDialog ref='loginDialog' onAccessToken={this._onAccessToken} />
 			</Fabric>
 		);
 	}

@@ -14,11 +14,12 @@ function getInstallerConfig () {
     const outPath = path.join(rootPath, 'builds')
 
     return Promise.resolve({
-       appDirectory: path.join(outPath, 'star-trek-timelines-tool-win32-x64'),
+       appDirectory: path.join(outPath, 'startrektimelinestool-win32-x64'),
        authors: 'IAmPicard',
+		version: '0.3.1',
        noMsi: false,
        outputDirectory: path.join(outPath, 'windows-installer'),
-       exe: 'star-trek-timelines-tool.exe',
-       setupExe: 'star-trek-timelines-tool-installer.exe'
+	   exe: 'startrektimelinestool.exe',
+       setupExe: 'startrektimelinestoolinstaller.exe'
    })
 }

@@ -21,8 +21,8 @@ function createWindow() {
     width: 1024, height: 768, show: false
 	});
 
-  mainWindow.setTitle('Star Trek Timelines crew management');
-  //mainWindow.setMenu(null);
+  mainWindow.setTitle('Star Trek Timelines Crew Management');
+  mainWindow.setMenu(null);
 
   // and load the index.html of the app.
   let indexPath;
