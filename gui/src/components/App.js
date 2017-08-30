@@ -21,6 +21,7 @@ import { ShipList } from './ShipList.js';
 import { ItemList } from './ItemList.js';
 import { CrewList } from './CrewList.js';
 import { GauntletHelper } from './GauntletHelper.js';
+import { MissionHelper } from './MissionHelper.js';
 
 const shell = require('electron').shell;
 
@@ -40,6 +41,7 @@ class App extends React.Component {
 			shipList: [],
 			itemList: [],
 			gauntlet: null,
+			missionHelperParams: {},
 			spinnerLabel: 'Loading...'
 		};
 
@@ -83,6 +85,9 @@ class App extends React.Component {
 						</PivotItem>
 						<PivotItem linkText='Ships' itemIcon='Airplane'>
 							<ShipList data={this.state.shipList} />
+						</PivotItem>
+						<PivotItem linkText='Missions' itemIcon='Trophy'>
+							<MissionHelper params={this.state.missionHelperParams} />
 						</PivotItem>
 						<PivotItem linkText='Gauntlet' itemIcon='DeveloperTools'>
 							<GauntletHelper gauntlet={this.state.gauntlet} crew={this.state.crewList} />
@@ -215,7 +220,8 @@ class App extends React.Component {
 					showSpinner: false,
 					captainName: this.player.player.character.display_name,
 					secondLine: 'Level ' + this.player.player.character.level,
-					itemList: this.player.player.character.items
+					itemList: this.player.player.character.items,
+					missionHelperParams: { accesstoken: accesstoken, accepted_missions: this.player.player.character.accepted_missions}
 				});
 
 				getWikiImageUrl(this.player.player.character.crew_avatar.name.split(' ').join('_') + '_Head.png', 0, function (id, url)

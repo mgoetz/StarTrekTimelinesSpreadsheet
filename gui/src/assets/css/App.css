@@ -24,3 +24,7 @@ h1 {
 .skill-stats-range {
     font-size: x-small;
 }
+
+.quest-mastery {
+    display: inline-flex;
+}
