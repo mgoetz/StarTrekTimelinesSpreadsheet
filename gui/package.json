@@ -40,6 +40,7 @@
     "regedit": "^2.2.7",
     "exceljs": "^0.5.1",
     "json2csv": "^3.11.1",
-    "request": "latest"
+    "request": "latest",
+    "electron-json-storage": "latest"
   }
 }

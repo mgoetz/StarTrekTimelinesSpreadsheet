@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 
-import { loadAccessTokenFromRegistry } from '../utils/registry.js';
+import { loadAccessTokenFromRegistry, storeAccessTokenInCache } from '../utils/registry.js';
 import { Dialog, DialogType, DialogFooter } from 'office-ui-fabric-react/lib/Dialog';
 import { PrimaryButton, DefaultButton } from 'office-ui-fabric-react/lib/Button';
 import { TextField } from 'office-ui-fabric-react/lib/TextField';
@@ -64,8 +64,7 @@ export class AccessTokenDialog extends React.Component {
 
 	_getErrorMessage(value) {
 		return (value.length == CONFIG.accessTokenFormat.length)
-			? ''
-			: `The length of the input value should be ${CONFIG.accessTokenFormat.length}, actual is ${value.length}.`;
+			? '' : `The length of the input value should be ${CONFIG.accessTokenFormat.length}, actual is ${value.length}.`;
 	}
 
 	_showDialog(errMsg) {
@@ -74,6 +73,7 @@ export class AccessTokenDialog extends React.Component {
 
 	_closeDialog() {
 		this.setState({ hideDialog: true });
+		storeAccessTokenInCache(this.state.accesstoken);
 		this.props.onAccessToken(this.state.accesstoken);
 	}
 }

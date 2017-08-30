@@ -25,21 +25,6 @@ export class ItemList extends React.Component {
 			}
 		});
 
-		items.forEach(function (item) {
-			var fileName = item.name + CONFIG.rarityRes[item.rarity].name + '.png';
-			fileName = fileName.split(' ').join('');
-			fileName = fileName.split('\'').join('');
-
-			getWikiImageUrl(fileName, item.id, function (id, url) {
-				this.state.items.forEach(function (item) {
-					if (item.id === id)
-						item.iconUrl = url;
-				});
-
-				this.forceUpdate();
-			}.bind(this));
-		}.bind(this));
-
 		this.state = {
 			items: sortItems(items, 'name'),
 			columns: [
@@ -117,6 +102,29 @@ export class ItemList extends React.Component {
 		};
 
 		this._onColumnClick = this._onColumnClick.bind(this);
+
+		this._mounted = false;
+
+		items.forEach(function (item) {
+			var fileName = item.name + CONFIG.rarityRes[item.rarity].name + '.png';
+			fileName = fileName.split(' ').join('');
+			fileName = fileName.split('\'').join('');
+
+			getWikiImageUrl(fileName, item.id, function (id, url) {
+				this.state.items.forEach(function (item) {
+					if (item.id === id)
+						item.iconUrl = url;
+				});
+
+				// Sometimes we get the callback before the component is even mounted, so no need to force update
+				if (this._mounted)
+					this.forceUpdate();
+			}.bind(this));
+		}.bind(this));
+	}
+
+	componentDidMount() {
+		this._mounted = true;
 	}
 
 	render() {

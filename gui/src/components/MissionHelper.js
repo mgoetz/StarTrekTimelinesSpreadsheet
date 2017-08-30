@@ -17,7 +17,6 @@ export class TraitBonuses extends React.Component {
 			return (<span />);
 		}
 		else {
-
 			var traitBonuses = [];
 
 			this.props.trait_bonuses.map(function (traitBonus) {
@@ -56,7 +55,7 @@ export class Locks extends React.Component {
 				else
 				{
 					// TODO: get name of challenge
-					lockTraits.push(<span key={lock.trait}>Success on {lock.success_on_node_id}</span>);
+					lockTraits.push(<span key='s{lock.success_on_node_id}'>Success on {lock.success_on_node_id}</span>);
 				}
 			})
 
@@ -174,7 +173,7 @@ export class MissionHelper extends React.Component {
 	}
 
 	_onRenderCell(nestingDepth, challenge, itemIndex) {
-		console.log(JSON.stringify(challenge));
+		//console.log(JSON.stringify(challenge));
 		return (
 			<div data-selection-index={itemIndex} data-is-focusable={true}>
 				<FocusZone direction={FocusZoneDirection.horizontal}>
