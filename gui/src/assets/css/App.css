@@ -28,3 +28,11 @@ h1 {
 .quest-mastery {
     display: inline-flex;
 }
+
+.groupHeader {
+    font-size:x-large;
+}
+
+.groupHeaderDescriptiom {
+    font-size:medium;
+}

@@ -107,25 +107,3 @@ export function loadMissionData(token, accepted_missions, callback) {
 		}
 	});
 }
-/*
-// Get details for each quest:
-
-//https://stt.disruptorbeam.com/quest/conflict_info?id=221&client_api=8&access_token=186414c8-43bd-47be-b7c2-56fd03dc46e0
-
-data.description
-
-data.name
-
-masteryBasic = data.mastery_levels[0]; //1, 2
-masteryBasic.energy_cost
-masteryBasic.progress.goal_progress - masteryBasic.progress.goals
-
-if (masteryElite.locked) // the critical value will be for mastery 2 only
-
-data.challenges.forEach(function (challenge) {
-	challenge.name
-	challenge.skill // "science_skill"
-	challenge.difficulty_by_mastery // [114, 234, 515]
-	challenge.trait_bonuses // [{trait: "hologram", bonuses: [27, 55, 122]}]
-	challenge.critical.threshold // 149
-});*/
