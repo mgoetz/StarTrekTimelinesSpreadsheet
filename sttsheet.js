@@ -157,19 +157,24 @@ function matchCrew(crew_avatars, character, token, callback)
 	});
 
 	// Now add all the frozen crew (note: for these, we don't actually get the stats)
-	character.stored_immortals.forEach(function (crew) {
-		rosterEntry = getDefaults(crew.id);
-		rosterEntry.frozen = crew.quantity;
-		rosterEntry.level = 100;
-		rosterEntry.rarity = rosterEntry.max_rarity;
-		roster.push(rosterEntry);
+	if (character.stored_immortals && character.stored_immortals.length > 0) {
+		character.stored_immortals.forEach(function (crew) {
+			rosterEntry = getDefaults(crew.id);
+			rosterEntry.frozen = crew.quantity;
+			rosterEntry.level = 100;
+			rosterEntry.rarity = rosterEntry.max_rarity;
+			roster.push(rosterEntry);
 
-		loadFrozen(rosterEntry, token, queue('frozen'));
-	});
+			loadFrozen(rosterEntry, token, queue('frozen'));
+		});
 
-	queue.done('frozen', function () {
+		queue.done('frozen', function () {
+			callback(roster);
+		});
+	}
+	else {
 		callback(roster);
-	});
+	}
 }
 
 function loadFrozen(rosterEntry, token, callback)

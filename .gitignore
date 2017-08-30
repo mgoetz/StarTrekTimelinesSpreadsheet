@@ -14,3 +14,4 @@ node_modules/
 /gauntlet.js
 /test.xlsx
 /gui/.vs
+/npm-debug.log
