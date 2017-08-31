@@ -33,7 +33,7 @@ This tab give an overview of all accepted missions, along with individual requir
 
 ![Screenshot Cadet](/Screenshot-Cadet.png "Cadet screenshot")
 
-Similar to the Missions tab, but for cadet challenged.
+Similar to the Missions tab, but for cadet challenges.
 
 ### Crew recommendations
 
@@ -47,7 +47,7 @@ This tab will make recommendations about which crew you can freeze or airlock, a
 
 ![Screenshot Gauntlet](/Screenshot-Gauntlet.png "Gauntlet screenshot")
 
-In this tab you can get recommendations for which crew to use in your next gauntlet (if you didn't already start it). Please see source code for details, the algorithm is still "hand-wavy" at this point and could use input from someone more experienced with statistic analysis.
+In this tab you can get recommendations for which crew to use in your next gauntlet (if you didn't already start it). Please see source code for details, the algorithm is still "hand-wavy" at this point and could use input from someone more experienced with statistical analysis.
 
 ## Get an access token
 First, you need to obtain an access token. If you're running on a Windows PC, install the free Star Trek Timelines [Steam application](http://store.steampowered.com/app/600750/Star_Trek_Timelines/), then open it at least once to log in.
