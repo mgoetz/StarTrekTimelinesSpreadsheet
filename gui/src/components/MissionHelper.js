@@ -6,11 +6,14 @@ import { DetailsRow } from 'office-ui-fabric-react/lib/components/DetailsList/De
 import { FocusZone, FocusZoneDirection } from 'office-ui-fabric-react/lib/FocusZone';
 import { Selection, SelectionMode, SelectionZone } from 'office-ui-fabric-react/lib/utilities/selection/index';
 import { Link } from 'office-ui-fabric-react/lib/Link';
+import { DefaultButton } from 'office-ui-fabric-react/lib/Button';
+import { Callout } from 'office-ui-fabric-react/lib/Callout';
+import { Spinner, SpinnerSize } from 'office-ui-fabric-react/lib/Spinner';
 
 import { loadMissionData } from '../utils/missions.js';
+const CONFIG = require('../utils/config.js');
 
 export class TraitBonuses extends React.Component {
-
 	render() {
 
 		if (!this.props.trait_bonuses || this.props.trait_bonuses.length == 0) {
@@ -20,26 +23,18 @@ export class TraitBonuses extends React.Component {
 			var traitBonuses = [];
 
 			this.props.trait_bonuses.map(function (traitBonus) {
-				traitBonuses.push(
-				<span key={traitBonus.trait}>{traitBonus.trait}
-					<span className='quest-mastery'>
-						<Image src='https://stt.wiki/w/images/thumb/8/8f/Normal_64.png/48px-Normal_64.png' height={20} />({traitBonus.bonuses[0]})
-						<Image src='https://stt.wiki/w/images/thumb/3/38/Elite_64.png/48px-Elite_64.png' height={20} />({traitBonus.bonuses[1]})
-						<Image src='https://stt.wiki/w/images/thumb/5/57/Epic_64.png/48px-Epic_64.png' height={20} />({traitBonus.bonuses[2]})
-					</span>,
-				</span>);
-			});
+				traitBonuses.push(<span key={traitBonus.trait}>{this.props.trait_names[traitBonus.trait] ? this.props.trait_names[traitBonus.trait] : traitBonus.trait}</span>);
+			}.bind(this));
 
 			return (<span>
 				<br />
-				<span style={{ width: 2 * 20, display: 'inline-block' }} />Trait bonuses: {traitBonuses}
+				<span style={{ width: 3 * 20, display: 'inline-block' }} />Trait bonuses: {traitBonuses.reduce((prev, curr) => [prev, ', ', curr])}
 			</span>);
 		}
 	}
 }
 
 export class Locks extends React.Component {
-
 	render() {
 
 		if (!this.props.locks || this.props.locks.length == 0) {
@@ -50,37 +45,120 @@ export class Locks extends React.Component {
 
 			this.props.locks.map(function (lock) {
 				if (lock.trait) {
-					lockTraits.push(<span key={lock.trait}>{lock.trait}</span>);
+					lockTraits.push(<span key={lock.trait}>{this.props.trait_names[lock.trait] ? this.props.trait_names[lock.trait] : lock.trait}</span>);
 				}
 				else
 				{
 					// TODO: get name of challenge
 					lockTraits.push(<span key='s{lock.success_on_node_id}'>Success on {lock.success_on_node_id}</span>);
 				}
-			})
+			}.bind(this))
 
 			return (<span>
 				<br />
-				<span style={{ width: 2 * 20, display: 'inline-block' }} />Locks:{lockTraits}
+				<span style={{ width: 3 * 20, display: 'inline-block' }} />Locks: {lockTraits.reduce((prev, curr) => [prev, ', ', curr])}
 			</span>);
 		}
 	}
 }
 
-export class Critical extends React.Component {
+export class QuestDetails extends React.Component {
+	_menuButtonElement;
+
+	constructor(props) {
+		super(props);
+
+		this._onShowMenuClicked = this._onShowMenuClicked.bind(this);
+		this._onCalloutDismiss = this._onCalloutDismiss.bind(this);
+
+		this.state = {
+			isCalloutVisible: false
+		};
+	}
+
+	htmlDecode(input) {
+		input = input.replace(/<#([0-9A-F]{6})>/gi, '<span style="color:#$1">');
+		input = input.replace(/<\/color>/g, '</span>');
+
+		return {
+			__html: input
+		};
+	}
 
 	render() {
+		let { isCalloutVisible } = this.state;
 
-		if (!this.props.critical) {
-			return (<span />);
-		}
-		else {
-			//TODO: the threshold is for the last data.mastery_levels[0] with locked==false
-			return (<span>
-				<br />
-				<span style={{ width: 2 * 20, display: 'inline-block' }} />Critical threshold:{this.props.critical.threshold}
-			</span>);
-		}
+		return (
+			<div className='CalloutQuest'>
+				<div className='CalloutQuest-buttonArea' ref={(menuButton) => this._menuButtonElement = menuButton}>
+					<DefaultButton
+						onClick={this._onShowMenuClicked}
+						text={isCalloutVisible ? 'Hide details' : 'Show details'}
+					/>
+				</div>
+				{isCalloutVisible && (
+					<Callout
+						className='CalloutQuest-callout'
+						ariaLabelledBy={'callout-label-1'}
+						ariaDescribedBy={'callout-description-1'}
+						role={'alertdialog'}
+						gapSpace={0}
+						targetElement={this._menuButtonElement}
+						onDismiss={this._onCalloutDismiss}
+						setInitialFocus={true}
+					>
+						<div className='ms-CalloutExample-header'>
+							<p className='ms-CalloutExample-title' id={'callout-label-1'}>
+								{this.props.quest.name}
+							</p>
+						</div>
+						<div className='ms-CalloutExample-inner'>
+							<div className='ms-CalloutExample-content'>
+								<div className='ms-CalloutExample-subText' id={'callout-description-1'}>
+									{this.props.quest.description}
+								</div>
+								<div className='ms-CalloutExample-subText' id={'callout-description-1'}>
+									Mastery required: <span className='quest-mastery'>
+										<Image src='https://stt.wiki/w/images/thumb/8/8f/Normal_64.png/48px-Normal_64.png' height={20} />({this.props.quest.difficulty_by_mastery[0]})
+										<Image src='https://stt.wiki/w/images/thumb/3/38/Elite_64.png/48px-Elite_64.png' height={20} />({this.props.quest.difficulty_by_mastery[1]})
+										<Image src='https://stt.wiki/w/images/thumb/5/57/Epic_64.png/48px-Epic_64.png' height={20} />({this.props.quest.difficulty_by_mastery[2]})
+									</span>
+								</div>
+								<div className='ms-CalloutExample-subText' id={'callout-description-2'}>
+									Trait bonuses: <span className='quest-mastery'>
+										<Image src='https://stt.wiki/w/images/thumb/8/8f/Normal_64.png/48px-Normal_64.png' height={20} />({this.props.quest.trait_bonuses[0]})
+										<Image src='https://stt.wiki/w/images/thumb/3/38/Elite_64.png/48px-Elite_64.png' height={20} />({this.props.quest.trait_bonuses[1]})
+										<Image src='https://stt.wiki/w/images/thumb/5/57/Epic_64.png/48px-Epic_64.png' height={20} />({this.props.quest.trait_bonuses[2]})
+									</span>
+								</div>
+								<div className='ms-CalloutExample-subText' id={'callout-description-3'}>
+									Critical threshold: {this.props.quest.critical_threshold ? this.props.quest.critical_threshold : 'none'}
+								</div>
+								{this.props.quest.cadet && (
+									<div className='ms-CalloutExample-subText' id={'callout-description-4'}>
+										Cadet requirements: <span dangerouslySetInnerHTML={this.htmlDecode(this.props.quest.crew_requirement.description)} />
+									</div>
+								)}
+							</div>
+						</div>
+					</Callout>
+				)}
+			</div>
+		);
+
+		//TODO: the threshold is for the last data.mastery_levels[0] with locked==false
+	}
+
+	_onShowMenuClicked() {
+		this.setState({
+			isCalloutVisible: !this.state.isCalloutVisible
+		});
+	}
+
+	_onCalloutDismiss() {
+		this.setState({
+			isCalloutVisible: false
+		});
 	}
 }
 
@@ -135,6 +213,21 @@ export class MissionHelper extends React.Component {
 								}));
 							}
 
+							// Get the numbers from the first challenge that has them (since they match across the quest)
+							newQuest.challenges.forEach(function (challenge) {
+								if (challenge.difficulty_by_mastery) {
+									newQuest.difficulty_by_mastery = challenge.difficulty_by_mastery;
+								}
+
+								if (challenge.critical && challenge.critical.threshold) {
+									newQuest.critical_threshold = challenge.critical.threshold;
+								}
+
+								if (challenge.trait_bonuses && (challenge.trait_bonuses.length > 0)) {
+									newQuest.trait_bonuses = challenge.trait_bonuses[0].bonuses;
+								}
+							});
+
 							newMission.children.push(newQuest);
 						}
 					});
@@ -169,7 +262,7 @@ export class MissionHelper extends React.Component {
 				</div>
 			);
 		else
-			return (<div>Not loaded yet</div>);
+			return (<Spinner size={SpinnerSize.large} label='Loading mission and quest data...' /> );
 	}
 
 	_onRenderCell(nestingDepth, challenge, itemIndex) {
@@ -178,16 +271,13 @@ export class MissionHelper extends React.Component {
 			<div data-selection-index={itemIndex} data-is-focusable={true}>
 				<FocusZone direction={FocusZoneDirection.horizontal}>
 					<span className='groupHeaderDescriptiom'>
-						<span style={{ width: 2 * 20, display: 'inline-block' }} />
-						{challenge.name} <i>({challenge.skill})</i>
+						<span className='itemHeader'><span style={{ width: 2 * 20, display: 'inline-block' }} />{challenge.name}</span><br/>
+						<span style={{ width: 3 * 20, display: 'inline-block' }} />
 						<span className='quest-mastery'>
-							<Image src='https://stt.wiki/w/images/thumb/8/8f/Normal_64.png/48px-Normal_64.png' height={20} />({challenge.difficulty_by_mastery[0]})
-							<Image src='https://stt.wiki/w/images/thumb/3/38/Elite_64.png/48px-Elite_64.png' height={20} />({challenge.difficulty_by_mastery[1]})
-							<Image src='https://stt.wiki/w/images/thumb/5/57/Epic_64.png/48px-Epic_64.png' height={20} />({challenge.difficulty_by_mastery[2]})
+							Skill: <Image src={CONFIG.skillRes[challenge.skill].url} height={18} /> {CONFIG.skillRes[challenge.skill].name}
 						</span>
-						<TraitBonuses trait_bonuses={challenge.trait_bonuses} />
-						<Locks locks={challenge.locks} />
-						<Critical critical={challenge.critical} />
+						<TraitBonuses trait_bonuses={challenge.trait_bonuses} trait_names={this.props.params.trait_names} />
+						<Locks locks={challenge.locks} trait_names={this.props.params.trait_names} />
 					</span>
 				</FocusZone>
 			</div>
@@ -221,6 +311,7 @@ export class MissionHelper extends React.Component {
 								<Image src='https://stt.wiki/w/images/thumb/3/38/Elite_64.png/48px-Elite_64.png' height={20} />({props.group.mastery_levels[1].progress.goal_progress} / {props.group.mastery_levels[1].progress.goals})
 								<Image src='https://stt.wiki/w/images/thumb/5/57/Epic_64.png/48px-Epic_64.png' height={20} />({props.group.mastery_levels[2].progress.goal_progress} / {props.group.mastery_levels[2].progress.goals})
 							</span>
+							<QuestDetails quest={props.group} />
 							<br />
 							{props.group.isCollapsed || true ? (<span />) : (<span className='groupHeaderDescriptiom'>{props.group.description}</span>)}
 						</span>)

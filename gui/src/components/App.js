@@ -22,6 +22,7 @@ import { ItemList } from './ItemList.js';
 import { CrewList } from './CrewList.js';
 import { GauntletHelper } from './GauntletHelper.js';
 import { MissionHelper } from './MissionHelper.js';
+import { CrewRecommendations } from './CrewRecommendations.js';
 
 const shell = require('electron').shell;
 
@@ -40,8 +41,10 @@ class App extends React.Component {
 			crewList: [],
 			shipList: [],
 			itemList: [],
+			trait_names: [],
 			gauntlet: null,
 			missionHelperParams: {},
+			cadetMissionHelperParams: {},
 			spinnerLabel: 'Loading...'
 		};
 
@@ -86,11 +89,17 @@ class App extends React.Component {
 						<PivotItem linkText='Ships' itemIcon='Airplane'>
 							<ShipList data={this.state.shipList} />
 						</PivotItem>
-						<PivotItem linkText='Missions' itemIcon='Trophy'>
+						<PivotItem linkText='Missions' itemIcon='Ribbon'>
 							<MissionHelper params={this.state.missionHelperParams} />
 						</PivotItem>
+						<PivotItem linkText='Cadet challenges' itemIcon='Trophy'>
+							<MissionHelper params={this.state.cadetMissionHelperParams} />
+						</PivotItem>
+						<PivotItem linkText='Crew recommendations' itemIcon='Lightbulb'>
+							<CrewRecommendations crew={this.state.crewList} cadetMissions={this.state.cadetMissionHelperParams} missions={this.state.missionHelperParams} />
+						</PivotItem>
 						<PivotItem linkText='Gauntlet' itemIcon='DeveloperTools'>
-							<GauntletHelper gauntlet={this.state.gauntlet} crew={this.state.crewList} />
+							<GauntletHelper gauntlet={this.state.gauntlet} crew={this.state.crewList} trait_names={this.state.trait_names} />
 						</PivotItem>
 					</Pivot>
 				)}
@@ -221,7 +230,17 @@ class App extends React.Component {
 					captainName: this.player.player.character.display_name,
 					secondLine: 'Level ' + this.player.player.character.level,
 					itemList: this.player.player.character.items,
-					missionHelperParams: { accesstoken: accesstoken, accepted_missions: this.player.player.character.accepted_missions}
+					trait_names: this.config.config.trait_names,
+					missionHelperParams: {
+						accesstoken: accesstoken,
+						accepted_missions: this.player.player.character.accepted_missions,
+						trait_names: this.config.config.trait_names
+					},
+					cadetMissionHelperParams: {
+						accesstoken: accesstoken,
+						accepted_missions: this.player.player.character.cadet_schedule.missions,
+						trait_names: this.config.config.trait_names
+					}
 				});
 
 				getWikiImageUrl(this.player.player.character.crew_avatar.name.split(' ').join('_') + '_Head.png', 0, function (id, url)

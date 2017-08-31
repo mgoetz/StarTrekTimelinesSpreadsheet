@@ -40,6 +40,10 @@ function loadQuestData(token, quest, callback) {
 			quest.description = newQuest.description;
 			quest.challenges = newQuest.challenges;
 			quest.mastery_levels = newQuest.mastery_levels;
+
+			// For cadet challenges
+			quest.cadet = newQuest.cadet;
+			quest.crew_requirement = newQuest.crew_requirement;
 		}
 		else
 		{

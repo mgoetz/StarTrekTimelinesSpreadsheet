@@ -33,6 +33,47 @@ h1 {
     font-size:x-large;
 }
 
+.itemHeader {
+    font-size: large;
+}
+
 .groupHeaderDescriptiom {
     font-size:medium;
+}
+
+.CalloutQuest {
+    display: inline-block;
+}
+
+.CalloutQuest-buttonArea {
+    vertical-align: top;
+    display: inline-block;
+    text-align: center;
+}
+
+.CalloutQuest-callout {
+    max-width: 350px;
+}
+
+.ms-CalloutExample-title {
+    font-size: x-large;
+}
+
+.ms-CalloutExample-inner {
+    height: 100%;
+    padding: 0 24px 20px;
+}
+
+.ms-CalloutExample-header {
+    padding: 18px 24px 12px;
+}
+
+.ms-CalloutExample-title {
+    margin: 0;
+    font-size:large;
+}
+
+.ms-CalloutExample-subText {
+    margin: 0;
+    font-size:small;
 }

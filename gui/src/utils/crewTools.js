@@ -33,7 +33,7 @@ function rosterFromCrew(rosterEntry, crew, trait_names) {
 	}
 
 	rosterEntry.traits = crew.traits.concat(crew.traits_hidden).map(function (trait) { return trait_names[trait] ? trait_names[trait] : trait; }).join();
-	rosterEntry.rawTraits = crew.traits;
+	rosterEntry.rawTraits = crew.traits.concat(crew.traits_hidden);
 }
 
 export function matchCrew(crew_avatars, character, token, trait_names, callback) {
