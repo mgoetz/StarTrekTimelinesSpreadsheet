@@ -28,7 +28,9 @@ If you're not running on a Windows PC or don't want to install the Steam applica
 *NOTE*: you need to repeat this process about once every 2 weeks, as the access token expires after a set period of time.
 
 ## Command line version of the tool
-**NOTE:The command line version of the tool is deprecated, all new development happens in the GUI version**
+**NOTE:The command line version of the tool is deprecated, all new development happens in the GUI version!**
+
+
 [See details here for the command line version of the tool](CLI.MD)
 
 ## GUI version of the tool
