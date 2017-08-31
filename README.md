@@ -9,7 +9,13 @@ I recommend you install the development environment and play with the source cod
 
 However, if you're only interested in installing and running the tool, head on to the [releases](https://github.com/IAmPicard/StarTrekTimelinesSpreadsheet/releases) page and pick a recent release to install.
 
+## Features
+
+### Crew management
+
 ![Screenshot tool](/Screenshot-Tool.png "Tool screenshot")
+
+The first tab lets you manage your crew. You can sort by various fields, (un)group by rarity as well as export the data in Excel or plain CSV formats.
 
 ## Get an access token
 First, you need to obtain an access token. If you're running on a Windows PC, install the free Star Trek Timelines [Steam application](http://store.steampowered.com/app/600750/Star_Trek_Timelines/), then open it at least once to log in.
