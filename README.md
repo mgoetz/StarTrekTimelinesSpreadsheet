@@ -1,9 +1,7 @@
 # Star Trek Timelines Spreadsheet Tool
 A tool to ease with crew management in Star Trek Timelines
 
-**DISCLAIMER** This tool is provided "as is", without warranty of any kind. Use at your own risk! Make sure you read and understand [Disruptor Beam's Terms of Service](https://www.disruptorbeam.com/tos/); review the functionality of this tool and their TOS carefully before determining its compliance.
-
-Star Trek Timelines content and materials are trademarks and copyrights of [Disruptor Beam](https://www.disruptorbeam.com/games/star-trek-timelines/); I have no affiliation with Disruptor Beam or any of its partners.
+**DISCLAIMER** This tool is provided "as is", without warranty of any kind. Use at your own risk! Make sure you read and understand [Disruptor Beam's Terms of Service](https://www.disruptorbeam.com/tos/). Star Trek Timelines content and materials are trademarks and copyrights of [Disruptor Beam](https://www.disruptorbeam.com/games/star-trek-timelines/); I have no affiliation with Disruptor Beam or any of its partners.
 
 ## Install and run the tool
 
@@ -30,6 +28,7 @@ If you're not running on a Windows PC or don't want to install the Steam applica
 *NOTE*: you need to repeat this process about once every 2 weeks, as the access token expires after a set period of time.
 
 ## Command line version of the tool
+**NOTE:The command line version of the tool is deprecated, all new development happens in the GUI version**
 [See details here for the command line version of the tool](CLI.MD)
 
 ## GUI version of the tool
