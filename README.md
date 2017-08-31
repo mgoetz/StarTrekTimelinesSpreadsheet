@@ -17,6 +17,38 @@ However, if you're only interested in installing and running the tool, head on t
 
 The first tab lets you manage your crew. You can sort by various fields, (un)group by rarity as well as export the data in Excel or plain CSV formats.
 
+### Item management
+
+![Screenshot Items](/Screenshot-Items.png "Items screenshot")
+
+This tab lists out all the items you currently have, along with their quantity and type.
+
+### Missions
+
+![Screenshot Missions](/Screenshot-Missions.png "Missions screenshot")
+
+This tab give an overview of all accepted missions, along with individual requirements and player stats for each quest and challenge.
+
+### Cadet challenges
+
+![Screenshot Cadet](/Screenshot-Cadet.png "Cadet screenshot")
+
+Similar to the Missions tab, but for cadet challenged.
+
+### Crew recommendations
+
+![Screenshot CrewRecommendations](/Screenshot-CrewRecommendations.png "CrewRecommendations screenshot")
+
+*Work in progress!*
+
+This tab will make recommendations about which crew you can freeze or airlock, and which you need to keep in your active roster, primarily for cadet challenges.
+
+### Gauntlet
+
+![Screenshot Gauntlet](/Screenshot-Gauntlet.png "Gauntlet screenshot")
+
+In this tab you can get recommendations for which crew to use in your next gauntlet (if you didn't already start it). Please see source code for details, the algorithm is still "hand-wavy" at this point and could use input from someone more experienced with statistic analysis.
+
 ## Get an access token
 First, you need to obtain an access token. If you're running on a Windows PC, install the free Star Trek Timelines [Steam application](http://store.steampowered.com/app/600750/Star_Trek_Timelines/), then open it at least once to log in.
 
