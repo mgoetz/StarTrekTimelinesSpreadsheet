@@ -130,7 +130,7 @@ export class ItemList extends React.Component {
 
 	render() {
 		return (
-			<div className='data-grid' data-is-scrollable='true'>
+			<div className='tab-panel' data-is-scrollable='true'>
 				<DetailsList
 					items={this.state.items}
 					columns={this.state.columns}

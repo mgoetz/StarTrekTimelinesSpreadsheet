@@ -162,13 +162,26 @@ export class CrewList extends React.Component {
 			}
 		];
 
-		this.state = {
-			items: items,
-			columns: _columns,
-			groups: groupBy(items, 'max_rarity'),
-			groupedColumn: 'max_rarity',
-			isCompactMode: true
-		};
+		if (props.grouped === false)
+		{
+			this.state = {
+				items: items,
+				columns: _columns,
+				groups: null,
+				groupedColumn: '',
+				isCompactMode: true
+			};
+		}
+		else
+		{
+			this.state = {
+				items: items,
+				columns: _columns,
+				groups: groupBy(items, 'max_rarity'),
+				groupedColumn: 'max_rarity',
+				isCompactMode: true
+			};
+		}
 
 		this._onColumnClick = this._onColumnClick.bind(this);
 	}
@@ -177,7 +190,7 @@ export class CrewList extends React.Component {
 		let { columns, isCompactMode, items, groups } = this.state;
 
 		return (
-			<div className='data-grid' data-is-scrollable='true'>
+			<div className={this.props.overrideClassName ? this.props.overrideClassName : 'data-grid'} data-is-scrollable='true'>
 				<DetailsList
 					items={items}
 					groups={groups}

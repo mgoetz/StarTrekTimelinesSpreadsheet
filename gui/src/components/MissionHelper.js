@@ -243,7 +243,7 @@ export class MissionHelper extends React.Component {
 	render() {
 		if (this.state.dataAvailable)
 			return (
-				<div className='data-grid' data-is-scrollable='true'>
+				<div className='tab-panel' data-is-scrollable='true'>
 				<FocusZone>
 					<SelectionZone
 						selection={this._selection}

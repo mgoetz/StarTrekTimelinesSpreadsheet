@@ -37,13 +37,12 @@ export function getWikiImageUrl(fileName, id, callback, errCallback) {
 
 			request(reqOptions, function (error, response, body) {
 				if (!error && response.statusCode == 200) {
-					var imageInfo = JSON.parse(body);
 					var url = CONFIG.defaultItemIconUrl;
 
 					try {
-
-						if (imageInfo.query.pages.length > 0) {
-							url = imageInfo.query.pages[Object.keys(imageInfo.query.pages)[0]].imageinfo[0].url;
+						var imageInfo = JSON.parse(body).query.pages;
+						if ((Object.keys(imageInfo).length > 0) && imageInfo[Object.keys(imageInfo)[0]].imageinfo) {
+							url = imageInfo[Object.keys(imageInfo)[0]].imageinfo[0].url;
 						}
 
 						if (!sttImageCache)

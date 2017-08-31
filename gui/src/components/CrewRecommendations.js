@@ -1,8 +1,121 @@
 import React, { Component } from 'react';
 import { Spinner, SpinnerSize } from 'office-ui-fabric-react/lib/Spinner';
+import { Toggle } from 'office-ui-fabric-react/lib/Toggle';
+import { Icon } from 'office-ui-fabric-react/lib/Icon';
+import { Image, ImageFit } from 'office-ui-fabric-react/lib/Image';
+
+import { CrewList } from './CrewList.js';
 
 import { loadMissionData } from '../utils/missions.js';
 const CONFIG = require('../utils/config.js');
+
+export class GuaranteedSuccess extends React.Component {
+	constructor(props) {
+		super(props);
+
+		this.state = {
+			isCollapsed: true
+		};
+	}
+
+	render() {
+		return (<div>
+			<h2><button type='button' style={{ cursor: 'default', background: 'none', border: 'none' }} onClick={() => this.setState({ isCollapsed: !this.state.isCollapsed })}>
+				<Icon iconName={this.state.isCollapsed ? 'ChevronDown' : 'ChevronUp'} />
+				</button> {this.props.title}
+			</h2>
+			{!this.state.isCollapsed && this.props.recommendations.map(function (recommendation) {
+				if (recommendation.crew.length == 0) {
+					return (<div key={recommendation.name}>
+						<h3>{recommendation.name}</h3>
+						<span style={{ color: 'red' }}>No crew can complete this challenge!</span><br/>
+						<span className='quest-mastery'>You need a crew with the <Image src={CONFIG.skillRes[recommendation.skill].url} height={18} /> {CONFIG.skillRes[recommendation.skill].name} skill of at least {recommendation.roll}
+							{(recommendation.lockedTraits.length > 0) &&
+								(<span>&nbsp;and one of these skills: {recommendation.lockedTraits.map(function (trait) { return (<span>{this.props.trait_names[trait] ? this.props.trait_names[trait] : trait}</span>); }.bind(this)).reduce((prev, curr) => [prev, ', ', curr])}
+								</span>)}.</span>
+					</div>);
+				}
+
+				if (recommendation.crew.filter(function (crew) { return crew.success > 99.9; }).length == 0) {
+					return (<div key={recommendation.name}>
+						<h3>{recommendation.name}</h3>
+						<span>Your best bet is {recommendation.crew[0].name} with a {recommendation.crew[0].success.toFixed(2)}% success chance.</span>
+					</div>);
+				}
+			}.bind(this))
+			}</div>);
+	}
+}
+
+export class MinimalComplement extends React.Component {
+	constructor(props) {
+		super(props);
+
+		var baseline = 0;
+
+		var allConsideredCrew = new Set();
+		props.recommendations.forEach(function (entry) {
+			entry.crew.forEach(function (crew) {
+				allConsideredCrew.add(crew.id);
+			});
+
+			baseline += (entry.crew.length > 0) ? entry.crew[0].success : 0;
+		});
+
+		// TODO: This should actually do a combinatorial (all possible combinations of crew ids from allConsideredCrew).
+		// However, that pegs the CPU for minutes even on a fast i7-7700k
+		// The algorithm below is suboptimal but it's much cheaper to run
+
+		// Calculate minimal set of crew out of allConsideredCrew that still yields the same result for all challenges
+		var start = allConsideredCrew.size;
+
+		var removedCrew = new Set();
+
+		var before;
+		do {
+			before = allConsideredCrew.size;
+
+			for (var crewId of allConsideredCrew) {
+				var result = 0;
+
+				props.recommendations.forEach(function (entry) {
+					var filteredCrew = entry.crew.filter(function (crew) { return (crew.id != crewId) && !removedCrew.has(crew.id); });
+					result += (filteredCrew.length > 0) ? filteredCrew[0].success : 0;
+				});
+
+				if (result == baseline) {
+					allConsideredCrew.delete(crewId);
+					removedCrew.add(crewId);
+					break;
+				}
+			}
+		} while (allConsideredCrew.size < before);
+		
+		this.state = {
+			isCollapsed: true,
+			removableCrew: this.props.crew.filter(function (crew) { return removedCrew.has(crew.id) && (crew.frozen == 0); }),
+			unfreezeCrew: this.props.crew.filter(function (crew) { return allConsideredCrew.has(crew.id) && (crew.frozen > 0); })
+		};
+	}
+
+	render() {
+		return (<div>
+			<h2><button type='button' style={{ cursor: 'default', background: 'none', border: 'none' }} onClick={() => this.setState({ isCollapsed: !this.state.isCollapsed })}>
+				<Icon iconName={this.state.isCollapsed ? 'ChevronDown' : 'ChevronUp'} />
+			</button> {this.props.title}
+			</h2>
+			{!this.state.isCollapsed &&
+				(<div>
+				<p><b>Note:</b> These recommendations do not take into account the needs for gauntlets, shuttle missions or any ship battle missions. Manually review each one before making decisions.</p>
+
+				<h3>Crew which could be frozen or airlocked</h3>
+				<CrewList data={this.state.removableCrew} grouped={false} overrideClassName='embedded-crew-grid' />
+				<h3>Crew which needs to be unfrozen</h3>
+				<CrewList data={this.state.unfreezeCrew} grouped={false} overrideClassName='embedded-crew-grid' />
+				</div>)}
+		</div>);
+	}
+}
 
 export class CrewRecommendations extends React.Component {
 	constructor(props) {
@@ -10,10 +123,11 @@ export class CrewRecommendations extends React.Component {
 
 		this.state = {
 			dataAvailable: false,
+			showDetails: false,
 			recommendations: []
 		};
 
-		loadMissionData(props.cadetMissions.accesstoken, props.cadetMissions.accepted_missions, function (result) {
+		loadMissionData(props.cadetMissions.accesstoken, props.cadetMissions.accepted_missions.concat(props.missions.accepted_missions), function (result) {
 			if (result.errorMsg || (result.statusCode && (result.statusCode != 200))) {
 
 			}
@@ -24,25 +138,23 @@ export class CrewRecommendations extends React.Component {
 					mission.quests.forEach(function (quest) {
 						if (quest.quest_type == 'ConflictQuest') {
 							quest.challenges.forEach(function (challenge) {
-
 								var entry = {
 									name: mission.episode_title + ' - ' + quest.name + ' - ' + challenge.name,
 									roll: 0,
-									critical: 0,
+									skill : challenge.skill,
+									cadet: quest.cadet,
+									crew_requirement: quest.crew_requirement,
 									traits: [],
+									lockedTraits: [],
 									crew: []
 								};
 
-								var roll = 0;
-
 								if (challenge.difficulty_by_mastery) {
-									entry.roll = challenge.difficulty_by_mastery[2];
-									roll += challenge.difficulty_by_mastery[2];
+									entry.roll += challenge.difficulty_by_mastery[2];
 								}
 
 								if (challenge.critical && challenge.critical.threshold) {
-									entry.critical = challenge.critical.threshold;
-									roll += challenge.critical.threshold;
+									entry.roll += challenge.critical.threshold;
 								}
 
 								if (challenge.trait_bonuses && (challenge.trait_bonuses.length > 0)) {
@@ -52,32 +164,46 @@ export class CrewRecommendations extends React.Component {
 								}
 
 								if (challenge.locks && (challenge.locks.length > 0)) {
-									alert('It looks like DB introduced locks in cadet challenged. Contact me to update the script!');
+									challenge.locks.forEach(function (lock) {
+										if (lock.trait) {
+											entry.lockedTraits.push(lock.trait);
+										}
+									});
 								}
-								
+
 								this.props.crew.forEach(function (crew) {
-									if ((crew.rarity < quest.crew_requirement.min_stars) || (crew.rarity > quest.crew_requirement.max_stars)) {
-										return; // Doesn't meet rarity requirements
+									let rawTraits = new Set(crew.rawTraits);
+
+									if (entry.cadet) {
+										if ((crew.rarity < entry.crew_requirement.min_stars) || (crew.rarity > entry.crew_requirement.max_stars)) {
+											return; // Doesn't meet rarity requirements
+										}
+										
+										if (entry.crew_requirement.traits && (entry.crew_requirement.traits.length > 0)) {
+											var matchingTraits = entry.crew_requirement.traits.filter(trait => rawTraits.has(trait)).length;
+											if (matchingTraits == 0)
+												return; // Doesn't meet trait requirements
+										}
 									}
 
-									let rawTraits = new Set(crew.rawTraits);
-									if (quest.crew_requirement.traits && (quest.crew_requirement.traits.length > 0)) {
-										var matchingTraits = quest.crew_requirement.traits.filter(trait => rawTraits.has(trait)).length;
+									if (entry.lockedTraits.length > 0)
+									{
+										var matchingTraits = entry.lockedTraits.filter(trait => rawTraits.has(trait)).length;
 										if (matchingTraits == 0)
-											return; // Doesn't meet trait requirements
+											return; // Node is locked by a trait which this crew doesn't have
 									}
 
 									// Compute roll for crew
-									var rollCrew = crew[challenge.skill].core;
+									var rollCrew = crew[entry.skill].core;
 
-									if (challenge.trait_bonuses && (challenge.trait_bonuses.length > 0)) {
-										var matchingTraits = challenge.trait_bonuses.filter(traitBonus => rawTraits.has(traitBonus.trait)).length;
-										rollCrew += matchingTraits * challenge.trait_bonuses[0].bonuses[2];
+									if (entry.traits && (entry.traits.length > 0)) {
+										var matchingTraits = entry.traits.filter(traitBonus => rawTraits.has(traitBonus.trait)).length;
+										rollCrew += matchingTraits * entry.traits[0].bonus;
 									}
 
-									if (rollCrew + crew[challenge.skill].max > roll) // Does this crew even have a chance?
+									if (rollCrew + crew[entry.skill].max > entry.roll) // Does this crew even have a chance?
 									{
-										var successPercentage = (rollCrew + crew[challenge.skill].max - roll) * 100 / (crew[challenge.skill].max - crew[challenge.skill].min);
+										var successPercentage = (rollCrew + crew[entry.skill].max - entry.roll) * 100 / (crew[entry.skill].max - crew[entry.skill].min);
 										if (successPercentage > 100) successPercentage = 100;
 
 										entry.crew.push({ id: crew.id, name: crew.name, frozen: crew.frozen, success: successPercentage });
@@ -103,34 +229,22 @@ export class CrewRecommendations extends React.Component {
 	render() {
 		if (this.state.dataAvailable) {
 			return (
-				<div className='data-grid' data-is-scrollable='true'>
-					<h2>Cadet challenges without 100% success chance</h2>
-					{this.state.recommendations.map(function (recommendation) {
-						if (recommendation.crew.length == 0) {
-							return (<div key={recommendation.name}>
-								<h3>{recommendation.name}</h3>
-								<span style={{color:'red'}}>You have no crew which can complete this challenge!</span>
-							</div>);
-						}
+				<div className='tab-panel' data-is-scrollable='true'>
+					<GuaranteedSuccess title='Cadet challenges without guaranteed success' trait_names={this.props.cadetMissions.trait_names} recommendations={this.state.recommendations.filter(function (recommendation) { return recommendation.cadet; })} />
+					<GuaranteedSuccess title='Missions without guaranteed success' trait_names={this.props.cadetMissions.trait_names} recommendations={this.state.recommendations.filter(function (recommendation) { return !recommendation.cadet; })} />
+					<MinimalComplement title='Minimal crew complement needed for cadet challenges' recommendations={this.state.recommendations} crew={this.props.crew} />
 
-						if (recommendation.crew.filter(function (crew) { return crew.success > 99.9; }).length == 0)
-						{
-							return (<div key={recommendation.name}>
-								<h3>{recommendation.name}</h3>
-								<span>Your best bet is {recommendation.crew[0].name} with a {recommendation.crew[0].success.toFixed(2)}% success chance.</span>
-							</div>);
-						}
+					<Toggle
+						onText='Show detailed list of crew success stats for all cadet challenges and missions'
+						offText='Hide detailed list of crew success stats for all cadet challenges and missions'
+						checked={this.state.showDetails}
+						onChanged={checked => this.setState({ showDetails: checked })} />
 
-						return <span />;
-					})}
-					<h2>Minimal crew complement needed for cadet challenges</h2>
-					<span style={{ color: 'red' }}>Not yet implemented!</span>
-
-					<h2>Detailed list of crew success stats for all cadet challenge</h2>
-					{this.state.recommendations.map(function (recommendation) {
+					{this.state.showDetails && this.state.recommendations.map(function (recommendation) {
 						return (<div key={recommendation.name}>
 							<h3>{recommendation.name}</h3>
-							{recommendation.crew.map(function (crew) {
+							{(recommendation.crew.length == 0) ? (<span style={{ color: 'red' }}>You have no crew which can complete this challenge!</span>) :
+								recommendation.crew.map(function (crew) {
 								return (<span key={crew.name}>{crew.name} ({crew.success.toFixed(2)}%)</span>);
 							}).reduce((prev, curr) => [prev, ', ', curr])}
 						</div>);
