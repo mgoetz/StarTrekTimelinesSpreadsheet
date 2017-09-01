@@ -23,7 +23,7 @@ h1 {
 
 .embedded-crew-grid {
     -webkit-overflow-scrolling: touch;
-    max-height: 250px;
+    max-height: 300px;
     overflow-x: hidden;
     overflow-y: auto;
     padding: 20px 0;

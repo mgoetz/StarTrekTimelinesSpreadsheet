@@ -4,7 +4,7 @@ import { Image, ImageFit } from 'office-ui-fabric-react/lib/Image';
 import { Rating, RatingSize } from 'office-ui-fabric-react/lib/Rating';
 import { Link } from 'office-ui-fabric-react/lib/Link';
 
-import { groupBy, sortItems, columnClick } from '../utils/listUtils.js';
+import { sortItems, columnClick } from '../utils/listUtils.js';
 import { getWikiImageUrl } from '../utils/wikiImage.js';
 
 const CONFIG = require('../utils/config.js');

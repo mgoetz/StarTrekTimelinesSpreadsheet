@@ -39,7 +39,11 @@ export class GuaranteedSuccess extends React.Component {
 				if (recommendation.crew.filter(function (crew) { return crew.success > 99.9; }).length == 0) {
 					return (<div key={recommendation.name}>
 						<h3>{recommendation.name}</h3>
-						<span>Your best bet is {recommendation.crew[0].name} with a {recommendation.crew[0].success.toFixed(2)}% success chance.</span>
+						<span>Your best bet is {recommendation.crew[0].name} with a {recommendation.crew[0].success.toFixed(2)}% success chance.</span><br />
+						<span className='quest-mastery'>You need a crew with the <Image src={CONFIG.skillRes[recommendation.skill].url} height={18} /> {CONFIG.skillRes[recommendation.skill].name} skill of at least {recommendation.roll}
+							{(recommendation.lockedTraits.length > 0) &&
+								(<span>&nbsp;and one of these skills: {recommendation.lockedTraits.map(function (trait) { return (<span>{this.props.trait_names[trait] ? this.props.trait_names[trait] : trait}</span>); }.bind(this)).reduce((prev, curr) => [prev, ', ', curr])}
+								</span>)}.</span>
 					</div>);
 				}
 			}.bind(this))

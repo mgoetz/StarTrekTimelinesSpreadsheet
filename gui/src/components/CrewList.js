@@ -3,10 +3,44 @@ import { DetailsList, DetailsListLayoutMode, SelectionMode } from 'office-ui-fab
 import { Image, ImageFit } from 'office-ui-fabric-react/lib/Image';
 import { Rating, RatingSize } from 'office-ui-fabric-react/lib/Rating';
 import { Link } from 'office-ui-fabric-react/lib/Link';
+import { Icon } from 'office-ui-fabric-react/lib/Icon';
 
 import { SkillCell } from './SkillCell.js';
 
-import { groupBy, sortItems, columnClick } from '../utils/listUtils.js';
+import { sortItems, columnClick } from '../utils/listUtils.js';
+
+const CONFIG = require('../utils/config.js');
+
+function groupBy(items, fieldName) {
+	let groups = items.reduce((currentGroups, currentItem, index) => {
+		let lastGroup = currentGroups[currentGroups.length - 1];
+		let fieldValue = currentItem[fieldName];
+
+		if (!lastGroup || lastGroup.value !== fieldValue) {
+			currentGroups.push({
+				key: 'group' + fieldValue + index,
+				name: CONFIG.rarityRes[fieldValue].name + " crew",
+				value: fieldValue,
+				startIndex: index,
+				level: 0,
+				count: 0
+			});
+		}
+		if (lastGroup) {
+			lastGroup.count = index - lastGroup.startIndex;
+		}
+		return currentGroups;
+	}, []);
+
+	// Fix last group count
+	let lastGroup = groups[groups.length - 1];
+
+	if (lastGroup) {
+		lastGroup.count = items.length - lastGroup.startIndex;
+	}
+
+	return groups;
+}
 
 export class CrewList extends React.Component {
 	constructor(props) {
@@ -14,6 +48,15 @@ export class CrewList extends React.Component {
 
 		var items = props.data;
 		items = sortItems(items, 'max_rarity');
+
+		items.forEach(function (item) {
+			item.command_skill_core = item.command_skill.core;
+			item.science_skill_core = item.science_skill.core;
+			item.security_skill_core = item.security_skill.core;
+			item.engineering_skill_core = item.engineering_skill.core;
+			item.diplomacy_skill_core = item.diplomacy_skill.core;
+			item.medicine_skill_core = item.medicine_skill.core;
+		});
 
 		const _columns = [
 			{
@@ -41,6 +84,7 @@ export class CrewList extends React.Component {
 				key: 'name',
 				name: 'Full name',
 				minWidth: 100,
+				maxWidth: 180,
 				isResizable: true,
 				fieldName: 'name'
 			},
@@ -48,7 +92,7 @@ export class CrewList extends React.Component {
 				key: 'level',
 				name: 'Level',
 				minWidth: 30,
-				maxWidth: 80,
+				maxWidth: 50,
 				isResizable: true,
 				fieldName: 'level'
 			},
@@ -93,7 +137,7 @@ export class CrewList extends React.Component {
 				minWidth: 70,
 				maxWidth: 100,
 				isResizable: true,
-				fieldName: 'command_skill',
+				fieldName: 'command_skill_core',
 				onRender: (item) => {
 					return (<SkillCell skill={item.command_skill} />);
 				}
@@ -104,7 +148,7 @@ export class CrewList extends React.Component {
 				minWidth: 70,
 				maxWidth: 100,
 				isResizable: true,
-				fieldName: 'diplomacy_skill',
+				fieldName: 'diplomacy_skill_core',
 				onRender: (item) => {
 					return (<SkillCell skill={item.diplomacy_skill} />);
 				}
@@ -115,7 +159,7 @@ export class CrewList extends React.Component {
 				minWidth: 75,
 				maxWidth: 100,
 				isResizable: true,
-				fieldName: 'engineering_skill',
+				fieldName: 'engineering_skill_core',
 				onRender: (item) => {
 					return (<SkillCell skill={item.engineering_skill} />);
 				}
@@ -126,7 +170,7 @@ export class CrewList extends React.Component {
 				minWidth: 70,
 				maxWidth: 100,
 				isResizable: true,
-				fieldName: 'medicine_skill',
+				fieldName: 'medicine_skill_core',
 				onRender: (item) => {
 					return (<SkillCell skill={item.medicine_skill} />);
 				}
@@ -137,7 +181,7 @@ export class CrewList extends React.Component {
 				minWidth: 70,
 				maxWidth: 100,
 				isResizable: true,
-				fieldName: 'science_skill',
+				fieldName: 'science_skill_core',
 				onRender: (item) => {
 					return (<SkillCell skill={item.science_skill} />);
 				}
@@ -148,7 +192,7 @@ export class CrewList extends React.Component {
 				minWidth: 70,
 				maxWidth: 100,
 				isResizable: true,
-				fieldName: 'security_skill',
+				fieldName: 'security_skill_core',
 				onRender: (item) => {
 					return (<SkillCell skill={item.security_skill} />);
 				}
@@ -204,10 +248,6 @@ export class CrewList extends React.Component {
 		);
 	}
 
-	_onColumnClick(ev, column) {
-		this.setState(columnClick(this.state.items, this.state.columns, column));
-	}
-
 	getGroupedColumn() {
 		return this.state.groupedColumn;
 	}
@@ -217,5 +257,18 @@ export class CrewList extends React.Component {
 			this.setState({ groupedColumn: '', groups: null });
 		else
 			this.setState({ groupedColumn: groupedColumn, groups: groupBy(this.state.items, groupedColumn) });
+	}
+
+	_onColumnClick(ev, column) {
+		if (column.fieldName != this.state.groupedColumn) {
+			this.setGroupedColumn('');
+		}
+
+		this.setState(columnClick(this.state.items, this.state.columns, column));
+
+		if (this.state.groupedColumn == '')
+			this.setState({ groups: null });
+		else
+			this.setState({ groups: groupBy(this.state.items, this.state.groupedColumn) });
 	}
 }

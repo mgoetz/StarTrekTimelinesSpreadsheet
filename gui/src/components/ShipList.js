@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import { DetailsList, DetailsListLayoutMode, SelectionMode } from 'office-ui-fabric-react/lib/DetailsList';
 import { Rating, RatingSize } from 'office-ui-fabric-react/lib/Rating';
 
-import { groupBy, sortItems, columnClick } from '../utils/listUtils.js';
+import { sortItems, columnClick } from '../utils/listUtils.js';
 
 export class ShipList extends React.Component {
 	constructor(props) {

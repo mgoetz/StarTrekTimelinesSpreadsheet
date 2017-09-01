@@ -1,36 +1,5 @@
 const CONFIG = require('./config.js');
 
-export function groupBy(items, fieldName) {
-	let groups = items.reduce((currentGroups, currentItem, index) => {
-		let lastGroup = currentGroups[currentGroups.length - 1];
-		let fieldValue = currentItem[fieldName];
-
-		if (!lastGroup || lastGroup.value !== fieldValue) {
-			currentGroups.push({
-				key: 'group' + fieldValue + index,
-				name: CONFIG.rarityRes[fieldValue].name + " crew",
-				value: fieldValue,
-				startIndex: index,
-				level: 0,
-				count: 0
-			});
-		}
-		if (lastGroup) {
-			lastGroup.count = index - lastGroup.startIndex;
-		}
-		return currentGroups;
-	}, []);
-
-	// Fix last group count
-	let lastGroup = groups[groups.length - 1];
-
-	if (lastGroup) {
-		lastGroup.count = items.length - lastGroup.startIndex;
-	}
-
-	return groups;
-}
-
 export function sortItems(items, sortBy, descending) {
 	if (descending) {
 		return items.sort((a, b) => {
@@ -63,21 +32,9 @@ export function columnClick(items, columns, column) {
 		isSortedDescending = !isSortedDescending;
 	}
 
-	// Sort the items.
-	items = items.concat([]).sort((a, b) => {
-		let firstValue = a[column.fieldName].core ? a[column.fieldName].core : a[column.fieldName];
-		let secondValue = b[column.fieldName].core ? b[column.fieldName].core : b[column.fieldName];
-
-		if (isSortedDescending) {
-			return firstValue > secondValue ? -1 : 1;
-		} else {
-			return firstValue > secondValue ? 1 : -1;
-		}
-	});
-
 	// Reset the items and columns to match the state.
 	return {
-		items: items,
+		items: sortItems(items, column.fieldName, isSortedDescending),
 		columns: columns.map(col => {
 			col.isSorted = (col.key === column.key);
 
