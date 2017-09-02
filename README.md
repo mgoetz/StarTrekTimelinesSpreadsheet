@@ -1,5 +1,5 @@
 # Star Trek Timelines Spreadsheet Tool
-A tool to ease with crew management in Star Trek Timelines
+A tool to help with crew management in Star Trek Timelines
 
 **NOTE** This tool does not (and will never) automate any part of the game play; its sole purpose is to help players organize their crew using the functionality built within or with a spreadsheet application of their choice.
 
