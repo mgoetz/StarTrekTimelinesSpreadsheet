@@ -23,6 +23,7 @@ import { CrewList } from './CrewList.js';
 import { GauntletHelper } from './GauntletHelper.js';
 import { MissionHelper } from './MissionHelper.js';
 import { CrewRecommendations } from './CrewRecommendations.js';
+import { AboutAndHelp } from './AboutAndHelp.js';
 
 const shell = require('electron').shell;
 
@@ -100,6 +101,9 @@ class App extends React.Component {
 						</PivotItem>
 						<PivotItem linkText='Gauntlet' itemIcon='DeveloperTools'>
 							<GauntletHelper gauntlet={this.state.gauntlet} crew={this.state.crewList} trait_names={this.state.trait_names} />
+						</PivotItem>
+						<PivotItem linkText='About' itemIcon='Help'>
+							<AboutAndHelp />
 						</PivotItem>
 					</Pivot>
 				)}

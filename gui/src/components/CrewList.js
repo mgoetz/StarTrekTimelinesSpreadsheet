@@ -47,7 +47,10 @@ export class CrewList extends React.Component {
 		super(props);
 
 		var items = props.data;
-		items = sortItems(items, 'max_rarity');
+
+		var sortColumn = props.sortColumn ? props.sortColumn : 'max_rarity';
+
+		items = sortItems(items, sortColumn);
 
 		items.forEach(function (item) {
 			item.command_skill_core = item.command_skill.core;
@@ -103,8 +106,6 @@ export class CrewList extends React.Component {
 				minWidth: 70,
 				maxWidth: 100,
 				isResizable: true,
-				isSorted: true,
-				isSortedDescending: false,
 				onRender: (item) => {
 					return (
 						<Rating
@@ -205,6 +206,13 @@ export class CrewList extends React.Component {
 				fieldName: 'traits'
 			}
 		];
+
+		_columns.forEach(function (column) {
+			if (column.key == sortColumn) {
+				column.isSorted = true;
+				column.isSortedDescending = false;
+			}
+		});
 
 		if (props.grouped === false)
 		{

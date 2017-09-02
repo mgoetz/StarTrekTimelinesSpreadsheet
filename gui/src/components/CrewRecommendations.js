@@ -51,6 +51,36 @@ export class GuaranteedSuccess extends React.Component {
 	}
 }
 
+export class CrewDuplicates extends React.Component {
+	constructor(props) {
+		super(props);
+
+		var uniq = this.props.crew.map((crew) => { return { count: 1, crewId: crew.id }; })
+			.reduce((a, b) => {
+				a[b.crewId] = (a[b.crewId] || 0) + b.count;
+				return a;
+			}, {});
+
+		var duplicateIds = Object.keys(uniq).filter((a) => uniq[a] > 1);
+
+		this.state = {
+			isCollapsed: true,
+			duplicates: this.props.crew.filter(function (crew) { return duplicateIds.includes(crew.id.toString()); })
+		};
+	}
+
+	render() {
+		return (<div>
+			<h2><button type='button' style={{ cursor: 'default', background: 'none', border: 'none' }} onClick={() => this.setState({ isCollapsed: !this.state.isCollapsed })}>
+				<Icon iconName={this.state.isCollapsed ? 'ChevronDown' : 'ChevronUp'} />
+			</button> {this.props.title}
+			</h2>
+			{!this.state.isCollapsed &&
+				<CrewList data={this.state.duplicates} grouped={false} sortColumn='name' overrideClassName='embedded-crew-grid' />
+			}</div>);
+	}
+}
+
 export class MinimalComplement extends React.Component {
 	constructor(props) {
 		super(props);
@@ -236,6 +266,7 @@ export class CrewRecommendations extends React.Component {
 				<div className='tab-panel' data-is-scrollable='true'>
 					<GuaranteedSuccess title='Cadet challenges without guaranteed success' trait_names={this.props.cadetMissions.trait_names} recommendations={this.state.recommendations.filter(function (recommendation) { return recommendation.cadet; })} />
 					<GuaranteedSuccess title='Missions without guaranteed success' trait_names={this.props.cadetMissions.trait_names} recommendations={this.state.recommendations.filter(function (recommendation) { return !recommendation.cadet; })} />
+					<CrewDuplicates title='Crew duplicates' crew={this.props.crew} />
 					<MinimalComplement title='Minimal crew complement needed for cadet challenges' recommendations={this.state.recommendations} crew={this.props.crew} />
 
 					<Toggle
