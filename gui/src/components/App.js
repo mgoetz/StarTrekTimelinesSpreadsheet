@@ -24,6 +24,7 @@ import { GauntletHelper } from './GauntletHelper.js';
 import { MissionHelper } from './MissionHelper.js';
 import { CrewRecommendations } from './CrewRecommendations.js';
 import { AboutAndHelp } from './AboutAndHelp.js';
+import { FleetDetails } from './FleetDetails.js';
 
 const shell = require('electron').shell;
 
@@ -39,6 +40,7 @@ class App extends React.Component {
 			captainName: 'captain',
 			secondLine: '',
 			captainAvatarUrl: '',
+			fleetId: null,
 			crewList: [],
 			shipList: [],
 			itemList: [],
@@ -101,6 +103,9 @@ class App extends React.Component {
 						</PivotItem>
 						<PivotItem linkText='Gauntlet' itemIcon='DeveloperTools'>
 							<GauntletHelper gauntlet={this.state.gauntlet} crew={this.state.crewList} trait_names={this.state.trait_names} />
+						</PivotItem>
+						<PivotItem linkText='Fleet' itemIcon='WindDirection'>
+							<FleetDetails id={this.state.fleetId} accessToken={this.state.accessToken} />
 						</PivotItem>
 						<PivotItem linkText='About' itemIcon='Help'>
 							<AboutAndHelp />
@@ -235,6 +240,8 @@ class App extends React.Component {
 					secondLine: 'Level ' + this.player.player.character.level,
 					itemList: this.player.player.character.items,
 					trait_names: this.config.config.trait_names,
+					fleetId: this.player.player.fleet ? this.player.player.fleet.id : nullptr,
+					accessToken: accesstoken,
 					missionHelperParams: {
 						accesstoken: accesstoken,
 						accepted_missions: this.player.player.character.accepted_missions,
