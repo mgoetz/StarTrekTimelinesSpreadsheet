@@ -133,6 +133,21 @@ export class CrewList extends React.Component {
 				}
 			},
 			{
+				key: 'buyback',
+				name: 'Buy-back',
+				minWidth: 16,
+				maxWidth: 16,
+				iconName: 'EmptyRecycleBin',
+				isIconOnly: true,
+				fieldName: 'buyback',
+				onRender: (item) => {
+					if (item.buyback)
+						return (<Icon iconName='EmptyRecycleBin' />);
+					else
+						return (<p />);
+				}
+			},
+			{
 				key: 'command_skill',
 				name: 'Command',
 				minWidth: 70,
