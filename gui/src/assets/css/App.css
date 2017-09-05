@@ -95,3 +95,12 @@ h1 {
     margin: 0;
     font-size:small;
 }
+
+.starbase-room {
+    display: inline-flex;
+    vertical-align:middle;
+}
+
+.starbase-room-name {
+    padding-top: 12px;
+}
