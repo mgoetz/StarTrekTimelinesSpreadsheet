@@ -57,24 +57,22 @@ class App extends React.Component {
 
 	render() {
 		return (
-			<Fabric>
-				<table>
-					<tbody>
-					<tr>
-						<td rowSpan='2'>
-							<Image src={this.state.captainAvatarUrl} height={60} />
-						</td>
-						<td>
-							<b>Hello, {this.state.captainName}!</b>
-						</td>
-					</tr>
-					<tr>
-						<td>
-							<Label>{this.state.secondLine}</Label>
-						</td>
-					</tr>
-					</tbody>
-				</table>
+			<Fabric className='App'>
+				<div className='lcars'>
+					<div className='lcars-corner-left' />
+					<div className='lcars-content'>
+						<Image src={this.state.captainAvatarUrl} height={25} />
+					</div>
+					<div className='lcars-ellipse' />
+					<div className='lcars-content-text'>
+						{this.state.captainName}
+					</div>
+					<div className='lcars-box' />
+					<div className='lcars-content-text'>
+						{this.state.secondLine}
+					</div>
+					<div className='lcars-corner-right' />
+				</div>
 
 				{this.state.showSpinner && (
 					<Spinner size={SpinnerSize.large} label={this.state.spinnerLabel} /> 
