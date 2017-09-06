@@ -1,17 +1,4 @@
 .vscode/launch.json
 node_modules/
 /.vs
-/temp.csv
-/gauntletc.json
-/gauntlet4.json
-/gauntlet3.json
-/gauntlet2.json
-/gauntlet1.json
-/gauntlet.json
-/notes.txt
-/notes.txt
-/notes.txt
-/gauntlet.js
-/test.xlsx
 /gui/.vs
-/npm-debug.log
