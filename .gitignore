@@ -1,4 +1,5 @@
 .vscode/launch.json
 node_modules/
+dist/
+builds/
 /.vs
-/gui/.vs
