@@ -140,7 +140,7 @@ export class MinimalComplement extends React.Component {
 			</h2>
 			{!this.state.isCollapsed &&
 				(<div>
-				<p><b>Note:</b> These recommendations do not take into account the needs for gauntlets, shuttle missions or any ship battle missions. Manually review each one before making decisions.</p>
+				<p><b>Note:</b> These recommendations do not take into account the needs for gauntlets, shuttle missions or any ship battle missions. They also don't account for quest paths, only considering the needs of individual nodes. Manually review each one before making decisions.</p>
 
 				<h3>Crew which could be frozen or airlocked</h3>
 				<CrewList data={this.state.removableCrew} grouped={false} overrideClassName='embedded-crew-grid' />

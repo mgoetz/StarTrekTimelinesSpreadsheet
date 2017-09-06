@@ -37,7 +37,7 @@ class App extends React.Component {
 		this.state = {
 			showSpinner: false,
 			dataLoaded: false,
-			captainName: 'captain',
+			captainName: 'Welcome!',
 			secondLine: '',
 			captainAvatarUrl: '',
 			fleetId: null,

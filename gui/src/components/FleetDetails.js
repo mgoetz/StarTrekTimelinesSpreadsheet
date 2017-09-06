@@ -23,12 +23,12 @@ export class MemberList extends React.Component {
 				{
 					key: 'icon',
 					name: '',
-					minWidth: 50,
-					maxWidth: 50,
+					minWidth: 32,
+					maxWidth: 32,
 					fieldName: 'display_name',
 					onRender: (item) => {
 						if (item.iconUrl)
-							return (<Image src={item.iconUrl} width={50} height={50} imageFit={ImageFit.contain} />);
+							return (<Image src={item.iconUrl} width={32} height={32} imageFit={ImageFit.contain} />);
 						else
 							return <span />
 					}
@@ -55,11 +55,17 @@ export class MemberList extends React.Component {
 				{
 					key: 'squad_name',
 					name: 'Squad',
-					minWidth: 80,
-					maxWidth: 120,
+					minWidth: 90,
+					maxWidth: 150,
 					isResizable: true,
 					fieldName: 'squad_name',
-					isPadded: true
+					isPadded: true,
+					onRender: (item) => {
+						if (item.squad_name)
+							return (<span>{item.squad_name} ({item.squad_rank})</span>);
+						else
+							return (<span style={{ color: 'red' }}>Not in a squad</span>);
+					}
 				},
 				{
 					key: 'last_active',
