@@ -7,6 +7,8 @@ import { DetailsList, DetailsListLayoutMode, SelectionMode } from 'office-ui-fab
 import { Image, ImageFit } from 'office-ui-fabric-react/lib/Image';
 import { Rating, RatingSize } from 'office-ui-fabric-react/lib/Rating';
 
+import { CollapsibleSection } from './CollapsibleSection.js';
+
 import { loadFleetData } from '../utils/fleet.js';
 import { loginPubNub } from '../utils/chat.js';
 import { sortItems, columnClick } from '../utils/listUtils.js';
@@ -17,7 +19,6 @@ export class MemberList extends React.Component {
 		super(props);
 
 		this.state = {
-			isCollapsed: true,
 			members: sortItems(this.props.members, 'display_name'),
 			columns: [
 				{
@@ -110,21 +111,16 @@ export class MemberList extends React.Component {
 	}
 
 	render() {
-		return (<div>
-			<h2><button type='button' style={{ cursor: 'default', background: 'none', border: 'none' }} onClick={() => this.setState({ isCollapsed: !this.state.isCollapsed })}>
-				<Icon iconName={this.state.isCollapsed ? 'ChevronDown' : 'ChevronUp'} />
-			</button> {this.props.title}
-			</h2>
-			{!this.state.isCollapsed &&
-				<DetailsList
-					items={this.state.members}
-					columns={this.state.columns}
-					setKey='set'
-					selectionMode={SelectionMode.none}
-					layoutMode={DetailsListLayoutMode.justified}
-					onColumnHeaderClick={this._onColumnClick}
-				/>
-			}</div>);
+		return (<CollapsibleSection title={this.props.title}>
+			<DetailsList
+				items={this.state.members}
+				columns={this.state.columns}
+				setKey='set'
+				selectionMode={SelectionMode.none}
+				layoutMode={DetailsListLayoutMode.justified}
+				onColumnHeaderClick={this._onColumnClick}
+			/>
+		</CollapsibleSection>);
 	}
 }
 
@@ -133,32 +129,26 @@ export class Starbase extends React.Component {
 		super(props);
 
 		this.state = {
-			isCollapsed: true,
 			starbase_rooms: this.props.starbase[0].character.starbase_rooms
 		};
 	}
 
 	render() {
-		return (<div>
-			<h2><button type='button' style={{ cursor: 'default', background: 'none', border: 'none' }} onClick={() => this.setState({ isCollapsed: !this.state.isCollapsed })}>
-				<Icon iconName={this.state.isCollapsed ? 'ChevronDown' : 'ChevronUp'} />
-			</button> {this.props.title}
-			</h2>
-			{!this.state.isCollapsed &&
-				<ul>
+		return (<CollapsibleSection title={this.props.title}>
+			<ul>
 				{this.state.starbase_rooms.map(function (room) {
 					return <li key={room.id}>
 						<span className='starbase-room'><span className='starbase-room-name'>{room.name}</span><Rating size={RatingSize.Small} min={1} max={room.max_level} rating={(room.level > 0) ? room.level : null} /></span>
 						{(room.level > 0) &&
 							<ul>
-							{room.upgrades.slice(0, room.level + 1).map(function (upgrade) {
-								return <li key={upgrade.name}>{upgrade.name} {(upgrade.buffs && upgrade.buffs.length > 0) ? (' (' + upgrade.buffs[0].name + ' )') : ''} </li>
-							})}
+								{room.upgrades.slice(0, room.level + 1).map(function (upgrade) {
+									return <li key={upgrade.name}>{upgrade.name} {(upgrade.buffs && upgrade.buffs.length > 0) ? (' (' + upgrade.buffs[0].name + ' )') : ''} </li>
+								})}
 							</ul>}
 					</li>
 				})}
-				</ul>
-			}</div>);
+			</ul>
+		</CollapsibleSection>);
 	}
 }
 

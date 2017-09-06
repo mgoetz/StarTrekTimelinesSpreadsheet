@@ -5,33 +5,22 @@ import { Icon } from 'office-ui-fabric-react/lib/Icon';
 import { Image, ImageFit } from 'office-ui-fabric-react/lib/Image';
 
 import { CrewList } from './CrewList.js';
+import { CollapsibleSection } from './CollapsibleSection.js';
 
 import { loadMissionData } from '../utils/missions.js';
 const CONFIG = require('../utils/config.js');
 
 export class GuaranteedSuccess extends React.Component {
-	constructor(props) {
-		super(props);
-
-		this.state = {
-			isCollapsed: true
-		};
-	}
-
 	render() {
-		return (<div>
-			<h2><button type='button' style={{ cursor: 'default', background: 'none', border: 'none' }} onClick={() => this.setState({ isCollapsed: !this.state.isCollapsed })}>
-				<Icon iconName={this.state.isCollapsed ? 'ChevronDown' : 'ChevronUp'} />
-				</button> {this.props.title}
-			</h2>
-			{!this.state.isCollapsed && this.props.recommendations.map(function (recommendation) {
+		return (<CollapsibleSection title={this.props.title}>
+			{this.props.recommendations.map(function (recommendation) {
 				if (recommendation.crew.length == 0) {
 					return (<div key={recommendation.name}>
 						<h3>{recommendation.name}</h3>
-						<span style={{ color: 'red' }}>No crew can complete this challenge!</span><br/>
+						<span style={{ color: 'red' }}>No crew can complete this challenge!</span><br />
 						<span className='quest-mastery'>You need a crew with the <Image src={CONFIG.skillRes[recommendation.skill].url} height={18} /> {CONFIG.skillRes[recommendation.skill].name} skill of at least {recommendation.roll}
 							{(recommendation.lockedTraits.length > 0) &&
-								(<span>&nbsp;and one of these skills: {recommendation.lockedTraits.map(function (trait) { return (<span>{this.props.trait_names[trait] ? this.props.trait_names[trait] : trait}</span>); }.bind(this)).reduce((prev, curr) => [prev, ', ', curr])}
+								(<span>&nbsp;and one of these skills: {recommendation.lockedTraits.map(function (trait) { return (<span key={trait}>{this.props.trait_names[trait] ? this.props.trait_names[trait] : trait}</span>); }.bind(this)).reduce((prev, curr) => [prev, ', ', curr])}
 								</span>)}.</span>
 					</div>);
 				}
@@ -42,12 +31,12 @@ export class GuaranteedSuccess extends React.Component {
 						<span>Your best bet is {recommendation.crew[0].name} with a {recommendation.crew[0].success.toFixed(2)}% success chance.</span><br />
 						<span className='quest-mastery'>You need a crew with the <Image src={CONFIG.skillRes[recommendation.skill].url} height={18} /> {CONFIG.skillRes[recommendation.skill].name} skill of at least {recommendation.roll}
 							{(recommendation.lockedTraits.length > 0) &&
-								(<span>&nbsp;and one of these skills: {recommendation.lockedTraits.map(function (trait) { return (<span>{this.props.trait_names[trait] ? this.props.trait_names[trait] : trait}</span>); }.bind(this)).reduce((prev, curr) => [prev, ', ', curr])}
+								(<span>&nbsp;and one of these skills: {recommendation.lockedTraits.map(function (trait) { return (<span key={trait}>{this.props.trait_names[trait] ? this.props.trait_names[trait] : trait}</span>); }.bind(this)).reduce((prev, curr) => [prev, ', ', curr])}
 								</span>)}.</span>
 					</div>);
 				}
 			}.bind(this))
-			}</div>);
+			}</CollapsibleSection>);
 	}
 }
 
@@ -64,20 +53,19 @@ export class CrewDuplicates extends React.Component {
 		var duplicateIds = Object.keys(uniq).filter((a) => uniq[a] > 1);
 
 		this.state = {
-			isCollapsed: true,
 			duplicates: this.props.crew.filter(function (crew) { return duplicateIds.includes(crew.id.toString()); })
 		};
 	}
 
 	render() {
-		return (<div>
-			<h2><button type='button' style={{ cursor: 'default', background: 'none', border: 'none' }} onClick={() => this.setState({ isCollapsed: !this.state.isCollapsed })}>
-				<Icon iconName={this.state.isCollapsed ? 'ChevronDown' : 'ChevronUp'} />
-			</button> {this.props.title}
-			</h2>
-			{!this.state.isCollapsed &&
+		if (this.state.duplicates.length > 0) {
+			return (<CollapsibleSection title={this.props.title}>
 				<CrewList data={this.state.duplicates} grouped={false} sortColumn='name' overrideClassName='embedded-crew-grid' />
-			}</div>);
+			</CollapsibleSection>);
+		}
+		else {
+			return <span />;
+		}
 	}
 }
 
@@ -126,28 +114,22 @@ export class MinimalComplement extends React.Component {
 		} while (allConsideredCrew.size < before);
 		
 		this.state = {
-			isCollapsed: true,
 			removableCrew: this.props.crew.filter(function (crew) { return removedCrew.has(crew.id) && (crew.frozen == 0); }),
 			unfreezeCrew: this.props.crew.filter(function (crew) { return allConsideredCrew.has(crew.id) && (crew.frozen > 0); })
 		};
 	}
 
 	render() {
-		return (<div>
-			<h2><button type='button' style={{ cursor: 'default', background: 'none', border: 'none' }} onClick={() => this.setState({ isCollapsed: !this.state.isCollapsed })}>
-				<Icon iconName={this.state.isCollapsed ? 'ChevronDown' : 'ChevronUp'} />
-			</button> {this.props.title}
-			</h2>
-			{!this.state.isCollapsed &&
-				(<div>
+		return (<CollapsibleSection title={this.props.title}>
+			<div>
 				<p><b>Note:</b> These recommendations do not take into account the needs for gauntlets, shuttle missions or any ship battle missions. They also don't account for quest paths, only considering the needs of individual nodes. Manually review each one before making decisions.</p>
 
 				<h3>Crew which could be frozen or airlocked</h3>
 				<CrewList data={this.state.removableCrew} grouped={false} overrideClassName='embedded-crew-grid' />
 				<h3>Crew which needs to be unfrozen</h3>
 				<CrewList data={this.state.unfreezeCrew} grouped={false} overrideClassName='embedded-crew-grid' />
-				</div>)}
-		</div>);
+			</div>
+		</CollapsibleSection>);
 	}
 }
 
