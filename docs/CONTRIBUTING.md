@@ -10,7 +10,7 @@ Validating the features of the tool with a wide variety of user profiles (with o
 
 ## Submitting changes
 
-Please send a [GitHub Pull Request](https://github.com/IAmPicard/StarTrekTimelinesSpreadsheet/pull/new/master) with a clear list of what you've done (read more about [pull requests](http://help.github.com/pull-requests/)).
+Please send a [GitHub Pull Request](https://github.com/IAmPicard/StarTrekTimelinesSpreadsheet/pull/new/master) with a clear list of what you've done (read more about [pull requests](https://help.github.com/articles/about-pull-requests/)).
 
 Particularly looking for folks with frontend (HTML / CSS) experience - I'd love to get a nice LCARS theme going.
 
