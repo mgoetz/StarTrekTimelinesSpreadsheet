@@ -17,31 +17,31 @@ However, if you're only interested in installing and running the tool, head on t
 
 ### Crew management
 
-![Screenshot tool](/Screenshot-Tool.png "Tool screenshot")
+![Screenshot tool](/docs/Screenshot-Tool.png "Tool screenshot")
 
 The first tab lets you manage your crew. You can sort by various fields, (un)group by rarity as well as export the data in Excel or plain CSV formats.
 
 ### Item management
 
-![Screenshot Items](/Screenshot-Items.png "Items screenshot")
+![Screenshot Items](/docs/Screenshot-Items.png "Items screenshot")
 
 This tab lists out all the items you currently have, along with their quantity and type.
 
 ### Missions
 
-![Screenshot Missions](/Screenshot-Missions.png "Missions screenshot")
+![Screenshot Missions](/docs/Screenshot-Missions.png "Missions screenshot")
 
 This tab give an overview of all accepted missions, along with individual requirements and player stats for each quest and challenge.
 
 ### Cadet challenges
 
-![Screenshot Cadet](/Screenshot-Cadet.png "Cadet screenshot")
+![Screenshot Cadet](/docs/Screenshot-Cadet.png "Cadet screenshot")
 
 Similar to the Missions tab, but for cadet challenges.
 
 ### Crew recommendations
 
-![Screenshot CrewRecommendations](/Screenshot-CrewRecommendations.png "CrewRecommendations screenshot")
+![Screenshot CrewRecommendations](/docs/Screenshot-CrewRecommendations.png "CrewRecommendations screenshot")
 
 *Work in progress!*
 
@@ -49,7 +49,7 @@ This tab will make recommendations about which crew you can freeze or airlock, a
 
 ### Gauntlet
 
-![Screenshot Gauntlet](/Screenshot-Gauntlet.png "Gauntlet screenshot")
+![Screenshot Gauntlet](/docs/Screenshot-Gauntlet.png "Gauntlet screenshot")
 
 In this tab you can get recommendations for which crew to use in your next gauntlet (if you didn't already start it). Please see source code for details, the algorithm is still "hand-wavy" at this point and could use input from someone more experienced with statistical analysis.
 
@@ -63,7 +63,7 @@ If you're not running on a Windows PC or don't want to install the Steam applica
 3. Back in the debug page, enter "stt.disruptorbeam.com/player" in the Filter input. Select the first item in the list of requests.
 4. On the right, you should see something like this:
 
-![Screenshot](/screenshot.png "Screenshot")
+![Screenshot](/docs/Screenshot.png "Screenshot")
 
 5. Copy the access_token, which should be in this format: "123e4567-e89b-12d3-a456-426655440000"
 
