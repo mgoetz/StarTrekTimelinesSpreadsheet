@@ -18,10 +18,10 @@ if ( process.defaultApp || /[\\/]electron-prebuilt[\\/]/.test(process.execPath) 
 function createWindow() {
   // Create the browser window.
   mainWindow = new BrowserWindow({
-    width: 1024, height: 768, show: false
+	  width: 1024, height: 768, show: false
 	});
 
-  mainWindow.setTitle('Star Trek Timelines Crew Management');
+  mainWindow.setTitle('Star Trek Timelines Crew Management v' + app.getVersion());
   mainWindow.setMenu(null);
 
   // and load the index.html of the app.

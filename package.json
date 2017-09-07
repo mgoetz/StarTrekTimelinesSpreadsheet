@@ -15,34 +15,35 @@
     "dev": "webpack-dev-server --hot --host 0.0.0.0 --config=./webpack.dev.config.js",
     "build": "webpack --config webpack.build.config.js",
     "package": "webpack --config webpack.build.config.js",
-    "postpackage": "electron-packager ./ --out=./builds"
+    "postpackage": "electron-packager ./ --out=./builds",
+    "installer": "node createinstaller.js"
   },
   "devDependencies": {
-    "babel-core": "^6.24.1",
-    "babel-loader": "^6.4.0",
-    "babel-preset-react": "^6.24.1",
-    "babili-webpack-plugin": "^0.0.11",
-    "css-loader": "^0.28.1",
-    "electron": "1.7.5",
-    "electron-packager": "^8.7.0",
-    "electron-winstaller": "^2.6.3",
-    "extract-text-webpack-plugin": "^2.1.0",
-    "file-loader": "^0.11.1",
-    "html-webpack-plugin": "^2.28.0",
-    "react": "^15.4.2",
-    "react-dom": "^15.4.2",
-    "style-loader": "^0.17.0",
-    "webpack": "^2.5.1",
-    "webpack-dev-server": "^2.4.5"
+    "babel-core": "latest",
+    "babel-loader": "latest",
+    "babel-minify-webpack-plugin": "latest",
+    "babel-preset-react": "latest",
+    "css-loader": "latest",
+    "electron": "1.7.6",
+    "electron-packager": "latest",
+    "electron-winstaller": "latest",
+    "extract-text-webpack-plugin": "latest",
+    "file-loader": "latest",
+    "html-webpack-plugin": "latest",
+    "react": "latest",
+    "react-dom": "latest",
+    "style-loader": "latest",
+    "webpack": "latest",
+    "webpack-dev-server": "latest"
   },
   "dependencies": {
-    "office-ui-fabric-react": "^4.37.1",
-    "regedit": "^2.2.7",
-    "exceljs": "^0.5.1",
-    "json2csv": "^3.11.1",
+    "electron-json-storage": "latest",
+    "exceljs": "latest",
+    "json2csv": "latest",
+    "office-ui-fabric-react": "latest",
     "pubnub": "latest",
-    "uuid": "latest",
+    "regedit": "latest",
     "request": "latest",
-    "electron-json-storage": "latest"
+    "uuid": "latest"
   }
 }
