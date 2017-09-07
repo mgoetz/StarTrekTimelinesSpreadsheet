@@ -1,8 +1,10 @@
 import React, { Component } from 'react';
 import { DetailsList, DetailsListLayoutMode, SelectionMode } from 'office-ui-fabric-react/lib/DetailsList';
 import { Rating, RatingSize } from 'office-ui-fabric-react/lib/Rating';
+import { Image, ImageFit } from 'office-ui-fabric-react/lib/Image';
 
 import { sortItems, columnClick } from '../utils/listUtils.js';
+import { getWikiImageUrl } from '../utils/wikiImage.js';
 
 export class ShipList extends React.Component {
 	constructor(props) {
@@ -11,6 +13,19 @@ export class ShipList extends React.Component {
 		this.state = {
 			items: sortItems(this.props.data, 'name'),
 			columns: [
+				{
+					key: 'icon',
+					name: '',
+					minWidth: 48,
+					maxWidth: 48,
+					fieldName: 'name',
+					onRender: (item) => {
+						if (item.iconUrl)
+							return (<Image src={item.iconUrl} width={48} height={48} imageFit={ImageFit.contain} />);
+						else
+							return <span />
+					}
+				},
 				{
 					key: 'name',
 					name: 'Name',
@@ -33,7 +48,7 @@ export class ShipList extends React.Component {
 							<Rating
 								min={1}
 								max={item.max_level}
-								rating={item.level}
+								rating={(item.level > 0) ? item.level : null}
 							/>
 						);
 					},
@@ -60,47 +75,80 @@ export class ShipList extends React.Component {
 				{
 					key: 'shields',
 					name: 'Shields',
-					minWidth: 50,
-					maxWidth: 80,
+					minWidth: 40,
+					maxWidth: 50,
 					isResizable: true,
 					fieldName: 'shields'
 				},
 				{
 					key: 'hull',
 					name: 'Hull',
-					minWidth: 50,
-					maxWidth: 80,
+					minWidth: 40,
+					maxWidth: 50,
 					isResizable: true,
 					fieldName: 'hull'
 				},
 				{
 					key: 'attack',
 					name: 'Attack',
-					minWidth: 50,
+					minWidth: 60,
 					maxWidth: 80,
 					isResizable: true,
-					fieldName: 'attack'
+					fieldName: 'attack',
+					onRender: (item) => {
+						return (
+							<span>{item.attack} ({item.attacks_per_second}/s)</span>
+						);
+					},
 				},
 				{
 					key: 'accuracy',
 					name: 'Accuracy',
-					minWidth: 50,
-					maxWidth: 80,
+					minWidth: 40,
+					maxWidth: 50,
 					isResizable: true,
 					fieldName: 'accuracy'
 				},
 				{
 					key: 'evasion',
 					name: 'Evasion',
-					minWidth: 50,
-					maxWidth: 80,
+					minWidth: 40,
+					maxWidth: 50,
 					isResizable: true,
 					fieldName: 'evasion'
+				},
+				{
+					key: 'flavor',
+					name: 'Description',
+					minWidth: 100,
+					isResizable: true,
+					fieldName: 'flavor'
 				}
 			]
 		};
 
+		this._mounted = false;
+
+		this.state.items.forEach(function (ship) {
+			var fileName = ship.name.split(' ').join('_').split('.').join('') + '.png';
+			getWikiImageUrl(fileName, ship.name, function (id, url) {
+				this.state.items.forEach(function (item) {
+					if (item.name === id) {
+						item.iconUrl = url;
+					}
+				});
+
+				// Sometimes we get the callback before the component is even mounted, so no need to force update
+				if (this._mounted)
+					this.forceUpdate();
+			}.bind(this));
+		}.bind(this));
+
 		this._onColumnClick = this._onColumnClick.bind(this);
+	}
+
+	componentDidMount() {
+		this._mounted = true;
 	}
 
 	render() {

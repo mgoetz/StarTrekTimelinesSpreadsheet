@@ -3,3 +3,4 @@ node_modules/
 dist/
 builds/
 /.vs
+/notes.txt
