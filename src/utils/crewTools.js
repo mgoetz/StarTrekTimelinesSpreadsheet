@@ -70,6 +70,15 @@ export function matchCrew(crew_avatars, character, token, trait_names, callback)
 			loadFrozen(rosterEntry, token, trait_names, queue('frozen'));
 		});
 
+		// This code will load all unowned crew as well ; but what's the point if we don't get any stats
+		/*var unowned = crew_avatars.filter(function (crew) { return !roster.find(function (rosterEntry) { return rosterEntry.name == crew.name; }); });
+		unowned.forEach(function (crew) {
+			rosterEntry = getDefaults(crew.id);
+			rosterEntry.level = 0;
+			rosterEntry.rarity = 0;
+			roster.push(rosterEntry);
+		});*/
+
 		queue.done('frozen', function () {
 			callback(roster);
 		});

@@ -107,35 +107,35 @@ export class QuestDetails extends React.Component {
 						onDismiss={this._onCalloutDismiss}
 						setInitialFocus={true}
 					>
-						<div className='ms-CalloutExample-header'>
-							<p className='ms-CalloutExample-title' id={'callout-label-1'}>
+						<div className='CalloutQuest-header'>
+							<p className='CalloutQuest-title' id={'callout-label-1'}>
 								{this.props.quest.name}
 							</p>
 						</div>
-						<div className='ms-CalloutExample-inner'>
-							<div className='ms-CalloutExample-content'>
-								<div className='ms-CalloutExample-subText' id={'callout-description-1'}>
+						<div className='CalloutQuest-inner'>
+							<div className='CalloutQuest-content'>
+								<div className='CalloutQuest-subText' id={'callout-description-1'}>
 									{this.props.quest.description}
 								</div>
-								<div className='ms-CalloutExample-subText' id={'callout-description-1'}>
+								<div className='CalloutQuest-subText' id={'callout-description-1'}>
 									Mastery required: <span className='quest-mastery'>
 										<Image src='https://stt.wiki/w/images/thumb/8/8f/Normal_64.png/48px-Normal_64.png' height={20} />({this.props.quest.difficulty_by_mastery[0]})
 										<Image src='https://stt.wiki/w/images/thumb/3/38/Elite_64.png/48px-Elite_64.png' height={20} />({this.props.quest.difficulty_by_mastery[1]})
 										<Image src='https://stt.wiki/w/images/thumb/5/57/Epic_64.png/48px-Epic_64.png' height={20} />({this.props.quest.difficulty_by_mastery[2]})
 									</span>
 								</div>
-								<div className='ms-CalloutExample-subText' id={'callout-description-2'}>
+								<div className='CalloutQuest-subText' id={'callout-description-2'}>
 									Trait bonuses: <span className='quest-mastery'>
 										<Image src='https://stt.wiki/w/images/thumb/8/8f/Normal_64.png/48px-Normal_64.png' height={20} />({this.props.quest.trait_bonuses[0]})
 										<Image src='https://stt.wiki/w/images/thumb/3/38/Elite_64.png/48px-Elite_64.png' height={20} />({this.props.quest.trait_bonuses[1]})
 										<Image src='https://stt.wiki/w/images/thumb/5/57/Epic_64.png/48px-Epic_64.png' height={20} />({this.props.quest.trait_bonuses[2]})
 									</span>
 								</div>
-								<div className='ms-CalloutExample-subText' id={'callout-description-3'}>
+								<div className='CalloutQuest-subText' id={'callout-description-3'}>
 									Critical threshold: {this.props.quest.critical_threshold ? this.props.quest.critical_threshold : 'none'}
 								</div>
 								{this.props.quest.cadet && (
-									<div className='ms-CalloutExample-subText' id={'callout-description-4'}>
+									<div className='CalloutQuest-subText' id={'callout-description-4'}>
 										Cadet requirements: <span dangerouslySetInnerHTML={this.htmlDecode(this.props.quest.crew_requirement.description)} />
 									</div>
 								)}

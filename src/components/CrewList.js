@@ -111,7 +111,7 @@ export class CrewList extends React.Component {
 						<Rating
 							min={1}
 							max={item.max_rarity}
-							rating={item.rarity}
+							rating={item.rarity ? item.rarity : null}
 						/>
 					);
 				},

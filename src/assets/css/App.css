@@ -77,25 +77,21 @@
     max-width: 350px;
 }
 
-.ms-CalloutExample-title {
-    font-size: x-large;
-}
-
-.ms-CalloutExample-inner {
+.CalloutQuest-inner {
     height: 100%;
     padding: 0 24px 20px;
 }
 
-.ms-CalloutExample-header {
+.CalloutQuest-header {
     padding: 18px 24px 12px;
 }
 
-.ms-CalloutExample-title {
+.CalloutQuest-title {
     margin: 0;
     font-size:large;
 }
 
-.ms-CalloutExample-subText {
+.CalloutQuest-subText {
     margin: 0;
     font-size:small;
 }
