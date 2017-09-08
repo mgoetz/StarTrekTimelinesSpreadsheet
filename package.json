@@ -1,6 +1,6 @@
 {
   "name": "startrektimelinestool",
-  "version": "0.3.5",
+  "version": "0.3.6",
   "description": "Tool for managing Star Trek Timelines crew",
   "author": "IAmPicard",
   "homepage": "https://github.com/IAmPicard/StarTrekTimelinesSpreadsheet",
@@ -15,7 +15,7 @@
     "dev": "webpack-dev-server --hot --host 0.0.0.0 --config=./webpack.dev.config.js",
     "build": "webpack --config webpack.build.config.js",
     "package": "webpack --config webpack.build.config.js",
-    "postpackage": "electron-packager ./ --out=./builds",
+    "postpackage": "electron-packager ./ --out=./builds --prune",
     "installer": "node createinstaller.js"
   },
   "devDependencies": {
@@ -26,7 +26,7 @@
     "css-loader": "latest",
     "electron": "1.7.6",
     "electron-packager": "latest",
-    "electron-winstaller": "latest",
+    "electron-builder": "latest",
     "extract-text-webpack-plugin": "latest",
     "file-loader": "latest",
     "html-webpack-plugin": "latest",

@@ -1,27 +1,21 @@
-const createWindowsInstaller = require('electron-winstaller').createWindowsInstaller;
+const builder = require("electron-builder");
+const Platform = builder.Platform;
 const path = require('path');
-const fs = require('fs');
 
-var version = JSON.parse(fs.readFileSync('package.json'), 'utf8').version;
+const rootPath = path.join('./');
+const outPath = path.join(rootPath, 'builds');
 
-getInstallerConfig()
-	.then(createWindowsInstaller)
+// Promise is returned
+builder.build({
+	targets: Platform.WINDOWS.createTarget(),
+	prepackaged: path.join(outPath, 'startrektimelinestool-win32-x64'),
+	config: {
+		win: { target: ['nsis', '7z'] }
+	}
+})
+	.then(() => {
+		// handle result
+	})
 	.catch((error) => {
-		console.error(error.message || error)
-		process.exit(1)
+		// handle error
 	});
-
-function getInstallerConfig() {
-	console.log('creating windows installer');
-	const rootPath = path.join('./');
-	const outPath = path.join(rootPath, 'builds');
-
-	return Promise.resolve({
-		appDirectory: path.join(outPath, 'startrektimelinestool-win32-x64'),
-		authors: 'IAmPicard',
-		noMsi: false,
-		outputDirectory: path.join(outPath, 'windows-installer'),
-		exe: 'startrektimelinestool.exe',
-		setupExe: 'setup-startrektimelinestool-' + version + '.exe'
-	});
-}
