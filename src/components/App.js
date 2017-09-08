@@ -178,7 +178,7 @@ class App extends React.Component {
 				name: 'Share',
 				icon: 'Share',
 				onClick: function () {
-					this.refs.shareDialog._showDialog();
+					this.refs.shareDialog._showDialog(this.state.captainName);
 				}.bind(this)
 			},
 			{
