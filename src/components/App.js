@@ -11,6 +11,7 @@ import { Image, ImageFit } from 'office-ui-fabric-react/lib/Image';
 import { getWikiImageUrl } from '../utils/wikiImage.js';
 import { exportExcel } from '../utils/excelExporter.js';
 import { exportCsv } from '../utils/csvExporter.js';
+import { shareCrew } from '../utils/pastebin.js';
 import { loadGauntlet } from '../utils/gauntlet.js';
 import { loadData } from '../utils/dataLoader.js';
 import { matchCrew } from '../utils/crewTools.js';
@@ -25,6 +26,7 @@ import { MissionHelper } from './MissionHelper.js';
 import { CrewRecommendations } from './CrewRecommendations.js';
 import { AboutAndHelp } from './AboutAndHelp.js';
 import { FleetDetails } from './FleetDetails.js';
+import { ShareDialog } from './ShareDialog.js';
 
 const shell = require('electron').shell;
 
@@ -53,6 +55,7 @@ class App extends React.Component {
 
 		this._onAccessToken = this._onAccessToken.bind(this);
 		this._getCommandItems = this._getCommandItems.bind(this);
+		this._onShare = this._onShare.bind(this);
 	}
 
 	render() {
@@ -112,6 +115,7 @@ class App extends React.Component {
 				)}
 
 				<AccessTokenDialog ref='loginDialog' onAccessToken={this._onAccessToken} />
+				<ShareDialog ref='shareDialog' onShare={this._onShare} />
 			</Fabric>
 		);
 	}
@@ -170,6 +174,14 @@ class App extends React.Component {
 				}.bind(this)
 			},
 			{
+				key: 'share',
+				name: 'Share',
+				icon: 'Share',
+				onClick: function () {
+					this.refs.shareDialog._showDialog();
+				}.bind(this)
+			},
+			{
 				key: 'configure',
 				name: 'Configure',
 				icon: 'Settings',
@@ -201,6 +213,12 @@ class App extends React.Component {
 				}
 			}
 		];
+	}
+
+	_onShare(options) {
+		shareCrew(this.state.crewList, options, function (url) {
+			shell.openItem(url);
+		});
 	}
 
 	_onAccessToken(accesstoken) {
