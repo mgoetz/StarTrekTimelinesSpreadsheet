@@ -27,6 +27,12 @@ The first tab lets you manage your crew. You can sort by various fields, (un)gro
 
 This tab lists out all the items you currently have, along with their quantity and type.
 
+### Ship management
+
+![Screenshot Ships](/docs/Screenshot-Ships.png "Ships screenshot")
+
+This tab lists out all the ships you currently have, along with their stats.
+
 ### Missions
 
 ![Screenshot Missions](/docs/Screenshot-Missions.png "Missions screenshot")
@@ -52,6 +58,12 @@ This tab will make recommendations about which crew you can freeze or airlock, a
 ![Screenshot Gauntlet](/docs/Screenshot-Gauntlet.png "Gauntlet screenshot")
 
 In this tab you can get recommendations for which crew to use in your next gauntlet (if you didn't already start it). Please see source code for details, the algorithm is still "hand-wavy" at this point and could use input from someone more experienced with statistical analysis.
+
+### Fleet
+
+![Screenshot Fleet](/docs/Screenshot-Fleet.png "Fleet screenshot")
+
+Basic information about your fleet such as a member list with their last online and event ranks and starbase rooms' status.
 
 ## Get an access token
 First, you need to obtain an access token. If you're running on a Windows PC, install the free Star Trek Timelines [Steam application](http://store.steampowered.com/app/600750/Star_Trek_Timelines/), then open it at least once to log in.
