@@ -27,7 +27,7 @@ module.exports = `
 	<div id="missions-table"></div>
 <% } %>
 	<footer>
-		<p>Exported via the <a href="https://github.com/IAmPicard/StarTrekTimelinesSpreadsheet">Star Trek Timelines Spreadsheet Tool</a> on <%(new Date()).toDateString()%>.</p>
+		<p>Exported via the <a href="https://github.com/IAmPicard/StarTrekTimelinesSpreadsheet">Star Trek Timelines Spreadsheet Tool v<%version%></a> on <%(new Date()).toDateString()%>.</p>
 	</footer>
 
 	<script type="text/javascript">

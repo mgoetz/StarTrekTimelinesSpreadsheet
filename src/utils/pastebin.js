@@ -1,6 +1,5 @@
 const request = require('electron').remote.require('request');
 const fs = require('electron').remote.require('fs');
-const path = require('electron').remote.require('path');
 
 import { loadMissionData } from './missions.js';
 
@@ -135,7 +134,8 @@ function shareCrewInternal(roster, options, missionList, callback) {
 				roster: roster,
 				missionList: missionList,
 				skillRes: CONFIG.skillRes,
-				template: options.htmlColorTheme
+				template: options.htmlColorTheme,
+				version: require('electron').remote.app.getVersion()
 			});
 	}
 	else if (options.exportType == 'json') {
@@ -143,7 +143,7 @@ function shareCrewInternal(roster, options, missionList, callback) {
 			title: options.title,
 			description: options.description,
 			created: {
-				tool: 'Star Trek Timelines Spreadsheet Tool',
+				tool: 'Star Trek Timelines Spreadsheet Tool v' + require('electron').remote.app.getVersion(),
 				url: 'https://github.com/IAmPicard/StarTrekTimelinesSpreadsheet',
 				when: (new Date())
 			},
