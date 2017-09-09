@@ -7,6 +7,10 @@
     font-family: "Helvetica Neue", Roboto, "Segoe UI", -apple-system, sans-serif !important;
 }
 
+.sharedialogMainOverride {
+    max-width: 550px !important;
+}
+
 .data-grid {
     -webkit-overflow-scrolling: touch;
     max-height: calc(100vh - 170px);

@@ -261,6 +261,7 @@ class App extends React.Component {
 					missionHelperParams: {
 						accesstoken: accesstoken,
 						accepted_missions: this.player.player.character.accepted_missions,
+						dispute_histories: this.player.player.character.dispute_histories,
 						trait_names: this.config.config.trait_names
 					},
 					cadetMissionHelperParams: {

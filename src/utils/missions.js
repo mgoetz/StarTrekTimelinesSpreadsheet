@@ -54,8 +54,13 @@ function loadQuestData(token, quest, callback) {
 	});
 }
 
-export function loadMissionData(token, accepted_missions, callback) {
+export function loadMissionData(token, accepted_missions, dispute_histories, callback) {
 	var mission_ids = accepted_missions.map(function (mission) { return mission.id; });
+
+	// Add all the episodes' missions
+	dispute_histories.forEach(function (dispute) {
+		mission_ids = mission_ids.concat(dispute.mission_ids);
+	});
 
 	const reqOptions = {
 		method: 'GET',
@@ -100,9 +105,46 @@ export function loadMissionData(token, accepted_missions, callback) {
 
 					missions.push(missionData);
 				}
+				else {
+					// Could be one of the episodes
+					dispute_histories.forEach(function (dispute) {
+						if (dispute.mission_ids.includes(mission.id))
+						{
+							if (!dispute.quests)
+								dispute.quests = [];
+
+							mission.quests.forEach(function (quest) {
+								if ((!quest.locked) && quest.name && !dispute.quests.find(function (q) { return q.id == quest.id; })) {
+									if (quest.quest_type == 'ConflictQuest') {
+										loadQuestData(token, quest, queue('quests'));
+									}
+									else {
+										quest.description = 'Ship battle';
+									}
+
+									dispute.quests.push(quest);
+								}
+							});
+						}
+					});
+				}
 			});
 
 			queue.done('quests', function () {
+				// Pretend the episodes (disputes) are missions too, to get them to show up
+				dispute_histories.forEach(function (dispute) {
+					var missionData = {
+						id: dispute.mission_ids[0],
+						episode_title: 'Episode ' + dispute.episode + ' : ' + dispute.name,
+						description: 'Episode ' + dispute.episode,
+						stars_earned: dispute.stars_earned,
+						total_stars: dispute.total_stars,
+						quests: dispute.quests
+					};
+
+					missions.push(missionData);
+				});
+
 				callback({ missionList: missions });
 			});
 		}

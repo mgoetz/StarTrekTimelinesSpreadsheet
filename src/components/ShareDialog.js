@@ -6,6 +6,7 @@ import { PrimaryButton, DefaultButton } from 'office-ui-fabric-react/lib/Button'
 import { TextField } from 'office-ui-fabric-react/lib/TextField';
 import { Dropdown, DropdownMenuItemType } from 'office-ui-fabric-react/lib/Dropdown';
 import { Checkbox, ICheckboxStyles } from 'office-ui-fabric-react/lib/Checkbox';
+import { Image, ImageFit } from 'office-ui-fabric-react/lib/Image';
 
 const CONFIG = require('../utils/config.js');
 
@@ -16,9 +17,13 @@ export class ShareDialog extends React.Component {
 			hideDialog: true,
 			shareMissions: false,
 			exportWhere: 'L',
+			exportType: 'html',
 			title: '',
+			htmlColorTheme: 'cyborg',
 			description: 'Here are my crew stats. Recommendations?'
 		};
+
+		this.htmlColorThemes = ['cerulean', 'cosmo', 'cyborg', 'darkly', 'flatly', 'journal', 'lumen', 'paper', 'readable', 'sandstone', 'simplex', 'slate', 'solar', 'spacelab', 'superhero', 'united', 'yeti'];
 
 		this._closeDialog = this._closeDialog.bind(this);
 		this._cancelDialog = this._cancelDialog.bind(this);
@@ -36,35 +41,81 @@ export class ShareDialog extends React.Component {
 						subText: 'Upload the crew list with their stats, allowing you to share the link with others online; maybe your fleet or on the forums / reddit to gather feedback.'
 					}}
 					modalProps={{
-						isBlocking: false
+						isBlocking: false,
+						containerClassName: 'sharedialogMainOverride'
 					}}
 				>
-					<TextField
-						label='Title:'
-						value={this.state.title}
-						onChanged={(value) => { this.setState({ title: value }) }}
-					/>
+					<table style={{ width: '100%' }}>
+						<tbody>
+						<tr>
+							<td style={{ verticalAlign: 'top' }}>
+								<TextField
+									label='Title:'
+									value={this.state.title}
+									onChanged={(value) => { this.setState({ title: value }) }}
+								/>
 
-					<TextField
-						label='Description text:'
-						value={this.state.description}
-						onChanged={(value) => { this.setState({ description: value }) }}
-						multiline autoAdjustHeight
-					/>
+								<TextField
+									label='Description:'
+									value={this.state.description}
+									onChanged={(value) => { this.setState({ description: value }) }}
+									multiline autoAdjustHeight
+								/>
+							</td>
+							<td style={{ verticalAlign: 'top' }}>
+							<Dropdown
+								selectedKey={this.state.exportWhere}
+								label='Where to export:'
+								allowFreeform={false}
+								autoComplete='on'
+								options={[
+									{ key: 'L', text: 'To local file' },
+									{ key: 'O', text: 'Online' }
+								]}
+								onChanged={(item) => {
+									this.setState({ exportWhere: item.key });
+								}}
+							/>
 
-					<Dropdown
-						selectedKey={this.state.exportWhere}
-						label='Where to export:'
-						allowFreeform={false}
-						autoComplete='on'
-						options={[
-							{ key: 'L', text: 'To local file' },
-							{ key: 'O', text: 'Online' }
-						]}
-						onChanged={(item) => {
-							this.setState({ exportWhere: item.key });
-						}}
-					/>
+							<Dropdown
+								selectedKey={this.state.exportType}
+								label='Export format:'
+								allowFreeform={false}
+								autoComplete='on'
+								options={[
+									{ key: 'html', text: 'Formatted HTML' },
+									{ key: 'json', text: 'Raw JSON' }
+								]}
+								onChanged={(item) => {
+									this.setState({ exportType: item.key });
+								}}
+							/>
+
+							{(this.state.exportType == 'html') &&
+								<Dropdown
+									selectedKey={this.state.htmlColorTheme}
+									label='HTML color theme:'
+									allowFreeform={false}
+									autoComplete='on'
+									options={this.htmlColorThemes.map(function (color) {
+										return {
+											key: color,
+											text: color[0].toUpperCase() + color.substr(1),
+											thumbnail: 'https://bootswatch.com/' + color + '/thumbnail.png'
+										};
+									})}
+									onChanged={(item) => {
+										this.setState({ htmlColorTheme: item.key });
+									}}
+									onRenderOption={(option) => {
+										return (<Image src={option.thumbnail} height={64} imageFit={ImageFit.contain} />);
+									}}
+								/>
+							}
+							</td>
+						</tr>
+						</tbody>
+					</table>
 
 					<Checkbox
 						label='Also share mission completion stats'
@@ -89,7 +140,14 @@ export class ShareDialog extends React.Component {
 
 	_closeDialog() {
 		this.setState({ hideDialog: true });
-		this.props.onShare({ description: this.state.description, title: this.state.title, exportWhere: this.state.exportWhere, shareMissions: this.state.shareMissions});
+		this.props.onShare({
+			description: this.state.description,
+			title: this.state.title,
+			exportWhere: this.state.exportWhere,
+			exportType: this.state.exportType,
+			htmlColorTheme: this.state.htmlColorTheme,
+			shareMissions: this.state.shareMissions
+		});
 	}
 
 	_cancelDialog() {
