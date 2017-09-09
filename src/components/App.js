@@ -216,7 +216,7 @@ class App extends React.Component {
 	}
 
 	_onShare(options) {
-		shareCrew(this.state.crewList, options, function (url) {
+		shareCrew(this.state.crewList, options, this.state.missionHelperParams, this.state.cadetMissionHelperParams, function (url) {
 			shell.openItem(url);
 		});
 	}

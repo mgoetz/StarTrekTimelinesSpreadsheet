@@ -300,7 +300,7 @@ export class MissionHelper extends React.Component {
 
 					{(props.groupLevel == 0) ?
 						(<span>{props.group.episode_title}
-							<span className='groupHeaderDescriptiom'>(Completed {props.group.stars_earned} of {props.group.total_stars})</span>
+							<span className='groupHeaderDescriptiom'> (Completed {props.group.stars_earned} of {props.group.total_stars})</span>
 							<br />
 							{props.group.isCollapsed || true ? (<span />) : (<span className='groupHeaderDescriptiom'>{props.group.description}</span>)}
 						</span>)

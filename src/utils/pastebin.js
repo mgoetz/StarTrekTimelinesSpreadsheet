@@ -1,6 +1,8 @@
 const request = require('electron').remote.require('request');
 const fs = require('electron').remote.require('fs');
 
+import { loadMissionData } from './missions.js';
+
 const CONFIG = require('./config.js');
 
 function pastebinPost(html, callback) {
@@ -23,8 +25,84 @@ function pastebinPost(html, callback) {
 	});
 }
 
-export function shareCrew(roster, options, callback) {
-	var html = `<html>
+export function shareCrew(roster, options, missionHelperParams, cadetMissionHelperParams, callback) {
+
+	if (options.shareMissions) {
+		loadMissionData(missionHelperParams.accesstoken, cadetMissionHelperParams.accepted_missions.concat(missionHelperParams.accepted_missions), function (result) {
+			if (result.errorMsg || (result.statusCode && (result.statusCode != 200))) {
+
+			}
+			else {
+				var allChallenges = [];
+
+				result.missionList.forEach(function (mission) {
+					mission.quests.forEach(function (quest) {
+						if (quest.quest_type == 'ConflictQuest') {
+							quest.challenges.forEach(function (challenge) {
+								var entry = {
+									missionname: mission.episode_title,
+									questname: quest.name,
+									challengename: challenge.name,
+									roll: 0,
+									goal_progress: quest.mastery_levels[0].progress.goal_progress + quest.mastery_levels[1].progress.goal_progress + quest.mastery_levels[2].progress.goal_progress,
+									skill: challenge.skill,
+									cadet: quest.cadet,
+									crew_requirement: quest.crew_requirement ? quest.crew_requirement.description.replace(/<#([0-9A-F]{6})>/gi, '<span style="color:#$1">').replace(/<\/color>/g, '</span>') : '',
+									traits: [],
+									traitBonus: 0,
+									lockedTraits: []
+								};
+
+								if (challenge.difficulty_by_mastery) {
+									entry.roll += challenge.difficulty_by_mastery[2];
+								}
+
+								if (challenge.critical && challenge.critical.threshold) {
+									entry.roll += challenge.critical.threshold;
+								}
+
+								if (challenge.trait_bonuses && (challenge.trait_bonuses.length > 0)) {
+									challenge.trait_bonuses.forEach(function (traitBonus) {
+										entry.traits.push(traitBonus.trait);
+										entry.traitBonus = traitBonus.bonuses[2];
+									});
+								}
+
+								entry.traits = entry.traits.map(function (trait) {
+									return missionHelperParams.trait_names[trait] ? missionHelperParams.trait_names[trait] : trait;
+								}).join(', ');
+
+								if (challenge.locks && (challenge.locks.length > 0)) {
+									challenge.locks.forEach(function (lock) {
+										if (lock.trait) {
+											entry.lockedTraits.push(lock.trait);
+										}
+									});
+								}
+
+								entry.lockedTraits = entry.lockedTraits.map(function (trait) {
+									return missionHelperParams.trait_names[trait] ? missionHelperParams.trait_names[trait] : trait;
+								}).join(', ');
+
+								allChallenges.push(entry);
+							});
+						}
+					});
+				});
+
+				shareCrewInternal(roster, options, allChallenges, callback);
+			}
+		});
+	}
+	else
+	{
+		shareCrewInternal(roster, options, null, callback);
+	}
+}
+
+function shareCrewInternal(roster, options, missionList, callback) {
+	var html = `<!DOCTYPE html>
+<html>
 <head>
 	<title>${options.title}</title>
 	<script type="text/javascript" src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
@@ -35,7 +113,7 @@ export function shareCrew(roster, options, callback) {
 	<link href="https://cdnjs.cloudflare.com/ajax/libs/tabulator/3.2.2/css/bootstrap/tabulator_bootstrap.min.css" rel="stylesheet">
 
 	<style>
-	body { margin: 5; }
+	body { margin: 5px; }
 	</style>
 </head>
 <body>
@@ -44,6 +122,8 @@ export function shareCrew(roster, options, callback) {
 		<h4>${options.description}</h4>
 	</header>
 	<div id="crew-table"></div>
+	<br/>
+	<div id="missions-table"></div>
 	<footer>
 		<p>Exported via the <a href="https://github.com/IAmPicard/StarTrekTimelinesSpreadsheet">Star Trek Timelines Spreadsheet Tool</a> on ${(new Date()).toDateString()}.</p>
 	</footer>
@@ -87,8 +167,42 @@ export function shareCrew(roster, options, callback) {
 
 		var tabledata = ${JSON.stringify(roster)};
 
-		$("#crew-table").tabulator("setData", tabledata);
-	</script>
+		$("#crew-table").tabulator("setData", tabledata);`;
+
+	if (options.shareMissions) {
+		html += `
+		var skillRes = ${JSON.stringify(CONFIG.skillRes)};
+
+		$("#missions-table").tabulator({
+			fitColumns: true,
+			columns:[
+				{title:"Mission Name", field:"missionname", width:150, responsive:0},
+				{title:"Quest Name", field:"questname", width:160, responsive:0},
+				{title:"Challenge Name", field:"challengename", width:200, responsive:0},
+				{title:"Quest Progress", field:"goal_progress", width:160, responsive:1, formatter:function(cell, formatterParams){
+					return starSvg(true).repeat(cell.getValue()) + starSvg(false).repeat(9 - cell.getValue());
+				}},
+				{title:"Skill", field:"skill", width:110, align:"left", responsive:1, formatter:function(cell, formatterParams){
+					return "<img src='" + skillRes[cell.getValue()].url + "'/>" + skillRes[cell.getValue()].name;
+				}},
+				{title:"Roll", field:"roll", width:80, align:"center", responsive:1},
+				{title:"Traits", field:"traits", width:150, responsive:3, headerSort:false},
+				{title:"Bonus", field:"traitBonus", width:80, responsive:3, headerSort:false},
+				{title:"Restrictions", field:"crew_requirement", responsive:4, formatter:function(cell, formatterParams){
+					if (cell.getRow().getData().cadet)
+						return cell.getValue();
+					else
+						return cell.getRow().getData().lockedTraits;
+				}}
+			]
+		});
+
+		var missionData = ${JSON.stringify(missionList)};
+
+		$("#missions-table").tabulator("setData", missionData);`;
+	}
+
+	html += `</script>
 </body>
 </html>`;
 

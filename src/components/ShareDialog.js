@@ -68,7 +68,6 @@ export class ShareDialog extends React.Component {
 
 					<Checkbox
 						label='Also share mission completion stats'
-						disabled={true}
 						checked={this.state.shareMissions}
 						onChange={(ev, checked) => {
 							this.setState({ shareMissions: checked });
