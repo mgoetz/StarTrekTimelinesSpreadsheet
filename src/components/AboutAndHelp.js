@@ -5,7 +5,7 @@ import { Link } from 'office-ui-fabric-react/lib/Link';
 export class AboutAndHelp extends React.Component {
 	render() {
 		return <div>
-			<h1>Star Trek Timelines Spreadsheet Tool</h1>
+			<h1>Star Trek Timelines Spreadsheet Tool v{require('electron').remote.app.getVersion()}</h1>
 			<p>A tool to help with crew management in Star Trek Timelines</p>
 
 			<p><b>NOTE</b> This tool does not (and will never) automate any part of the game play; its sole purpose is to help players organize their crew using the functionality built within or with a spreadsheet application of their choice.</p>

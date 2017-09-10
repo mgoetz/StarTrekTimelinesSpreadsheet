@@ -27,6 +27,7 @@ import { CrewRecommendations } from './CrewRecommendations.js';
 import { AboutAndHelp } from './AboutAndHelp.js';
 import { FleetDetails } from './FleetDetails.js';
 import { ShareDialog } from './ShareDialog.js';
+import { EquipmentDetails } from './EquipmentDetails.js';
 
 const shell = require('electron').shell;
 
@@ -47,6 +48,7 @@ class App extends React.Component {
 			shipList: [],
 			itemList: [],
 			trait_names: [],
+			allequipment: [],
 			gauntlet: null,
 			missionHelperParams: {},
 			cadetMissionHelperParams: {},
@@ -90,16 +92,19 @@ class App extends React.Component {
 						<PivotItem linkText='Items' itemIcon='Boards'>
 							<ItemList data={this.state.itemList} />
 						</PivotItem>
+						<PivotItem linkText='Equipment' itemIcon='CheckList'>
+							<EquipmentDetails crewList={this.state.crewList} allequipment={this.state.allequipment} />
+						</PivotItem>
 						<PivotItem linkText='Ships' itemIcon='Airplane'>
 							<ShipList data={this.state.shipList} />
 						</PivotItem>
 						<PivotItem linkText='Missions' itemIcon='Ribbon'>
 							<MissionHelper params={this.state.missionHelperParams} />
 						</PivotItem>
-						<PivotItem linkText='Cadet challenges' itemIcon='Trophy'>
+						<PivotItem linkText='Cadet' itemIcon='Trophy'>
 							<MissionHelper params={this.state.cadetMissionHelperParams} />
 						</PivotItem>
-						<PivotItem linkText='Crew recommendations' itemIcon='Lightbulb'>
+						<PivotItem linkText='Recommendations' itemIcon='Lightbulb'>
 							<CrewRecommendations crew={this.state.crewList} cadetMissions={this.state.cadetMissionHelperParams} missions={this.state.missionHelperParams} />
 						</PivotItem>
 						<PivotItem linkText='Gauntlet' itemIcon='DeveloperTools'>
@@ -282,9 +287,43 @@ class App extends React.Component {
 					}
 				}.bind(this));
 
+				// all the equipment available in the game, along with sources and recipes
+				var allequipment = [];
+				this.player.item_archetype_cache.archetypes.forEach(function (archetype) {
+					var newEquipment = {
+						name: archetype.name,
+						id: archetype.id,
+						rarity: archetype.rarity,
+						type: archetype.type, // 3 - no recipe, can only get from sources; 2 - otherwise
+						short_name: archetype.short_name, // only for type 3
+						recipe: archetype.recipe ? archetype.recipe.demands : null, //optional
+						item_sources: archetype.item_sources,
+						icon: archetype.icon.file,
+						iconUrl: CONFIG.defaultItemIconUrl
+					};
+
+					allequipment.push(newEquipment);
+				});
+
+				this.setState({ allequipment: allequipment });
+
+				allequipment.forEach(function (equipment) {
+					var fileName = equipment.name + CONFIG.rarityRes[equipment.rarity].name + '.png';
+					fileName = fileName.split(' ').join('');
+					fileName = fileName.split('\'').join('');
+
+					getWikiImageUrl(fileName, equipment.id, function (id, url) {
+						this.state.allequipment.forEach(function (item) {
+							if ((item.id === id) && url)
+								item.iconUrl = url;
+						});
+					}.bind(this));
+				}.bind(this));
+
 				matchCrew(this.allcrew.crew_avatars, this.player.player.character, accesstoken, this.config.config.trait_names, function (roster) {
 					roster.forEach(function (crew) {
 						crew.iconUrl = '';
+						crew.iconBodyUrl = '';
 					});
 
 					this.setState({ dataLoaded: true, crewList: roster });
@@ -298,8 +337,15 @@ class App extends React.Component {
 
 							this.forceUpdate();
 						}.bind(this));
-					}.bind(this));
+						getWikiImageUrl(crew.name.split(' ').join('_') + '.png', crew.id, function (id, url) {
+							this.state.crewList.forEach(function (crew) {
+								if (crew.id === id)
+									crew.iconBodyUrl = url;
+							});
 
+							this.forceUpdate();
+						}.bind(this));
+					}.bind(this));
 				}.bind(this));
 
 				matchShips(this.player.player.character.ships, accesstoken, function (ships) {

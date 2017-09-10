@@ -32,6 +32,18 @@ function rosterFromCrew(rosterEntry, crew, trait_names) {
 		rosterEntry[skill].max = crew.skills[skill].range_max;
 	}
 
+	rosterEntry.ship_battle = crew.ship_battle;
+
+	rosterEntry.equipment_slots = crew.equipment_slots;
+
+	rosterEntry.equipment_slots.forEach(function (equipment) {
+		equipment.have = false;
+	});
+
+	crew.equipment.forEach(function (equipment) {
+		rosterEntry.equipment_slots[equipment[0]].have = true;
+	});
+
 	rosterEntry.traits = crew.traits.concat(crew.traits_hidden).map(function (trait) { return trait_names[trait] ? trait_names[trait] : trait; }).join();
 	rosterEntry.rawTraits = crew.traits.concat(crew.traits_hidden);
 }
