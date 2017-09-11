@@ -19,6 +19,26 @@ export class ItemDetails extends React.Component {
 	constructor(props) {
 		super(props);
 
+		this.loadRecipeTree = this.loadRecipeTree.bind(this);
+
+		this.state = {
+			recipeTree: this.loadRecipeTree(this.props.equipment, 1)
+		};
+	}
+
+	loadRecipeTree(equipment, multi) {
+		if (!equipment) // TODO: the archetype cache doesn't include all the items; we should see how we can load more
+			return [];
+
+		if (!equipment.recipe || (equipment.recipe.length == 0))
+			return [{ equipment: equipment, count: multi }];
+
+		var result = [];
+		equipment.recipe.forEach(function (item) {
+			result = result.concat(this.loadRecipeTree(this.props.findEquipment(item.archetype_id), item.count * multi));
+		}.bind(this));
+
+		return result;
 	}
 
 	render() {
@@ -26,6 +46,11 @@ export class ItemDetails extends React.Component {
 			<span className='quest-mastery'><span style={{ paddingTop: '12px' }}>{this.props.equipment.name}</span><Rating min={1} max={5} rating={this.props.equipment.rarity} /></span>
 			<p>Sources: {this.props.equipment.item_sources && this.props.equipment.item_sources.length}</p>
 			<p>Recipe: {this.props.equipment.recipe && this.props.equipment.recipe.length}</p>
+			<div>
+				{this.state .recipeTree.map(function (item) {
+					return <span key={item.equipment.archetype_id}>{item.equipment.name} x {item.count}</span>;
+				}.bind(this))}
+			</div>
 		</div>);
 	}
 }
@@ -61,7 +86,7 @@ export class CrewEquipment extends React.Component {
 							<EquipmentSlot iconUrl={this.findEquipment(this.props.crew.equipment_slots[3].archetype).iconUrl} have={this.props.crew.equipment_slots[3].have} selected={this.state.selectedSlot == 3} onClick={(e) => this.setState({ selectedSlot: 3 })} />
 						</td>
 						<td style={{ verticalAlign: 'top' }}>
-							<ItemDetails equipment={this.findEquipment(this.props.crew.equipment_slots[this.state.selectedSlot].archetype)} />
+							<ItemDetails equipment={this.findEquipment(this.props.crew.equipment_slots[this.state.selectedSlot].archetype)} findEquipment={this.findEquipment} />
 						</td>
 					</tr>
 				</tbody>
