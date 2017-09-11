@@ -1,4 +1,4 @@
-const request = require('electron').remote.require('request');
+const request = require('request');
 const CONFIG = require('./config.js');
 
 export function loadData(token, callback) {

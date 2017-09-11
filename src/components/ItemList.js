@@ -111,7 +111,7 @@ export class ItemList extends React.Component {
 			fileName = fileName.split(' ').join('');
 			fileName = fileName.split('\'').join('');
 
-			getWikiImageUrl(fileName, item.id, function (id, url) {
+			getWikiImageUrl(this.props.imageURLs, fileName, item.id, function (id, url) {
 				this.state.items.forEach(function (item) {
 					if (item.id === id)
 						item.iconUrl = url;

@@ -1,5 +1,5 @@
-const json2csv = require('electron').remote.require('json2csv');
-const fs = require('electron').remote.require('fs');
+const json2csv = require('json2csv');
+const fs = require('fs');
 
 export function exportCsv(roster, fileName, callback) {
 	var fields = ['id', 'name', 'short_name', 'max_rarity', 'rarity', 'level', 'frozen', 'buyback', 'command_skill.core', 'command_skill.min', 'command_skill.max', 'diplomacy_skill.core',

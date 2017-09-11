@@ -25,10 +25,10 @@ function pastebinPost(data, exportType, callback) {
 	});
 }
 
-export function shareCrew(roster, options, missionHelperParams, cadetMissionHelperParams, callback) {
+export function shareCrew(dbCache, roster, options, missionHelperParams, cadetMissionHelperParams, callback) {
 
 	if (options.shareMissions) {
-		loadMissionData(missionHelperParams.accesstoken, cadetMissionHelperParams.accepted_missions.concat(missionHelperParams.accepted_missions), missionHelperParams.dispute_histories, function (result) {
+		loadMissionData(dbCache, missionHelperParams.accesstoken, cadetMissionHelperParams.accepted_missions.concat(missionHelperParams.accepted_missions), missionHelperParams.dispute_histories, function (result) {
 			if (result.errorMsg || (result.statusCode && (result.statusCode != 200))) {
 
 			}

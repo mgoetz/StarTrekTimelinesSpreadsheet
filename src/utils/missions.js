@@ -1,4 +1,4 @@
-const request = require('electron').remote.require('request');
+const request = require('request');
 const CONFIG = require('./config.js');
 
 function queue(name) {
@@ -21,7 +21,24 @@ queue.__proto__ = {
 	err: function (name, fn) { queue.e[name] = fn; }
 }
 
-function loadQuestData(token, quest, callback) {
+function loadQuestData(completed, questCache, token, quest, callback) {
+	if (completed)
+	{
+		var result = questCache.findOne({ id: quest.id });
+		if (result) {
+			quest.description = result.description;
+			quest.challenges = result.challenges;
+			quest.mastery_levels = result.mastery_levels;
+
+			// For cadet challenges
+			quest.cadet = result.cadet;
+			quest.crew_requirement = result.crew_requirement;
+
+			callback();
+			return;
+		}
+	}
+
 	const reqOptions = {
 		method: 'GET',
 		uri: 'https://stt.disruptorbeam.com/quest/conflict_info',
@@ -35,8 +52,7 @@ function loadQuestData(token, quest, callback) {
 	request(reqOptions, function (error, response, body) {
 		if (!error && response.statusCode == 200) {
 			var newQuest = JSON.parse(body);
-
-			//TODO: Is there a better way to copy this without rewriting the original ref?
+			
 			quest.description = newQuest.description;
 			quest.challenges = newQuest.challenges;
 			quest.mastery_levels = newQuest.mastery_levels;
@@ -44,6 +60,17 @@ function loadQuestData(token, quest, callback) {
 			// For cadet challenges
 			quest.cadet = newQuest.cadet;
 			quest.crew_requirement = newQuest.crew_requirement;
+
+			if (completed) {
+				questCache.insert({
+					id: quest.id,
+					description: quest.description,
+					challenges: quest.challenges,
+					mastery_levels: quest.mastery_levels,
+					cadet: quest.cadet,
+					crew_requirement: quest.crew_requirement
+				});
+			}
 		}
 		else
 		{
@@ -54,13 +81,22 @@ function loadQuestData(token, quest, callback) {
 	});
 }
 
-export function loadMissionData(token, accepted_missions, dispute_histories, callback) {
+export function loadMissionData(dbCache, token, accepted_missions, dispute_histories, callback) {
 	var mission_ids = accepted_missions.map(function (mission) { return mission.id; });
 
-	// Add all the episodes' missions
-	dispute_histories.forEach(function (dispute) {
-		mission_ids = mission_ids.concat(dispute.mission_ids);
-	});
+	// Add all the episodes' missions (if not cadet)
+	if (dispute_histories) {
+		dispute_histories.forEach(function (dispute) {
+			mission_ids = mission_ids.concat(dispute.mission_ids);
+		});
+	}
+
+	// Use the cache wherever possible
+	// TODO: does DB ever change the stats of crew? If yes, we may need to ocasionally clear the cache - perhaps based on record's age
+	var questCache = dbCache.getCollection('quests');
+	if (!questCache) {
+		questCache = dbCache.addCollection('quests');
+	}
 
 	const reqOptions = {
 		method: 'GET',
@@ -92,7 +128,7 @@ export function loadMissionData(token, accepted_missions, dispute_histories, cal
 						if ((!quest.locked) && quest.name) {
 							if (quest.quest_type == 'ConflictQuest')
 							{
-								loadQuestData(token, quest, queue('quests'));
+								loadQuestData(mission.stars_earned == mission.total_stars, questCache, token, quest, queue('quests'));
 							}
 							else
 							{
@@ -107,43 +143,46 @@ export function loadMissionData(token, accepted_missions, dispute_histories, cal
 				}
 				else {
 					// Could be one of the episodes
-					dispute_histories.forEach(function (dispute) {
-						if (dispute.mission_ids.includes(mission.id))
-						{
-							if (!dispute.quests)
-								dispute.quests = [];
+					if (dispute_histories) {
+						dispute_histories.forEach(function (dispute) {
+							if (dispute.mission_ids.includes(mission.id)) {
+								if (!dispute.quests)
+									dispute.quests = [];
 
-							mission.quests.forEach(function (quest) {
-								if ((!quest.locked) && quest.name && !dispute.quests.find(function (q) { return q.id == quest.id; })) {
-									if (quest.quest_type == 'ConflictQuest') {
-										loadQuestData(token, quest, queue('quests'));
-									}
-									else {
-										quest.description = 'Ship battle';
-									}
+								mission.quests.forEach(function (quest) {
+									if ((!quest.locked) && quest.name && !dispute.quests.find(function (q) { return q.id == quest.id; })) {
+										if (quest.quest_type == 'ConflictQuest') {
+											loadQuestData(dispute.stars_earned == dispute.total_stars, questCache, token, quest, queue('quests'));
+										}
+										else {
+											quest.description = 'Ship battle';
+										}
 
-									dispute.quests.push(quest);
-								}
-							});
-						}
-					});
+										dispute.quests.push(quest);
+									}
+								});
+							}
+						});
+					}
 				}
 			});
 
 			queue.done('quests', function () {
-				// Pretend the episodes (disputes) are missions too, to get them to show up
-				dispute_histories.forEach(function (dispute) {
-					var missionData = {
-						id: dispute.mission_ids[0],
-						episode_title: 'Episode ' + dispute.episode + ' : ' + dispute.name,
-						description: 'Episode ' + dispute.episode,
-						stars_earned: dispute.stars_earned,
-						total_stars: dispute.total_stars,
-						quests: dispute.quests
-					};
+				if (dispute_histories) {
+					// Pretend the episodes (disputes) are missions too, to get them to show up
+					dispute_histories.forEach(function (dispute) {
+						var missionData = {
+							id: dispute.mission_ids[0],
+							episode_title: 'Episode ' + dispute.episode + ' : ' + dispute.name,
+							description: 'Episode ' + dispute.episode,
+							stars_earned: dispute.stars_earned,
+							total_stars: dispute.total_stars,
+							quests: dispute.quests
+						};
 
-					missions.push(missionData);
-				});
+						missions.push(missionData);
+					});
+				}
 
 				callback({ missionList: missions });
 			});

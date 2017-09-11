@@ -176,7 +176,7 @@ export class MissionHelper extends React.Component {
 		this._selection = new Selection;
 
 		//TODO: Load on-demand
-		loadMissionData(props.params.accesstoken, props.params.accepted_missions, props.params.dispute_histories, function (result) {
+		loadMissionData(props.dbCache, props.params.accesstoken, props.params.accepted_missions, props.params.dispute_histories, function (result) {
 			if (result.errorMsg || (result.statusCode && (result.statusCode != 200)))
 			{
 

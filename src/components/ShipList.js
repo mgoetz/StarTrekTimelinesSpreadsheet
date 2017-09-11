@@ -131,7 +131,7 @@ export class ShipList extends React.Component {
 
 		this.state.items.forEach(function (ship) {
 			var fileName = ship.name.split(' ').join('_').split('.').join('') + '.png';
-			getWikiImageUrl(fileName, ship.name, function (id, url) {
+			getWikiImageUrl(this.props.imageURLs, fileName, ship.name, function (id, url) {
 				this.state.items.forEach(function (item) {
 					if (item.name === id) {
 						item.iconUrl = url;

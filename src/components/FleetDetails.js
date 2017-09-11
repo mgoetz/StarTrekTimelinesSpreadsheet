@@ -203,7 +203,7 @@ export class FleetDetails extends React.Component {
 
 				this.state.members.forEach(function (member) {
 					if (member.avatar) {
-						getWikiImageUrl(member.avatar.split(' ').join('_') + '_Head.png', member.dbid, function (id, url) {
+						getWikiImageUrl(this.props.imageURLs, member.avatar.split(' ').join('_') + '_Head.png', member.dbid, function (id, url) {
 							this.state.members.forEach(function (member) {
 								if (member.dbid === id)
 									member.iconUrl = url;

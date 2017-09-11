@@ -1,4 +1,5 @@
 const request = require('electron').remote.require('request');
+
 const CONFIG = require('./config.js');
 
 function queue(name) {
@@ -48,7 +49,7 @@ function rosterFromCrew(rosterEntry, crew, trait_names) {
 	rosterEntry.rawTraits = crew.traits.concat(crew.traits_hidden);
 }
 
-export function matchCrew(crew_avatars, character, token, trait_names, callback) {
+export function matchCrew(dbCache, crew_avatars, character, token, trait_names, callback) {
 	function getDefaults(id) {
 		var crew = crew_avatars.find(function (archetype) { return archetype.id === id; });
 		return {
@@ -72,6 +73,13 @@ export function matchCrew(crew_avatars, character, token, trait_names, callback)
 
 	// Now add all the frozen crew
 	if (character.stored_immortals && character.stored_immortals.length > 0) {
+		// Use the cache wherever possible
+		// TODO: does DB ever change the stats of crew? If yes, we may need to ocasionally clear the cache - perhaps based on record's age
+		var immortals = dbCache.getCollection('immortals');
+		if (!immortals) {
+			immortals = dbCache.addCollection('immortals');
+		}
+
 		character.stored_immortals.forEach(function (crew) {
 			rosterEntry = getDefaults(crew.id);
 			rosterEntry.frozen = crew.quantity;
@@ -79,7 +87,7 @@ export function matchCrew(crew_avatars, character, token, trait_names, callback)
 			rosterEntry.rarity = rosterEntry.max_rarity;
 			roster.push(rosterEntry);
 
-			loadFrozen(rosterEntry, token, trait_names, queue('frozen'));
+			loadFrozen(immortals, rosterEntry, token, trait_names, queue('frozen'));
 		});
 
 		// This code will load all unowned crew as well ; but what's the point if we don't get any stats
@@ -100,26 +108,41 @@ export function matchCrew(crew_avatars, character, token, trait_names, callback)
 	}
 }
 
-function loadFrozen(rosterEntry, token, trait_names, callback) {
-	const reqOptions = {
-		method: 'POST',
-		uri: 'https://stt.disruptorbeam.com/stasis_vault/immortal_restore_info',
-		qs: {
-			symbol: rosterEntry.symbol,
-			client_api: CONFIG.client_api_version
-		},
-		headers: {
-			'Content-Type': 'application/x-www-form-urlencoded',
-			'Authorization': 'Bearer ' + new Buffer(token).toString('base64')
-		}
-	};
-
-	request(reqOptions, function (error, response, body) {
-		if (!error && response.statusCode == 200) {
-			var crewJson = JSON.parse(body);
-
-			rosterFromCrew(rosterEntry, crewJson.crew, trait_names);
-		}
+function loadFrozen(immortals, rosterEntry, token, trait_names, callback) {
+	var result = immortals.findOne({ symbol: rosterEntry.symbol });
+	if (result) {
+		rosterFromCrew(rosterEntry, result.crew, trait_names);
 		callback();
-	});
+	}
+	else {
+		const reqOptions = {
+			method: 'POST',
+			uri: 'https://stt.disruptorbeam.com/stasis_vault/immortal_restore_info',
+			qs: {
+				symbol: rosterEntry.symbol,
+				client_api: CONFIG.client_api_version
+			},
+			headers: {
+				'Content-Type': 'application/x-www-form-urlencoded',
+				'Authorization': 'Bearer ' + new Buffer(token).toString('base64')
+			}
+		};
+
+		request(reqOptions, function (error, response, body) {
+			if (!error && response.statusCode == 200) {
+				var crewJson = JSON.parse(body);
+
+				rosterFromCrew(rosterEntry, crewJson.crew, trait_names);
+
+				immortals.insert({
+					symbol: rosterEntry.symbol,
+					crew: crewJson.crew
+				});
+			}
+			else {
+				console.error(error);
+			}
+			callback();
+		});
+	}
 }

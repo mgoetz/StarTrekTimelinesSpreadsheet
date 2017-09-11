@@ -29,7 +29,11 @@ import { FleetDetails } from './FleetDetails.js';
 import { ShareDialog } from './ShareDialog.js';
 import { EquipmentDetails } from './EquipmentDetails.js';
 
-const shell = require('electron').shell;
+const loki = require('lokijs');
+const path = require('path');
+const electron = require('electron');
+const app = electron.app || electron.remote.app;
+const shell = electron.shell;
 
 const CONFIG = require('../utils/config.js');
 
@@ -54,6 +58,9 @@ class App extends React.Component {
 			cadetMissionHelperParams: {},
 			spinnerLabel: 'Loading...'
 		};
+
+		this.dbCache = null;
+		this.imageURLs = null;
 
 		this._onAccessToken = this._onAccessToken.bind(this);
 		this._getCommandItems = this._getCommandItems.bind(this);
@@ -90,28 +97,28 @@ class App extends React.Component {
 							<CrewList data={this.state.crewList} ref='crewList' />
 						</PivotItem>
 						<PivotItem linkText='Items' itemIcon='Boards'>
-							<ItemList data={this.state.itemList} />
+							<ItemList data={this.state.itemList} imageURLs={this.imageURLs} />
 						</PivotItem>
 						<PivotItem linkText='Equipment' itemIcon='CheckList'>
 							<EquipmentDetails crewList={this.state.crewList} allequipment={this.state.allequipment} />
 						</PivotItem>
 						<PivotItem linkText='Ships' itemIcon='Airplane'>
-							<ShipList data={this.state.shipList} />
+							<ShipList data={this.state.shipList} imageURLs={this.imageURLs} />
 						</PivotItem>
 						<PivotItem linkText='Missions' itemIcon='Ribbon'>
-							<MissionHelper params={this.state.missionHelperParams} />
+							<MissionHelper params={this.state.missionHelperParams} dbCache={this.dbCache} />
 						</PivotItem>
 						<PivotItem linkText='Cadet' itemIcon='Trophy'>
-							<MissionHelper params={this.state.cadetMissionHelperParams} />
+							<MissionHelper params={this.state.cadetMissionHelperParams} dbCache={this.dbCache} />
 						</PivotItem>
 						<PivotItem linkText='Recommendations' itemIcon='Lightbulb'>
-							<CrewRecommendations crew={this.state.crewList} cadetMissions={this.state.cadetMissionHelperParams} missions={this.state.missionHelperParams} />
+							<CrewRecommendations crew={this.state.crewList} cadetMissions={this.state.cadetMissionHelperParams} missions={this.state.missionHelperParams} dbCache={this.dbCache} />
 						</PivotItem>
 						<PivotItem linkText='Gauntlet' itemIcon='DeveloperTools'>
 							<GauntletHelper gauntlet={this.state.gauntlet} crew={this.state.crewList} trait_names={this.state.trait_names} />
 						</PivotItem>
 						<PivotItem linkText='Fleet' itemIcon='WindDirection'>
-							<FleetDetails id={this.state.fleetId} accessToken={this.state.accessToken} />
+							<FleetDetails id={this.state.fleetId} accessToken={this.state.accessToken} imageURLs={this.imageURLs} />
 						</PivotItem>
 						<PivotItem linkText='About' itemIcon='Help'>
 							<AboutAndHelp />
@@ -221,13 +228,26 @@ class App extends React.Component {
 	}
 
 	_onShare(options) {
-		shareCrew(this.state.crewList, options, this.state.missionHelperParams, this.state.cadetMissionHelperParams, function (url) {
+		shareCrew(this.dbCache, this.state.crewList, options, this.state.missionHelperParams, this.state.cadetMissionHelperParams, function (url) {
 			shell.openItem(url);
 		});
 	}
 
+	componentWillUnmount() {
+		if (this.dbCache) {
+			this.dbCache.close();
+		}
+	}
+
 	_onAccessToken(accesstoken) {
 		this.setState({ showSpinner: true });
+
+		this.dbCache = new loki(path.join(app.getPath('userData'), 'storage', 'cache.json'), { autosave: true, autoload: true });
+		this.imageURLs = this.dbCache.getCollection('imageURLs');
+		if (!this.imageURLs) {
+			this.imageURLs = this.dbCache.addCollection('imageURLs');
+		}
+
 		loadData(accesstoken, function (data)
 		{
 			if (data.player)
@@ -276,7 +296,7 @@ class App extends React.Component {
 					}
 				});
 
-				getWikiImageUrl(this.player.player.character.crew_avatar.name.split(' ').join('_') + '_Head.png', 0, function (id, url)
+				getWikiImageUrl(this.imageURLs, this.player.player.character.crew_avatar.name.split(' ').join('_') + '_Head.png', 0, function (id, url)
 				{
 					this.setState({ captainAvatarUrl: url });
 				}.bind(this));
@@ -312,7 +332,7 @@ class App extends React.Component {
 					fileName = fileName.split(' ').join('');
 					fileName = fileName.split('\'').join('');
 
-					getWikiImageUrl(fileName, equipment.id, function (id, url) {
+					getWikiImageUrl(this.imageURLs, fileName, equipment.id, function (id, url) {
 						this.state.allequipment.forEach(function (item) {
 							if ((item.id === id) && url)
 								item.iconUrl = url;
@@ -320,7 +340,7 @@ class App extends React.Component {
 					}.bind(this));
 				}.bind(this));
 
-				matchCrew(this.allcrew.crew_avatars, this.player.player.character, accesstoken, this.config.config.trait_names, function (roster) {
+				matchCrew(this.dbCache, this.allcrew.crew_avatars, this.player.player.character, accesstoken, this.config.config.trait_names, function (roster) {
 					roster.forEach(function (crew) {
 						crew.iconUrl = '';
 						crew.iconBodyUrl = '';
@@ -329,7 +349,7 @@ class App extends React.Component {
 					this.setState({ dataLoaded: true, crewList: roster });
 
 					roster.forEach(function (crew) {
-						getWikiImageUrl(crew.name.split(' ').join('_') + '_Head.png', crew.id, function (id, url) {
+						getWikiImageUrl(this.imageURLs, crew.name.split(' ').join('_') + '_Head.png', crew.id, function (id, url) {
 							this.state.crewList.forEach(function (crew) {
 								if (crew.id === id)
 									crew.iconUrl = url;
@@ -337,7 +357,7 @@ class App extends React.Component {
 
 							this.forceUpdate();
 						}.bind(this));
-						getWikiImageUrl(crew.name.split(' ').join('_') + '.png', crew.id, function (id, url) {
+						getWikiImageUrl(this.imageURLs, crew.name.split(' ').join('_') + '.png', crew.id, function (id, url) {
 							this.state.crewList.forEach(function (crew) {
 								if (crew.id === id)
 									crew.iconBodyUrl = url;

@@ -40,6 +40,7 @@
     "electron-json-storage": "latest",
     "exceljs": "latest",
     "json2csv": "latest",
+    "lokijs": "^1.5.0",
     "office-ui-fabric-react": "latest",
     "pubnub": "latest",
     "regedit": "latest",
