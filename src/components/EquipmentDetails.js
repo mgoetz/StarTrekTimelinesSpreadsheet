@@ -68,6 +68,9 @@ export class CrewEquipment extends React.Component {
 
 	findEquipment(archetype) {
 		return this.props.allequipment.find(equipment => equipment.id == archetype);
+
+		// If not already in the cache, we can load equipment details with 
+		//https://stt.disruptorbeam.com/item/description?ids[]=2242&ids[]=2248&client_api=8&access_token=
 	}
 
 	render() {

@@ -266,13 +266,18 @@ class App extends React.Component {
 				this.allcrew = data.allcrew;
 			}
 
+			if (data.serverConfig) {
+				this.setState({ spinnerLabel: 'Loading server config...' });
+				this.serverConfig = data.serverConfig;
+			}
+
 			if (data.errorMsg || (data.statusCode && (data.statusCode != 200)))
 			{
 				this.setState({ showSpinner: false });
 				this.refs.loginDialog._showDialog((data.statusCode == 401) ? 'Incorrect access token. Try again!' : 'Unknown network error.');
 			}
 
-			if (this.player && this.config && this.allcrew)
+			if (this.player && this.config && this.allcrew && this.serverConfig)
 			{
 				// Successfully loaded all the needed data
 				this.setState({

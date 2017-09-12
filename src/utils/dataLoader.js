@@ -27,6 +27,16 @@ export function loadData(token, callback) {
 		}
 	});
 
+	reqOptions.uri = 'https://stt.disruptorbeam.com/config';
+	request(reqOptions, function (error, response, body) {
+		if (!error && response.statusCode == 200) {
+			callback({ serverConfig: JSON.parse(body) });
+		}
+		else {
+			callback({ errorMsg: error, statusCode: response.statusCode });
+		}
+	});
+
 	reqOptions.uri = 'https://stt.disruptorbeam.com/character/get_avatar_crew_archetypes';
 	request(reqOptions, function (error, response, body) {
 		if (!error && response.statusCode == 200) {
