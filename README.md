@@ -57,7 +57,9 @@ This tab will make recommendations about which crew you can freeze or airlock, a
 
 ![Screenshot Gauntlet](/docs/Screenshot-Gauntlet.png "Gauntlet screenshot")
 
-In this tab you can get recommendations for which crew to use in your next gauntlet (if you didn't already start it). Please see source code for details, the algorithm is still "hand-wavy" at this point and could use input from someone more experienced with statistical analysis.
+In this tab you can get recommendations for which crew to use in your next gauntlet (if you didn't already start it), and odds for crew matches (if you already started a gauntlet). Please see source code for details, the algorithm is still "hand-wavy" at this point and could use input from someone more experienced with statistical analysis.
+
+![Screenshot Gauntlet Round](/docs/Screenshot-GauntletRound.png "Gauntlet Round screenshot")
 
 ### Fleet
 

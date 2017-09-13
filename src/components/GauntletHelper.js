@@ -2,12 +2,41 @@ import React, { Component } from 'react';
 import { Label } from 'office-ui-fabric-react/lib/Label';
 import { Image, ImageFit } from 'office-ui-fabric-react/lib/Image';
 import { MessageBar, MessageBarType } from 'office-ui-fabric-react/lib/MessageBar';
-
+import { DefaultButton, IButtonProps } from 'office-ui-fabric-react/lib/Button';
 import { CrewList } from './CrewList.js';
 
 import { loadGauntlet, gauntletCrewSelection, gauntletRoundOdds } from '../utils/gauntlet.js';
+import { getCrewIconFromCache } from '../utils/crewTools.js';
 
 const CONFIG = require('../utils/config.js');
+
+export class GauntletMatch extends React.Component {
+	render() {
+		var yourCrew = this.props.allcrew.find((crew) => crew.symbol == this.props.match.crewOdd.archetype_symbol);
+		var theirCrew = this.props.allcrew.find((crew) => crew.symbol == this.props.match.opponent.archetype_symbol);
+
+		return (<table className='table-GauntletMatch'>
+			<tbody>
+				<tr>
+					<td>
+						<center><span>Your <b>{yourCrew.name}</b></span></center>
+						<Image src={getCrewIconFromCache(this.props.imageURLs, yourCrew.name)} height={128} />
+					</td>
+					<td style={{ verticalAlign: 'top' }}>
+						<span>has a {this.props.match.chance}% chance of beating</span>
+					</td>
+					<td>
+						<center><span>{this.props.match.opponent.name}'s <b>{theirCrew.name}</b></span></center>
+						<Image src={getCrewIconFromCache(this.props.imageURLs, theirCrew.name)} height={128} />
+					</td>
+					<td style={{ verticalAlign: 'top' }}>
+						<span>for {this.props.match.opponent.value} points</span>
+					</td>
+				</tr>
+			</tbody>
+		</table>);
+	}
+}
 
 export class GauntletHelper extends React.Component {
 	constructor(props) {
@@ -17,17 +46,23 @@ export class GauntletHelper extends React.Component {
 			gauntlet: null
 		};
 
-		loadGauntlet(props.accessToken, function (data) {
+		this._reloadGauntletData = this._reloadGauntletData.bind(this);
+
+		this._reloadGauntletData();
+	}
+
+	_reloadGauntletData() {
+		loadGauntlet(this.props.accessToken, function (data) {
 			if (data.gauntlet) {
 				if (data.gauntlet.state == 'NONE') {
-					var result = gauntletCrewSelection(data.gauntlet, props.crew);
+					var result = gauntletCrewSelection(data.gauntlet, this.props.crew);
 
 					this.setState({
 						gauntlet: data.gauntlet,
 						startsIn: Math.floor(data.gauntlet.seconds_to_join / 60),
 						featuredSkill: data.gauntlet.contest_data.featured_skill,
-						traits: data.gauntlet.contest_data.traits.map(function (trait) { return props.trait_names[trait] ? props.trait_names[trait] : trait; }),
-						recommendations: result.recommendations.map(function (id) { return props.crew.find((crew) => (crew.id == id)); }),
+						traits: data.gauntlet.contest_data.traits.map(function (trait) { return this.props.trait_names[trait] ? this.props.trait_names[trait] : trait; }),
+						recommendations: result.recommendations.map(function (id) { return this.props.crew.find((crew) => (crew.id == id)); }),
 						bestInSkill: result.best
 					});
 				}
@@ -64,9 +99,10 @@ export class GauntletHelper extends React.Component {
 			return (
 				<div className='tab-panel' data-is-scrollable='true'>
 					<h2>Next gauntlet round</h2>
+					<DefaultButton onClick={this._reloadGauntletData} text='Reload opponent list' iconProps={{ iconName: 'Refresh' }} />
 					<Label>Your rank is {this.state.roundOdds.rank} and you have {this.state.roundOdds.consecutive_wins} consecutive wins.</Label>
 					{this.state.roundOdds.matches.map(function (match) {
-						return <p key={match.crewOdd.archetype_symbol + match.opponent.name}>Your {this.props.allcrew.find(function (crew) { return crew.symbol == match.crewOdd.archetype_symbol; }).name} would beat {match.opponent.name}'s {this.props.allcrew.find(function (crew) { return crew.symbol == match.opponent.archetype_symbol; }).name} {match.chance}% of the time for {match.opponent.value} points.</p>;
+						return <GauntletMatch key={match.crewOdd.archetype_symbol + match.opponent.name} match={match} allcrew={this.props.allcrew} imageURLs={this.props.imageURLs} />;
 					}.bind(this))}
 				</div>
 			);

@@ -71,7 +71,8 @@ class App extends React.Component {
 		this._onCaptainClicked = this._onCaptainClicked.bind(this);
 		this._onCaptainCalloutDismiss = this._onCaptainCalloutDismiss.bind(this);
 
-		if (CONFIG.UserConfig.getValue('autoLogin') == true) {
+		// TODO: For testing only, remove
+		if (true || (CONFIG.UserConfig.getValue('autoLogin') == true)) {
 			this.state.showSpinner = true;
 			this.state.showLoginDialog = false;
 			this._onAccessToken(CONFIG.UserConfig.getValue('accessToken'));
@@ -151,7 +152,7 @@ class App extends React.Component {
 							<CrewRecommendations crew={this.state.crewList} cadetMissions={this.state.cadetMissionHelperParams} missions={this.state.missionHelperParams} dbCache={this.dbCache} />
 						</PivotItem>
 						<PivotItem linkText='Gauntlet' itemIcon='DeveloperTools'>
-							<GauntletHelper accessToken={this.state.accessToken} crew={this.state.crewList} allcrew={this.allcrew.crew_avatars} trait_names={this.state.trait_names} />
+							<GauntletHelper accessToken={this.state.accessToken} crew={this.state.crewList} allcrew={this.allcrew.crew_avatars} trait_names={this.state.trait_names} imageURLs={this.imageURLs} />
 						</PivotItem>
 						<PivotItem linkText='Fleet' itemIcon='WindDirection'>
 							<FleetDetails id={this.state.fleetId} accessToken={this.state.accessToken} imageURLs={this.imageURLs} />

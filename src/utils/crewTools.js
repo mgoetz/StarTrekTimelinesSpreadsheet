@@ -108,6 +108,15 @@ export function matchCrew(dbCache, crew_avatars, character, token, trait_names, 
 	}
 }
 
+export function getCrewIconFromCache(imageURLs, name) {
+	var result = imageURLs.findOne({ fileName: name.split(' ').join('_') + '_Head.png' });
+	if (result) {
+		return result.url;
+	}
+
+	return '';
+}
+
 function loadFrozen(immortals, rosterEntry, token, trait_names, callback) {
 	var result = immortals.findOne({ symbol: rosterEntry.symbol });
 	if (result) {
