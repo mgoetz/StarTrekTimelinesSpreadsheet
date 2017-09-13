@@ -153,7 +153,7 @@ class App extends React.Component {
 							<CrewRecommendations crew={this.state.crewList} cadetMissions={this.state.cadetMissionHelperParams} missions={this.state.missionHelperParams} dbCache={this.dbCache} />
 						</PivotItem>
 						<PivotItem linkText='Gauntlet' itemIcon='DeveloperTools'>
-							<GauntletHelper gauntlet={this.state.gauntlet} crew={this.state.crewList} trait_names={this.state.trait_names} />
+							<GauntletHelper gauntlet={this.state.gauntlet} crew={this.state.crewList} allcrew={this.allcrew.crew_avatars} trait_names={this.state.trait_names} />
 						</PivotItem>
 						<PivotItem linkText='Fleet' itemIcon='WindDirection'>
 							<FleetDetails id={this.state.fleetId} accessToken={this.state.accessToken} imageURLs={this.imageURLs} />

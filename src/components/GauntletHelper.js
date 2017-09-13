@@ -5,23 +5,18 @@ import { MessageBar, MessageBarType } from 'office-ui-fabric-react/lib/MessageBa
 
 import { CrewList } from './CrewList.js';
 
-import { computeGauntlet } from '../utils/gauntlet.js';
+import { gauntletCrewSelection, gauntletRoundOdds } from '../utils/gauntlet.js';
 const CONFIG = require('../utils/config.js');
 
 export class GauntletHelper extends React.Component {
 	constructor(props) {
 		super(props);
 
-		if (props.gauntlet.state != 'NONE') {
-			this.state = {
-				alreadyStarted: true
-			};
-		}
-		else {
-			var result = computeGauntlet(props.gauntlet, props.crew);
+		if (props.gauntlet.state == 'NONE') {
+			var result = gauntletCrewSelection(props.gauntlet, props.crew);
 
 			this.state = {
-				alreadyStarted: false,
+				gauntlet: props.gauntlet,
 				startsIn: Math.floor(props.gauntlet.seconds_to_join / 60),
 				featuredSkill: props.gauntlet.contest_data.featured_skill,
 				traits: props.gauntlet.contest_data.traits.map(function (trait) { return props.trait_names[trait] ? props.trait_names[trait] : trait; }),
@@ -29,13 +24,23 @@ export class GauntletHelper extends React.Component {
 				bestInSkill: result.best
 			};
 		}
+		else if (props.gauntlet.state == 'STARTED') {
+			var result = gauntletRoundOdds(props.gauntlet);
+
+			this.state = {
+				gauntlet: props.gauntlet,
+				roundOdds: result
+			};
+		}
+		else {
+			this.state = {
+				gauntlet: props.gauntlet
+			};
+		}
 	}
 
 	render() {
-		if (this.state.alreadyStarted) {
-			return (<MessageBar messageBarType={MessageBarType.error} >It looks like you already started this gauntlet. Try to use this option before joining your next gauntlet!</MessageBar>);
-		}
-		else {
+		if (this.state.gauntlet.state == 'NONE') {
 			return (
 				<div>
 					<Label>Next gauntlet starts in {this.state.startsIn} minutes.</Label>
@@ -46,9 +51,25 @@ export class GauntletHelper extends React.Component {
 				</div>
 			);
 		}
+		else if ((this.state.gauntlet.state == 'STARTED') && this.state.roundOdds) {
+			return (
+				<div className='tab-panel' data-is-scrollable='true'>
+					<h2>Next gauntlet round</h2>
+					<Label>Your rank is {this.state.roundOdds.rank} and you have {this.state.roundOdds.consecutive_wins} consecutive wins.</Label>
+					{this.state.roundOdds.matches.map(function (match) {
+						return <p key={match.crewOdd.archetype_symbol + match.opponent.name}>Your {this.props.allcrew.find(function (crew) { return crew.symbol == match.crewOdd.archetype_symbol; }).name} would beat {match.opponent.name}'s {this.props.allcrew.find(function (crew) { return crew.symbol == match.opponent.archetype_symbol; }).name} {match.chance}% of the time for {match.opponent.value} points.</p>;
+					}.bind(this))}
+				</div>
+			);
+		}
+		else {
+			return (<MessageBar messageBarType={MessageBarType.error} >Unknown state for this gauntlet! Check the app, perhaps it's waiting to join or already done.</MessageBar>);
+		}
 	}
 
 	componentDidMount() {
-		this.refs.recommendedCrew.setGroupedColumn('');
+		if (this.refs.recommendedCrew) {
+			this.refs.recommendedCrew.setGroupedColumn('');
+		}
 	}
 }

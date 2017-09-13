@@ -17,7 +17,90 @@ export function loadGauntlet(token, callback) {
 	});
 }
 
-export function computeGauntlet(currentGauntlet, roster) {
+export function gauntletRoundOdds(currentGauntlet) {
+	var result = {
+		rank: currentGauntlet.rank,
+		consecutive_wins: currentGauntlet.consecutive_wins,
+		crewOdds: [],
+		opponents: []
+	};
+
+	currentGauntlet.contest_data.selected_crew.forEach(function(crew) {
+		if (!crew.disabled) {
+			var crewOdd = {
+				archetype_symbol: crew.archetype_symbol,
+				id: crew.id,
+				crit_chance: crew.crit_chance,
+				used: crew.debuff / 4,
+				max: 0,
+				min: 0
+			};
+
+			crew.skills.forEach(function(skillStats) {
+				if ((skillStats.skill == currentGauntlet.contest_data.primary_skill) || (skillStats.skill == currentGauntlet.contest_data.secondary_skill)) {
+					crewOdd.max = crewOdd.max + skillStats.max;
+					crewOdd.min = crewOdd.min + skillStats.min;
+				}
+			});
+
+			result.crewOdds.push(crewOdd);
+		}
+	});
+
+	currentGauntlet.opponents.forEach(function(opponent) {
+		var opponentOdd = {
+			name: opponent.name,
+			level: opponent.level,
+			value: opponent.value,
+			archetype_symbol: opponent.crew_contest_data.crew[0].archetype_symbol,
+			crit_chance: opponent.crew_contest_data.crew[0].crit_chance,
+			max: 0,
+			min: 0
+		};
+
+		opponent.crew_contest_data.crew[0].skills.forEach(function(skillStats) {
+			if ((skillStats.skill == currentGauntlet.contest_data.primary_skill) || (skillStats.skill == currentGauntlet.contest_data.secondary_skill)) {
+				opponentOdd.max = opponentOdd.max + skillStats.max;
+				opponentOdd.min = opponentOdd.min + skillStats.min;
+			}
+		});
+
+		result.opponents.push(opponentOdd);
+	});
+
+	function roll(data) {
+		return (Math.floor((Math.random() * (data.max - data.min)) + data.min) * (Math.random() < (data.crit_chance / 100) ? 2 : 1));
+	}
+
+	result.matches = [];
+
+	result.crewOdds.forEach(function (crewOdd) {
+		result.opponents.forEach(function (opponent) {
+			// TODO: this is silly; perhaps someone more statisitically-inclined can chime in with a proper probabilistic formula
+
+			var simulatedRounds = 10000;
+			var wins = 0;
+			for (var i = 0; i < simulatedRounds; i++) {
+				if (roll(crewOdd) > roll(opponent))
+					wins++;
+			}
+
+			result.matches.push({
+				crewOdd: crewOdd,
+				opponent: opponent,
+				chance: Math.floor((wins / simulatedRounds) * 100)
+			});
+		});
+	});
+
+	result.matches.sort(function (a, b) {
+		return b.chance - a.chance;
+	});
+
+	return result;
+}
+
+export function gauntletCrewSelection(currentGauntlet, roster) {
 	// TODO: magical numbers below; tune these (or get them as parameters for customization)
 	var featuredSkillBonus = 1.1;
 	var critBonusDivider = 3;

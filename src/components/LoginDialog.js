@@ -16,7 +16,7 @@ export class LoginDialog extends React.Component {
 		this.state = {
 			hideDialog: !props.shownByDefault,
 			errorMessage: null,
-			autoLogin: false,
+			autoLogin: true,
 			showSpinner: false,
 			username: '',
 			password: ''
