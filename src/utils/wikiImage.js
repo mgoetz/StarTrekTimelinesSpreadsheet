@@ -10,7 +10,7 @@ export function getWikiImageUrl(imageURLs, fileName, id, callback, errCallback) 
 	}
 
 	//TODO: why are there so many we can't find?
-	console.info('Didn\'t find ' + fileName + ' in cache');
+	//console.info('Didn\'t find ' + fileName + ' in cache');
 
 	const reqOptions = {
 		method: 'GET',

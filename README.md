@@ -19,7 +19,7 @@ However, if you're only interested in installing and running the tool, head on t
 
 ![Screenshot tool](/docs/Screenshot-Tool.png "Tool screenshot")
 
-The first tab lets you manage your crew. You can sort by various fields, (un)group by rarity as well as export the data in Excel or plain CSV formats.
+The first tab lets you manage your crew. You can sort by various fields, (un)group by rarity as well as export the data in Excel, CSV, JSON or HTML formats.
 
 ### Item management
 
@@ -65,21 +65,11 @@ In this tab you can get recommendations for which crew to use in your next gaunt
 
 Basic information about your fleet such as a member list with their last online and event ranks and starbase rooms' status.
 
-## Get an access token
-First, you need to obtain an access token. If you're running on a Windows PC, install the free Star Trek Timelines [Steam application](http://store.steampowered.com/app/600750/Star_Trek_Timelines/), then open it at least once to log in.
+### Share your crew stats
 
-If you're not running on a Windows PC or don't want to install the Steam application, you can use the Facebook application through your browser. Please follow the steps below for obtaining an access token:
+![Screenshot Sharing](/docs/Screenshot-ShareOnline.png "Sharing screenshot")
 
-1. Open Chrome and hit F12 and switch to the Network tab in the debug pane that opens
-2. Now navigate to [Star Trek Timelines](https://apps.facebook.com/sttimelines) on the page and wait until you get the "Play >>" link
-3. Back in the debug page, enter "stt.disruptorbeam.com/player" in the Filter input. Select the first item in the list of requests.
-4. On the right, you should see something like this:
-
-![Screenshot](/docs/screenshot.png "Screenshot")
-
-5. Copy the access_token, which should be in this format: "123e4567-e89b-12d3-a456-426655440000"
-
-*NOTE*: you need to repeat this process about once every 2 weeks, as the access token expires after a set period of time.
+You can export a formatted html page with your crew stats and (optionally) your mission completion stats either to the local PC or directly upload it online, ready to send a link wherever you want - maybe your fleet-mates or to the forum / reddit / discord to ask for advice or just brag :wink: .
 
 ## Development environment
 
@@ -107,4 +97,4 @@ If you want to test the production build (In case you think Babili might be brea
 **NOTE: The command-line version of the tool is deprecated, all new development happens in the GUI version!**
 
 
-[See details here for the command line version of the tool](CLI.MD)
+[See details here for the command line version of the tool](/docs/CLI.MD)

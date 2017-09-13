@@ -35,6 +35,21 @@ module.exports = {
 				include: defaultInclude
 			},
 			{
+				test: /\.ts$/,
+				enforce: 'pre',
+				loader: 'tslint-loader',
+				options: {
+					typeCheck: true,
+					emitErrors: true
+				},
+				include: defaultInclude
+			},
+			{
+				test: /\.tsx?$/,
+				loader: ['babel-loader', 'ts-loader'],
+				include: defaultInclude
+			},
+			{
 				test: /\.(jpe?g|png|gif)$/,
 				use: [{ loader: 'file-loader?name=img/[name]__[hash:base64:5].[ext]' }],
 				include: defaultInclude

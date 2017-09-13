@@ -132,7 +132,7 @@ class App extends React.Component {
 					<Pivot linkFormat={PivotLinkFormat.tabs} linkSize={PivotLinkSize.large}>
 						<PivotItem linkText='Crew' itemIcon='Teamwork'>
 							<CommandBar items={this._getCommandItems()} />
-							<CrewList data={this.state.crewList} ref='crewList' />
+							<CrewList data={this.state.crewList} grouped={false} ref='crewList' />
 						</PivotItem>
 						<PivotItem linkText='Items' itemIcon='Boards'>
 							<ItemList data={this.state.itemList} imageURLs={this.imageURLs} />

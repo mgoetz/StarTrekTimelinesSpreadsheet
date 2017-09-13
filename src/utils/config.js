@@ -1,31 +1,4 @@
-const storage = require('electron-json-storage-sync');
-
-class UserConfigLoader {
-	constructor() {
-		const result = storage.get('userConfig');
-		if (result.status) {
-			this.userConfig = result.data;
-		}
-	}
-
-	getValue(prop) {
-		if (this.userConfig) {
-			return this.userConfig[prop];
-		}
-		else {
-			return undefined;
-		}
-	}
-
-	setValue(prop, value) {
-		if (!this.userConfig)
-			this.userConfig = {};
-
-		this.userConfig[prop] = value;
-
-		storage.set('userConfig');
-	}
-}
+import { UserConfigLoader } from './UserConfigLoader.ts';
 
 export var UserConfig = new UserConfigLoader();
 

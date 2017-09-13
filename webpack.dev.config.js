@@ -39,6 +39,19 @@ module.exports = {
 				test: /\.(eot|svg|ttf|woff|woff2)$/,
 				use: [{ loader: 'file-loader?name=font/[name]__[hash:base64:5].[ext]' }],
 				include: defaultInclude
+			},
+			{
+				test: /\.ts$/,
+				enforce: 'pre',
+				loader: 'tslint-loader',
+				options: {
+					typeCheck: true,
+					emitErrors: true
+				}
+			},
+			{
+				test: /\.tsx?$/,
+				loader: ['babel-loader', 'ts-loader']
 			}
 		]
 	},
