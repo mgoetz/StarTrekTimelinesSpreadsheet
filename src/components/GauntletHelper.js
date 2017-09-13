@@ -5,42 +5,51 @@ import { MessageBar, MessageBarType } from 'office-ui-fabric-react/lib/MessageBa
 
 import { CrewList } from './CrewList.js';
 
-import { gauntletCrewSelection, gauntletRoundOdds } from '../utils/gauntlet.js';
+import { loadGauntlet, gauntletCrewSelection, gauntletRoundOdds } from '../utils/gauntlet.js';
+
 const CONFIG = require('../utils/config.js');
 
 export class GauntletHelper extends React.Component {
 	constructor(props) {
 		super(props);
 
-		if (props.gauntlet.state == 'NONE') {
-			var result = gauntletCrewSelection(props.gauntlet, props.crew);
+		this.state = {
+			gauntlet: null
+		};
 
-			this.state = {
-				gauntlet: props.gauntlet,
-				startsIn: Math.floor(props.gauntlet.seconds_to_join / 60),
-				featuredSkill: props.gauntlet.contest_data.featured_skill,
-				traits: props.gauntlet.contest_data.traits.map(function (trait) { return props.trait_names[trait] ? props.trait_names[trait] : trait; }),
-				recommendations: result.recommendations.map(function (id) { return props.crew.find((crew) => (crew.id == id)); }),
-				bestInSkill: result.best
-			};
-		}
-		else if (props.gauntlet.state == 'STARTED') {
-			var result = gauntletRoundOdds(props.gauntlet);
+		loadGauntlet(props.accessToken, function (data) {
+			if (data.gauntlet) {
+				if (data.gauntlet.state == 'NONE') {
+					var result = gauntletCrewSelection(data.gauntlet, props.crew);
 
-			this.state = {
-				gauntlet: props.gauntlet,
-				roundOdds: result
-			};
-		}
-		else {
-			this.state = {
-				gauntlet: props.gauntlet
-			};
-		}
+					this.setState({
+						gauntlet: data.gauntlet,
+						startsIn: Math.floor(data.gauntlet.seconds_to_join / 60),
+						featuredSkill: data.gauntlet.contest_data.featured_skill,
+						traits: data.gauntlet.contest_data.traits.map(function (trait) { return props.trait_names[trait] ? props.trait_names[trait] : trait; }),
+						recommendations: result.recommendations.map(function (id) { return props.crew.find((crew) => (crew.id == id)); }),
+						bestInSkill: result.best
+					});
+				}
+				else if (data.gauntlet.state == 'STARTED') {
+					var result = gauntletRoundOdds(data.gauntlet);
+
+					this.setState({
+						gauntlet: data.gauntlet,
+						roundOdds: result
+					});
+				}
+				else {
+					this.setState({
+						gauntlet: data.gauntlet
+					});
+				}
+			}
+		}.bind(this));
 	}
 
 	render() {
-		if (this.state.gauntlet.state == 'NONE') {
+		if (this.state.gauntlet && (this.state.gauntlet.state == 'NONE')) {
 			return (
 				<div>
 					<Label>Next gauntlet starts in {this.state.startsIn} minutes.</Label>
@@ -51,7 +60,7 @@ export class GauntletHelper extends React.Component {
 				</div>
 			);
 		}
-		else if ((this.state.gauntlet.state == 'STARTED') && this.state.roundOdds) {
+		else if (this.state.gauntlet && ((this.state.gauntlet.state == 'STARTED') && this.state.roundOdds)) {
 			return (
 				<div className='tab-panel' data-is-scrollable='true'>
 					<h2>Next gauntlet round</h2>

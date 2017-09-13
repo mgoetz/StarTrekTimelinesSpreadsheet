@@ -13,7 +13,6 @@ import { getWikiImageUrl } from '../utils/wikiImage.js';
 import { exportExcel } from '../utils/excelExporter.js';
 import { exportCsv } from '../utils/csvExporter.js';
 import { shareCrew } from '../utils/pastebin.js';
-import { loadGauntlet } from '../utils/gauntlet.js';
 import { loadData } from '../utils/dataLoader.js';
 import { matchCrew } from '../utils/crewTools.js';
 import { matchShips } from '../utils/shipTools.js';
@@ -57,7 +56,6 @@ class App extends React.Component {
 			itemList: [],
 			trait_names: [],
 			allequipment: [],
-			gauntlet: null,
 			missionHelperParams: {},
 			cadetMissionHelperParams: {},
 			spinnerLabel: 'Loading...'
@@ -153,7 +151,7 @@ class App extends React.Component {
 							<CrewRecommendations crew={this.state.crewList} cadetMissions={this.state.cadetMissionHelperParams} missions={this.state.missionHelperParams} dbCache={this.dbCache} />
 						</PivotItem>
 						<PivotItem linkText='Gauntlet' itemIcon='DeveloperTools'>
-							<GauntletHelper gauntlet={this.state.gauntlet} crew={this.state.crewList} allcrew={this.allcrew.crew_avatars} trait_names={this.state.trait_names} />
+							<GauntletHelper accessToken={this.state.accessToken} crew={this.state.crewList} allcrew={this.allcrew.crew_avatars} trait_names={this.state.trait_names} />
 						</PivotItem>
 						<PivotItem linkText='Fleet' itemIcon='WindDirection'>
 							<FleetDetails id={this.state.fleetId} accessToken={this.state.accessToken} imageURLs={this.imageURLs} />
@@ -352,12 +350,6 @@ class App extends React.Component {
 						this.setState({ captainAvatarBodyUrl: url });
 					}.bind(this));
 				}
-
-				loadGauntlet(accesstoken, function (data) {
-					if (data.gauntlet) {
-						this.setState({ gauntlet: data.gauntlet });
-					}
-				}.bind(this));
 
 				// all the equipment available in the game, along with sources and recipes
 				var allequipment = [];
