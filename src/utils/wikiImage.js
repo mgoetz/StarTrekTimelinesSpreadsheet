@@ -1,4 +1,4 @@
-const request = require('request');
+const request = require('electron').remote.require('request');
 
 const CONFIG = require('./config.js');
 
@@ -8,6 +8,9 @@ export function getWikiImageUrl(imageURLs, fileName, id, callback, errCallback) 
 		callback(id, result.url);
 		return;
 	}
+
+	//TODO: why are there so many we can't find?
+	console.info('Didn\'t find ' + fileName + ' in cache');
 
 	const reqOptions = {
 		method: 'GET',

@@ -1,3 +1,36 @@
+const storage = require('electron-json-storage-sync');
+
+class UserConfigLoader {
+	constructor() {
+		const result = storage.get('userConfig');
+		if (result.status) {
+			this.userConfig = result.data;
+		}
+	}
+
+	getValue(prop) {
+		if (this.userConfig) {
+			return this.userConfig[prop];
+		}
+		else {
+			return undefined;
+		}
+	}
+
+	setValue(prop, value) {
+		if (!this.userConfig)
+			this.userConfig = {};
+
+		this.userConfig[prop] = value;
+
+		storage.set('userConfig');
+	}
+}
+
+export var UserConfig = new UserConfigLoader();
+
+// CONSTANTS below
+
 export const rarityRes = {
 	'0': { name: 'Basic', color: 'Grey' },
 	'1': { name: 'Common', color: '#ddd' },
@@ -21,3 +54,6 @@ export const accessTokenFormat = '123e4567-e89b-12d3-a456-426655440000';
 export const defaultItemIconUrl = 'https://stt.wiki/w/images/d/d6/ItemNameBasic.png';
 
 export const client_api_version = 8;
+
+// Default client_id of the Steam Windows version of STT
+export const client_id = '4fc852d7-d602-476a-a292-d243022a475d';

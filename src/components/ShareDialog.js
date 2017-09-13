@@ -1,6 +1,5 @@
 import React, { Component } from 'react';
 
-import { loadAccessTokenFromRegistry, storeAccessTokenInCache } from '../utils/registry.js';
 import { Dialog, DialogType, DialogFooter } from 'office-ui-fabric-react/lib/Dialog';
 import { PrimaryButton, DefaultButton } from 'office-ui-fabric-react/lib/Button';
 import { TextField } from 'office-ui-fabric-react/lib/TextField';

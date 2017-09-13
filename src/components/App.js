@@ -7,6 +7,7 @@ import { Label } from 'office-ui-fabric-react/lib/Label';
 import { Spinner, SpinnerSize } from 'office-ui-fabric-react/lib/Spinner';
 import { Pivot, PivotItem, PivotLinkFormat, PivotLinkSize } from 'office-ui-fabric-react/lib/Pivot';
 import { Image, ImageFit } from 'office-ui-fabric-react/lib/Image';
+import { Callout } from 'office-ui-fabric-react/lib/Callout';
 
 import { getWikiImageUrl } from '../utils/wikiImage.js';
 import { exportExcel } from '../utils/excelExporter.js';
@@ -17,7 +18,7 @@ import { loadData } from '../utils/dataLoader.js';
 import { matchCrew } from '../utils/crewTools.js';
 import { matchShips } from '../utils/shipTools.js';
 
-import { AccessTokenDialog } from './AccessTokenDialog.js';
+import { LoginDialog } from './LoginDialog.js';
 import { ShipList } from './ShipList.js';
 import { ItemList } from './ItemList.js';
 import { CrewList } from './CrewList.js';
@@ -28,6 +29,7 @@ import { AboutAndHelp } from './AboutAndHelp.js';
 import { FleetDetails } from './FleetDetails.js';
 import { ShareDialog } from './ShareDialog.js';
 import { EquipmentDetails } from './EquipmentDetails.js';
+import { CaptainCard } from './CaptainCard.js';
 
 const loki = require('lokijs');
 const path = require('path');
@@ -44,9 +46,11 @@ class App extends React.Component {
 		this.state = {
 			showSpinner: false,
 			dataLoaded: false,
+			isCaptainCalloutVisible: false,
 			captainName: 'Welcome!',
 			secondLine: '',
 			captainAvatarUrl: '',
+			captainAvatarBodyUrl: '',
 			fleetId: null,
 			crewList: [],
 			shipList: [],
@@ -61,10 +65,33 @@ class App extends React.Component {
 
 		this.dbCache = null;
 		this.imageURLs = null;
+		this._captainButtonElement = null;
 
 		this._onAccessToken = this._onAccessToken.bind(this);
 		this._getCommandItems = this._getCommandItems.bind(this);
 		this._onShare = this._onShare.bind(this);
+		this._onCaptainClicked = this._onCaptainClicked.bind(this);
+		this._onCaptainCalloutDismiss = this._onCaptainCalloutDismiss.bind(this);
+
+		if (CONFIG.UserConfig.getValue('autoLogin') == true) {
+			this.state.showSpinner = true;
+			this.state.showLoginDialog = false;
+			this._onAccessToken(CONFIG.UserConfig.getValue('accessToken'));
+		}
+		else {
+			this.state.showLoginDialog = true;
+		}
+	}
+
+	_onCaptainClicked() {
+		if (!this.state.showSpinner)
+			this.setState({ isCaptainCalloutVisible: !this.state.isCaptainCalloutVisible });
+	}
+
+	_onCaptainCalloutDismiss() {
+		this.setState({
+			isCaptainCalloutVisible: false
+		});
 	}
 
 	render() {
@@ -77,7 +104,18 @@ class App extends React.Component {
 					</div>
 					<div className='lcars-ellipse' />
 					<div className='lcars-content-text'>
-						{this.state.captainName}
+						<span style={{ cursor: 'pointer' }} onClick={this._onCaptainClicked} ref={(menuButton) => this._captainButtonElement = menuButton}>{this.state.captainName}</span>
+						{this.state.isCaptainCalloutVisible && (
+							<Callout className='CaptainCard-callout'
+								role={'alertdialog'}
+								gapSpace={0}
+								targetElement={this._captainButtonElement}
+								onDismiss={this._onCaptainCalloutDismiss}
+								setInitialFocus={true}
+							>
+								<CaptainCard player={this.player.player} captainAvatarBodyUrl={this.state.captainAvatarBodyUrl} />
+							</Callout>
+						)}
 					</div>
 					<div className='lcars-box' />
 					<div className='lcars-content-text'>
@@ -126,7 +164,7 @@ class App extends React.Component {
 					</Pivot>
 				)}
 
-				<AccessTokenDialog ref='loginDialog' onAccessToken={this._onAccessToken} />
+				<LoginDialog ref='loginDialog' onAccessToken={this._onAccessToken} shownByDefault={this.state.showLoginDialog} />
 				<ShareDialog ref='shareDialog' onShare={this._onShare} />
 			</Fabric>
 		);
@@ -239,7 +277,10 @@ class App extends React.Component {
 		}
 	}
 
-	_onAccessToken(accesstoken) {
+	_onAccessToken(accesstoken, autoLogin) {
+		CONFIG.UserConfig.setValue('autoLogin', autoLogin);
+		CONFIG.UserConfig.setValue('accessToken', accesstoken);
+
 		this.setState({ showSpinner: true });
 
 		this.dbCache = new loki(path.join(app.getPath('userData'), 'storage', 'cache.json'), { autosave: true, autoload: true });
@@ -248,6 +289,7 @@ class App extends React.Component {
 			this.imageURLs = this.dbCache.addCollection('imageURLs');
 		}
 
+		console.log("Loading data!");
 		loadData(accesstoken, function (data)
 		{
 			if (data.player)
@@ -301,10 +343,15 @@ class App extends React.Component {
 					}
 				});
 
-				getWikiImageUrl(this.imageURLs, this.player.player.character.crew_avatar.name.split(' ').join('_') + '_Head.png', 0, function (id, url)
-				{
-					this.setState({ captainAvatarUrl: url });
-				}.bind(this));
+				if (this.player.player.character.crew_avatar) {
+					getWikiImageUrl(this.imageURLs, this.player.player.character.crew_avatar.name.split(' ').join('_') + '_Head.png', 0, function (id, url) {
+						this.setState({ captainAvatarUrl: url });
+					}.bind(this));
+
+					getWikiImageUrl(this.imageURLs, this.player.player.character.crew_avatar.name.split(' ').join('_') + '.png', 0, function (id, url) {
+						this.setState({ captainAvatarBodyUrl: url });
+					}.bind(this));
+				}
 
 				loadGauntlet(accesstoken, function (data) {
 					if (data.gauntlet) {

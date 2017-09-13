@@ -1,6 +1,6 @@
 {
   "name": "startrektimelinestool",
-  "version": "0.3.7",
+  "version": "0.3.8",
   "description": "Tool for managing Star Trek Timelines crew",
   "author": "IAmPicard",
   "homepage": "https://github.com/IAmPicard/StarTrekTimelinesSpreadsheet",
@@ -37,13 +37,12 @@
     "webpack-dev-server": "latest"
   },
   "dependencies": {
-    "electron-json-storage": "latest",
+    "electron-json-storage-sync": "latest",
     "exceljs": "latest",
     "json2csv": "latest",
     "lokijs": "^1.5.0",
     "office-ui-fabric-react": "latest",
     "pubnub": "latest",
-    "regedit": "latest",
     "request": "latest",
     "uuid": "latest"
   }
