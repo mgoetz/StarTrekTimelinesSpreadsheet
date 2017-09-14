@@ -17,6 +17,69 @@ export function loadGauntlet(token, callback) {
 	});
 }
 
+export function payToGetNewOpponents(token, gauntlet_id, callback) {
+	const reqOptions = {
+		method: 'POST',
+		uri: 'https://stt.disruptorbeam.com/gauntlet/refresh_opp_pool_and_revive_crew',
+		qs: {
+			gauntlet_id: gauntlet_id,
+			pay: true,
+			client_api: CONFIG.client_api_version
+		},
+		headers: {
+			'Content-Type': 'application/x-www-form-urlencoded',
+			'Authorization': 'Bearer ' + new Buffer(token).toString('base64')
+		}
+	};
+
+	request(reqOptions, function (error, response, body) {
+		if (!error && response.statusCode == 200) {
+			var resp = JSON.parse(body);
+			resp.forEach(function (item) {
+				if (item.character) {
+					var currentGauntlet = item.character.gauntlets[0];
+					callback({ gauntlet: currentGauntlet });
+				}
+			});
+		}
+		callback({ errorMsg: error, statusCode: response.statusCode });
+	});
+}
+
+export function playContest(token, gauntlet_id, crew_id, opponent_id, op_crew_id, callback) {
+	const reqOptions = {
+		method: 'POST',
+		uri: 'https://stt.disruptorbeam.com/gauntlet/execute_crew_contest',
+		qs: {
+			gauntlet_id: gauntlet_id,
+			crew_id: crew_id,
+			opponent_id: opponent_id,
+			op_crew_id: op_crew_id,
+			boost: false,
+			client_api: CONFIG.client_api_version
+		},
+		headers: {
+			'Content-Type': 'application/x-www-form-urlencoded',
+			'Authorization': 'Bearer ' + new Buffer(token).toString('base64')
+		}
+	};
+
+	request(reqOptions, function (error, response, body) {
+		if (!error && response.statusCode == 200) {
+			var resp = JSON.parse(body);
+			resp.forEach(function (item) {
+				if (item.character && item.character.gauntlets) {
+					var currentGauntlet = item.character.gauntlets[0];
+					callback({ gauntlet: currentGauntlet });
+				} else if (item.contest) {
+					callback({ lastResult: item.contest });
+				}
+			});
+		}
+		callback({ errorMsg: error, statusCode: response.statusCode });
+	});
+}
+
 export function gauntletRoundOdds(currentGauntlet) {
 	var result = {
 		rank: currentGauntlet.rank,
@@ -29,7 +92,7 @@ export function gauntletRoundOdds(currentGauntlet) {
 		if (!crew.disabled) {
 			var crewOdd = {
 				archetype_symbol: crew.archetype_symbol,
-				id: crew.id,
+				crew_id: crew.crew_id,
 				crit_chance: crew.crit_chance,
 				used: crew.debuff / 4,
 				max: 0,
@@ -52,6 +115,8 @@ export function gauntletRoundOdds(currentGauntlet) {
 			name: opponent.name,
 			level: opponent.level,
 			value: opponent.value,
+			player_id: opponent.player_id,
+			crew_id: opponent.crew_contest_data.crew[0].crew_id,
 			archetype_symbol: opponent.crew_contest_data.crew[0].archetype_symbol,
 			crit_chance: opponent.crew_contest_data.crew[0].crit_chance,
 			max: 0,
