@@ -11,6 +11,9 @@ import { Callout } from 'office-ui-fabric-react/lib/Callout';
 import { Spinner, SpinnerSize } from 'office-ui-fabric-react/lib/Spinner';
 
 import { loadMissionData } from '../utils/missions.js';
+
+import STTApi from '../api/STTApi.ts';
+
 const CONFIG = require('../utils/config.js');
 
 export class TraitBonuses extends React.Component {
@@ -23,7 +26,7 @@ export class TraitBonuses extends React.Component {
 			var traitBonuses = [];
 
 			this.props.trait_bonuses.map(function (traitBonus) {
-				traitBonuses.push(<span key={traitBonus.trait}>{this.props.trait_names[traitBonus.trait] ? this.props.trait_names[traitBonus.trait] : traitBonus.trait}</span>);
+				traitBonuses.push(<span key={traitBonus.trait}>{STTApi.getTraitName(traitBonus.trait)}</span>);
 			}.bind(this));
 
 			return (<span>
@@ -45,7 +48,7 @@ export class Locks extends React.Component {
 
 			this.props.locks.map(function (lock) {
 				if (lock.trait) {
-					lockTraits.push(<span key={lock.trait}>{this.props.trait_names[lock.trait] ? this.props.trait_names[lock.trait] : lock.trait}</span>);
+					lockTraits.push(<span key={lock.trait}>{STTApi.getTraitName(lock.trait)}</span>);
 				}
 				else
 				{
@@ -176,7 +179,7 @@ export class MissionHelper extends React.Component {
 		this._selection = new Selection;
 
 		//TODO: Load on-demand
-		loadMissionData(props.dbCache, props.params.accesstoken, props.params.accepted_missions, props.params.dispute_histories, function (result) {
+		loadMissionData(props.dbCache, props.params.accepted_missions, props.params.dispute_histories, function (result) {
 			if (result.errorMsg || (result.statusCode && (result.statusCode != 200)))
 			{
 
@@ -276,8 +279,8 @@ export class MissionHelper extends React.Component {
 						<span className='quest-mastery'>
 							Skill: <Image src={CONFIG.skillRes[challenge.skill].url} height={18} /> {CONFIG.skillRes[challenge.skill].name}
 						</span>
-						<TraitBonuses trait_bonuses={challenge.trait_bonuses} trait_names={this.props.params.trait_names} />
-						<Locks locks={challenge.locks} trait_names={this.props.params.trait_names} />
+						<TraitBonuses trait_bonuses={challenge.trait_bonuses} />
+						<Locks locks={challenge.locks} />
 					</span>
 				</FocusZone>
 			</div>

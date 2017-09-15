@@ -13,7 +13,6 @@ import { getWikiImageUrl } from '../utils/wikiImage.js';
 import { exportExcel } from '../utils/excelExporter.js';
 import { exportCsv } from '../utils/csvExporter.js';
 import { shareCrew } from '../utils/pastebin.js';
-import { loadData } from '../utils/dataLoader.js';
 import { matchCrew } from '../utils/crewTools.js';
 import { matchShips } from '../utils/shipTools.js';
 
@@ -29,6 +28,8 @@ import { FleetDetails } from './FleetDetails.js';
 import { ShareDialog } from './ShareDialog.js';
 import { EquipmentDetails } from './EquipmentDetails.js';
 import { CaptainCard } from './CaptainCard.js';
+
+import STTApi from '../api/STTApi.ts';
 
 const loki = require('lokijs');
 const path = require('path');
@@ -54,7 +55,6 @@ class App extends React.Component {
 			crewList: [],
 			shipList: [],
 			itemList: [],
-			trait_names: [],
 			allequipment: [],
 			missionHelperParams: {},
 			cadetMissionHelperParams: {},
@@ -70,12 +70,14 @@ class App extends React.Component {
 		this._onShare = this._onShare.bind(this);
 		this._onCaptainClicked = this._onCaptainClicked.bind(this);
 		this._onCaptainCalloutDismiss = this._onCaptainCalloutDismiss.bind(this);
+		this._onDataFinished = this._onDataFinished.bind(this);
+		this._onDataError = this._onDataError.bind(this);
 
-		// TODO: For testing only, remove
-		if (true || (CONFIG.UserConfig.getValue('autoLogin') == true)) {
+		if (CONFIG.UserConfig.getValue('autoLogin') == true) {
 			this.state.showSpinner = true;
 			this.state.showLoginDialog = false;
-			this._onAccessToken(CONFIG.UserConfig.getValue('accessToken'));
+			STTApi.loginWithCachedAccessToken(CONFIG.UserConfig.getValue('accessToken'));
+			this._onAccessToken();
 		}
 		else {
 			this.state.showLoginDialog = true;
@@ -112,7 +114,7 @@ class App extends React.Component {
 								onDismiss={this._onCaptainCalloutDismiss}
 								setInitialFocus={true}
 							>
-								<CaptainCard player={this.player.player} captainAvatarBodyUrl={this.state.captainAvatarBodyUrl} />
+								<CaptainCard captainAvatarBodyUrl={this.state.captainAvatarBodyUrl} />
 							</Callout>
 						)}
 					</div>
@@ -152,10 +154,10 @@ class App extends React.Component {
 							<CrewRecommendations crew={this.state.crewList} cadetMissions={this.state.cadetMissionHelperParams} missions={this.state.missionHelperParams} dbCache={this.dbCache} />
 						</PivotItem>
 						<PivotItem linkText='Gauntlet' itemIcon='DeveloperTools'>
-							<GauntletHelper accessToken={this.state.accessToken} crew={this.state.crewList} allcrew={this.allcrew.crew_avatars} trait_names={this.state.trait_names} imageURLs={this.imageURLs} />
+							<GauntletHelper crew={this.state.crewList} imageURLs={this.imageURLs} />
 						</PivotItem>
 						<PivotItem linkText='Fleet' itemIcon='WindDirection'>
-							<FleetDetails id={this.state.fleetId} accessToken={this.state.accessToken} imageURLs={this.imageURLs} />
+							<FleetDetails id={this.state.fleetId} imageURLs={this.imageURLs} />
 						</PivotItem>
 						<PivotItem linkText='About' itemIcon='Help'>
 							<AboutAndHelp />
@@ -276,9 +278,9 @@ class App extends React.Component {
 		}
 	}
 
-	_onAccessToken(accesstoken, autoLogin) {
+	_onAccessToken(autoLogin) {
 		CONFIG.UserConfig.setValue('autoLogin', autoLogin);
-		CONFIG.UserConfig.setValue('accessToken', accesstoken);
+		CONFIG.UserConfig.setValue('accessToken', STTApi.accessToken);
 
 		this.setState({ showSpinner: true });
 
@@ -288,135 +290,133 @@ class App extends React.Component {
 			this.imageURLs = this.dbCache.addCollection('imageURLs');
 		}
 
-		console.log("Loading data!");
-		loadData(accesstoken, function (data)
-		{
-			if (data.player)
-			{
-				this.setState({ spinnerLabel: 'Loading player data...' });
-				this.player = data.player;
-			}
-
-			if (data.config) {
-				this.setState({ spinnerLabel: 'Loading config...' });
-				this.config = data.config;
-			}
-
-			if (data.allcrew) {
-				this.setState({ spinnerLabel: 'Loading crew data...' });
-				this.allcrew = data.allcrew;
-			}
-
-			if (data.serverConfig) {
-				this.setState({ spinnerLabel: 'Loading server config...' });
-				this.serverConfig = data.serverConfig;
-			}
-
-			if (data.errorMsg || (data.statusCode && (data.statusCode != 200)))
-			{
-				this.setState({ showSpinner: false });
-				this.refs.loginDialog._showDialog((data.statusCode == 401) ? 'Incorrect access token. Try again!' : 'Unknown network error.');
-			}
-
-			if (this.player && this.config && this.allcrew && this.serverConfig)
-			{
-				// Successfully loaded all the needed data
-				this.setState({
-					showSpinner: false,
-					captainName: this.player.player.character.display_name,
-					secondLine: 'Level ' + this.player.player.character.level,
-					itemList: this.player.player.character.items,
-					trait_names: this.config.config.trait_names,
-					fleetId: this.player.player.fleet ? this.player.player.fleet.id : nullptr,
-					accessToken: accesstoken,
-					missionHelperParams: {
-						accesstoken: accesstoken,
-						accepted_missions: this.player.player.character.accepted_missions,
-						dispute_histories: this.player.player.character.dispute_histories,
-						trait_names: this.config.config.trait_names
-					},
-					cadetMissionHelperParams: {
-						accesstoken: accesstoken,
-						accepted_missions: this.player.player.character.cadet_schedule.missions,
-						trait_names: this.config.config.trait_names
+		this.setState({ spinnerLabel: 'Loading crew information...' });
+		STTApi.loadCrewArchetypes(function (error, success) {
+			this.setState({ spinnerLabel: 'Loading server configuration...' });
+			if (success) {
+				STTApi.loadServerConfig(function (error, success) {
+					this.setState({ spinnerLabel: 'Loading platform configuration...' });
+					if (success) {
+						STTApi.loadPlatformConfig(function (error, success) {
+							this.setState({ spinnerLabel: 'Loading player data...' });
+							if (success) {
+								STTApi.loadPlayerData(function (error, success) {
+									this.setState({ spinnerLabel: 'Finishing up...' });
+									if (success) {
+										// Successfully loaded all the needed data
+										this._onDataFinished();
+									} else {
+										this._onDataError();
+									}
+								}.bind(this));
+							} else {
+								this._onDataError();
+							}
+						}.bind(this));
+					} else {
+						this._onDataError();
 					}
-				});
-
-				if (this.player.player.character.crew_avatar) {
-					getWikiImageUrl(this.imageURLs, this.player.player.character.crew_avatar.name.split(' ').join('_') + '_Head.png', 0, function (id, url) {
-						this.setState({ captainAvatarUrl: url });
-					}.bind(this));
-
-					getWikiImageUrl(this.imageURLs, this.player.player.character.crew_avatar.name.split(' ').join('_') + '.png', 0, function (id, url) {
-						this.setState({ captainAvatarBodyUrl: url });
-					}.bind(this));
-				}
-
-				// all the equipment available in the game, along with sources and recipes
-				var allequipment = [];
-				this.player.item_archetype_cache.archetypes.forEach(function (archetype) {
-					var newEquipment = {
-						name: archetype.name,
-						id: archetype.id,
-						rarity: archetype.rarity,
-						type: archetype.type, // 3 - no recipe, can only get from sources; 2 - otherwise
-						short_name: archetype.short_name, // only for type 3
-						recipe: archetype.recipe ? archetype.recipe.demands : null, //optional
-						item_sources: archetype.item_sources,
-						icon: archetype.icon.file,
-						iconUrl: CONFIG.defaultItemIconUrl
-					};
-
-					allequipment.push(newEquipment);
-				});
-
-				this.setState({ allequipment: allequipment });
-
-				allequipment.forEach(function (equipment) {
-					var fileName = equipment.name + CONFIG.rarityRes[equipment.rarity].name + '.png';
-					fileName = fileName.split(' ').join('');
-					fileName = fileName.split('\'').join('');
-
-					getWikiImageUrl(this.imageURLs, fileName, equipment.id, function (id, url) {
-						this.state.allequipment.forEach(function (item) {
-							if ((item.id === id) && url)
-								item.iconUrl = url;
-						});
-					}.bind(this));
 				}.bind(this));
+			} else {
+				this._onDataError();
+			}
+		}.bind(this));
+	}
 
-				matchCrew(this.dbCache, this.allcrew.crew_avatars, this.player.player.character, accesstoken, this.config.config.trait_names, function (roster) {
-					roster.forEach(function (crew) {
-						crew.iconUrl = '';
-						crew.iconBodyUrl = '';
+	_onDataError() {
+		this.setState({ showSpinner: false });
+		this.refs.loginDialog._showDialog('Unknown network error, failed to load!');
+	}
+
+	_onDataFinished() {
+		this.setState({
+			showSpinner: false,
+			captainName: STTApi.playerData.character.display_name,
+			secondLine: 'Level ' + STTApi.playerData.character.level,
+			itemList: STTApi.playerData.character.items,
+			fleetId: STTApi.playerData.fleet ? STTApi.playerData.fleet.id : nullptr,
+			missionHelperParams: {
+				accepted_missions: STTApi.playerData.character.accepted_missions,
+				dispute_histories: STTApi.playerData.character.dispute_histories
+			},
+			cadetMissionHelperParams: {
+				accepted_missions: STTApi.playerData.character.cadet_schedule.missions
+			}
+		});
+
+		if (STTApi.playerData.character.crew_avatar) {
+			getWikiImageUrl(this.imageURLs, STTApi.playerData.character.crew_avatar.name.split(' ').join('_') + '_Head.png', 0, function (id, url) {
+				this.setState({ captainAvatarUrl: url });
+			}.bind(this));
+
+			getWikiImageUrl(this.imageURLs, STTApi.playerData.character.crew_avatar.name.split(' ').join('_') + '.png', 0, function (id, url) {
+				this.setState({ captainAvatarBodyUrl: url });
+			}.bind(this));
+		}
+
+		// all the equipment available in the game, along with sources and recipes
+		var allequipment = [];
+		STTApi.itemArchetypeCache.archetypes.forEach(function (archetype) {
+			var newEquipment = {
+				name: archetype.name,
+				id: archetype.id,
+				rarity: archetype.rarity,
+				type: archetype.type, // 3 - no recipe, can only get from sources; 2 - otherwise
+				short_name: archetype.short_name, // only for type 3
+				recipe: archetype.recipe ? archetype.recipe.demands : null, //optional
+				item_sources: archetype.item_sources,
+				icon: archetype.icon.file,
+				iconUrl: CONFIG.defaultItemIconUrl
+			};
+
+			allequipment.push(newEquipment);
+		});
+
+		this.setState({ allequipment: allequipment });
+
+		allequipment.forEach(function (equipment) {
+			var fileName = equipment.name + CONFIG.rarityRes[equipment.rarity].name + '.png';
+			fileName = fileName.split(' ').join('');
+			fileName = fileName.split('\'').join('');
+
+			getWikiImageUrl(this.imageURLs, fileName, equipment.id, function (id, url) {
+				this.state.allequipment.forEach(function (item) {
+					if ((item.id === id) && url)
+						item.iconUrl = url;
+				});
+			}.bind(this));
+		}.bind(this));
+
+		matchCrew(this.dbCache, STTApi.playerData.character, function (roster) {
+			roster.forEach(function (crew) {
+				crew.iconUrl = '';
+				crew.iconBodyUrl = '';
+			});
+
+			this.setState({ dataLoaded: true, crewList: roster });
+
+			roster.forEach(function (crew) {
+				getWikiImageUrl(this.imageURLs, crew.name.split(' ').join('_') + '_Head.png', crew.id, function (id, url) {
+					this.state.crewList.forEach(function (crew) {
+						if (crew.id === id)
+							crew.iconUrl = url;
 					});
 
-					this.setState({ dataLoaded: true, crewList: roster });
-
-					roster.forEach(function (crew) {
-						getWikiImageUrl(this.imageURLs, crew.name.split(' ').join('_') + '_Head.png', crew.id, function (id, url) {
-							this.state.crewList.forEach(function (crew) {
-								if (crew.id === id)
-									crew.iconUrl = url;
-							});
-
-							this.forceUpdate();
-						}.bind(this));
-						getWikiImageUrl(this.imageURLs, crew.name.split(' ').join('_') + '.png', crew.id, function (id, url) {
-							this.state.crewList.forEach(function (crew) {
-								if (crew.id === id)
-									crew.iconBodyUrl = url;
-							});
-
-							this.forceUpdate();
-						}.bind(this));
-					}.bind(this));
+					this.forceUpdate();
 				}.bind(this));
+				getWikiImageUrl(this.imageURLs, crew.name.split(' ').join('_') + '.png', crew.id, function (id, url) {
+					this.state.crewList.forEach(function (crew) {
+						if (crew.id === id)
+							crew.iconBodyUrl = url;
+					});
 
-				matchShips(this.player.player.character.ships, accesstoken, function (ships) {
-					this.setState({ shipList: ships });
+					this.forceUpdate();
 				}.bind(this));
-			}
+			}.bind(this));
+		}.bind(this));
+
+		matchShips(STTApi.playerData.character.ships, function (ships) {
+			this.setState({ shipList: ships });
 		}.bind(this));
 	}
 }

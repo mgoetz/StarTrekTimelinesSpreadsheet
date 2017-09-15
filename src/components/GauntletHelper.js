@@ -8,6 +8,8 @@ import { CrewList } from './CrewList.js';
 import { loadGauntlet, gauntletCrewSelection, gauntletRoundOdds, payToGetNewOpponents, playContest } from '../utils/gauntlet.js';
 import { getCrewIconFromCache } from '../utils/crewTools.js';
 
+import STTApi from '../api/STTApi.ts';
+
 const CONFIG = require('../utils/config.js');
 
 export class GauntletMatch extends React.Component {
@@ -18,14 +20,14 @@ export class GauntletMatch extends React.Component {
 	}
 
 	_playMatch() {
-		playContest(this.props.accessToken, this.props.gauntletId, this.props.match.crewOdd.crew_id, this.props.match.opponent.player_id, this.props.match.opponent.crew_id, function (data) {
+		playContest(this.props.gauntletId, this.props.match.crewOdd.crew_id, this.props.match.opponent.player_id, this.props.match.opponent.crew_id, function (data) {
 			this.props.onNewData(data);
 		}.bind(this));
 	}
 
 	render() {
-		var yourCrew = this.props.allcrew.find((crew) => crew.symbol == this.props.match.crewOdd.archetype_symbol);
-		var theirCrew = this.props.allcrew.find((crew) => crew.symbol == this.props.match.opponent.archetype_symbol);
+		var yourCrew = STTApi.getCrewAvatarBySymbol(this.props.match.crewOdd.archetype_symbol);
+		var theirCrew = STTApi.getCrewAvatarBySymbol(this.props.match.opponent.archetype_symbol);
 
 		return (<table className='table-GauntletMatch'>
 			<tbody>
@@ -68,13 +70,13 @@ export class GauntletHelper extends React.Component {
 	}
 
 	_reloadGauntletData() {
-		loadGauntlet(this.props.accessToken, function (data) {
+		loadGauntlet(function (data) {
 			this._gauntletDataRecieved(data);
 		}.bind(this));
 	}
 
 	_payForNewOpponents() {
-		payToGetNewOpponents(this.props.accessToken, this.state.gauntlet.id, function (data) {
+		payToGetNewOpponents(this.state.gauntlet.id, function (data) {
 			this._gauntletDataRecieved(data);
 		}.bind(this));
 	}
@@ -88,8 +90,8 @@ export class GauntletHelper extends React.Component {
 					gauntlet: data.gauntlet,
 					startsIn: Math.floor(data.gauntlet.seconds_to_join / 60),
 					featuredSkill: data.gauntlet.contest_data.featured_skill,
-					traits: data.gauntlet.contest_data.traits.map(function (trait) { return this.props.trait_names[trait] ? this.props.trait_names[trait] : trait; }),
-					recommendations: result.recommendations.map(function (id) { return this.props.crew.find((crew) => (crew.id == id)); }),
+					traits: data.gauntlet.contest_data.traits.map(function (trait) { return STTApi.getTraitName(trait); }.bind(this)),
+					recommendations: result.recommendations.map(function (id) { return this.props.crew.find((crew) => (crew.id == id)); }.bind(this)),
 					bestInSkill: result.best
 				});
 			}
@@ -109,7 +111,10 @@ export class GauntletHelper extends React.Component {
 		}
 		else if (data.lastResult) {
 			{
-				alert('You ' + data.lastResult.win ? 'won' : 'lost');
+				let playerRollTotal = data.lastResult.player_rolls.reduce(function(sum, value) { return sum + value; }, 0);
+				let opponentRollTotal = data.lastResult.opponent_rolls.reduce(function(sum, value) { return sum + value; }, 0);
+
+				alert('You ' + playerRollTotal + ' vs them ' + opponentRollTotal + '. Result: ' + ((data.lastResult.win == true) ? 'win' : 'lose'));
 				//"player_rolls":[137, 143, 147, 0, 1, 1], "opponent_rolls":[1, 0, 0, 218, 274, 206],
 				//"player_crit_rolls":[false, false, false, false, false, false],
 				//"opponent_crit_rolls":[false, false, false, false, false, false],
@@ -137,7 +142,7 @@ export class GauntletHelper extends React.Component {
 					<DefaultButton onClick={this._payForNewOpponents} text='Pay merits for new opponents' iconProps={{ iconName: 'Money' }} />
 					<Label>Your rank is {this.state.roundOdds.rank} and you have {this.state.roundOdds.consecutive_wins} consecutive wins.</Label>
 					{this.state.roundOdds.matches.map(function (match) {
-						return <GauntletMatch key={match.crewOdd.archetype_symbol + match.opponent.name} match={match} allcrew={this.props.allcrew} gauntletId={this.state.gauntlet.id} accessToken={this.props.accessToken} imageURLs={this.props.imageURLs} onNewData={this._gauntletDataRecieved} />;
+						return <GauntletMatch key={match.crewOdd.archetype_symbol + match.opponent.player_id} match={match} gauntletId={this.state.gauntlet.id} imageURLs={this.props.imageURLs} onNewData={this._gauntletDataRecieved} />;
 					}.bind(this))}
 				</div>
 			);

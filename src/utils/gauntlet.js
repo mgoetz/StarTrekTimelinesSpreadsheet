@@ -1,8 +1,10 @@
 const request = require('electron').remote.require('request');
 const CONFIG = require('./config.js');
 
-export function loadGauntlet(token, callback) {
-	const options = { method: 'GET', qs: { client_api: CONFIG.client_api_version, access_token: token, gauntlet_id: -1 } };
+import STTApi from '../api/STTApi.ts';
+
+export function loadGauntlet(callback) {
+	const options = { method: 'GET', qs: { client_api: CONFIG.client_api_version, access_token: STTApi.accessToken, gauntlet_id: -1 } };
 
 	options.uri = 'https://stt.disruptorbeam.com/gauntlet/status';
 	request(options, function (error, response, body) {
@@ -17,7 +19,7 @@ export function loadGauntlet(token, callback) {
 	});
 }
 
-export function payToGetNewOpponents(token, gauntlet_id, callback) {
+export function payToGetNewOpponents(gauntlet_id, callback) {
 	const reqOptions = {
 		method: 'POST',
 		uri: 'https://stt.disruptorbeam.com/gauntlet/refresh_opp_pool_and_revive_crew',
@@ -28,7 +30,7 @@ export function payToGetNewOpponents(token, gauntlet_id, callback) {
 		},
 		headers: {
 			'Content-Type': 'application/x-www-form-urlencoded',
-			'Authorization': 'Bearer ' + new Buffer(token).toString('base64')
+			'Authorization': 'Bearer ' + new Buffer(STTApi.accessToken).toString('base64')
 		}
 	};
 
@@ -46,7 +48,7 @@ export function payToGetNewOpponents(token, gauntlet_id, callback) {
 	});
 }
 
-export function playContest(token, gauntlet_id, crew_id, opponent_id, op_crew_id, callback) {
+export function playContest(gauntlet_id, crew_id, opponent_id, op_crew_id, callback) {
 	const reqOptions = {
 		method: 'POST',
 		uri: 'https://stt.disruptorbeam.com/gauntlet/execute_crew_contest',
@@ -60,7 +62,7 @@ export function playContest(token, gauntlet_id, crew_id, opponent_id, op_crew_id
 		},
 		headers: {
 			'Content-Type': 'application/x-www-form-urlencoded',
-			'Authorization': 'Bearer ' + new Buffer(token).toString('base64')
+			'Authorization': 'Bearer ' + new Buffer(STTApi.accessToken).toString('base64')
 		}
 	};
 
@@ -95,14 +97,14 @@ export function gauntletRoundOdds(currentGauntlet) {
 				crew_id: crew.crew_id,
 				crit_chance: crew.crit_chance,
 				used: crew.debuff / 4,
-				max: 0,
-				min: 0
+				max: [],
+				min: []
 			};
 
 			crew.skills.forEach(function(skillStats) {
 				if ((skillStats.skill == currentGauntlet.contest_data.primary_skill) || (skillStats.skill == currentGauntlet.contest_data.secondary_skill)) {
-					crewOdd.max = crewOdd.max + skillStats.max;
-					crewOdd.min = crewOdd.min + skillStats.min;
+					crewOdd.max.push(skillStats.max);
+					crewOdd.min.push(skillStats.min);
 				}
 			});
 
@@ -119,22 +121,30 @@ export function gauntletRoundOdds(currentGauntlet) {
 			crew_id: opponent.crew_contest_data.crew[0].crew_id,
 			archetype_symbol: opponent.crew_contest_data.crew[0].archetype_symbol,
 			crit_chance: opponent.crew_contest_data.crew[0].crit_chance,
-			max: 0,
-			min: 0
+			max: [],
+			min: []
 		};
 
 		opponent.crew_contest_data.crew[0].skills.forEach(function(skillStats) {
 			if ((skillStats.skill == currentGauntlet.contest_data.primary_skill) || (skillStats.skill == currentGauntlet.contest_data.secondary_skill)) {
-				opponentOdd.max = opponentOdd.max + skillStats.max;
-				opponentOdd.min = opponentOdd.min + skillStats.min;
+				opponentOdd.max.push(skillStats.max);
+				opponentOdd.min.push(skillStats.min);
 			}
 		});
 
 		result.opponents.push(opponentOdd);
 	});
 
-	function roll(data) {
-		return (Math.floor((Math.random() * (data.max - data.min)) + data.min) * (Math.random() < (data.crit_chance / 100) ? 2 : 1));
+	function roll(data, skillIndex) {
+		let max = (Math.random() < 0.5) ? 0 : 1;
+		let min = (Math.random() < 0.5) ? 0 : 1;
+		if (data.max.length >= skillIndex + 1)
+		{
+			max = data.max[skillIndex];
+			min = data.min[skillIndex];
+		}
+
+		return (Math.floor((Math.random() * (max - min)) + min) * (Math.random() < (data.crit_chance / 100) ? 2 : 1));
 	}
 
 	result.matches = [];
@@ -143,10 +153,24 @@ export function gauntletRoundOdds(currentGauntlet) {
 		result.opponents.forEach(function (opponent) {
 			// TODO: this is silly; perhaps someone more statisitically-inclined can chime in with a proper probabilistic formula
 
-			var simulatedRounds = 10000;
+			var simulatedRounds = 20000;
 			var wins = 0;
 			for (var i = 0; i < simulatedRounds; i++) {
-				if (roll(crewOdd) > roll(opponent))
+				var totalCrew = roll(crewOdd, 0);
+				totalCrew += roll(crewOdd, 0);
+				totalCrew += roll(crewOdd, 0);
+				totalCrew += roll(crewOdd, 1);
+				totalCrew += roll(crewOdd, 1);
+				totalCrew += roll(crewOdd, 1);
+
+				var totalOpponent = roll(opponent, 0);
+				totalOpponent += roll(opponent, 0);
+				totalOpponent += roll(opponent, 0);
+				totalOpponent += roll(opponent, 1);
+				totalOpponent += roll(opponent, 1);
+				totalOpponent += roll(opponent, 1);
+
+				if (totalCrew > totalOpponent)
 					wins++;
 			}
 

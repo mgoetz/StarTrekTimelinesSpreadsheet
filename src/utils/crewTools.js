@@ -2,6 +2,8 @@ const request = require('electron').remote.require('request');
 
 const CONFIG = require('./config.js');
 
+import STTApi from '../api/STTApi.ts';
+
 function queue(name) {
 	queue.q[name]++ || (queue.q[name] = 1);
 	return function (err) {
@@ -22,7 +24,7 @@ queue.__proto__ = {
 	err: function (name, fn) { queue.e[name] = fn; }
 }
 
-function rosterFromCrew(rosterEntry, crew, trait_names) {
+function rosterFromCrew(rosterEntry, crew) {
 	rosterEntry.level = crew.level;
 	rosterEntry.rarity = crew.rarity;
 	rosterEntry.buyback = crew.in_buy_back_state;
@@ -45,13 +47,13 @@ function rosterFromCrew(rosterEntry, crew, trait_names) {
 		rosterEntry.equipment_slots[equipment[0]].have = true;
 	});
 
-	rosterEntry.traits = crew.traits.concat(crew.traits_hidden).map(function (trait) { return trait_names[trait] ? trait_names[trait] : trait; }).join();
+	rosterEntry.traits = crew.traits.concat(crew.traits_hidden).map(function (trait) { return STTApi.getTraitName(trait); }).join();
 	rosterEntry.rawTraits = crew.traits.concat(crew.traits_hidden);
 }
 
-export function matchCrew(dbCache, crew_avatars, character, token, trait_names, callback) {
+export function matchCrew(dbCache, character, callback) {
 	function getDefaults(id) {
-		var crew = crew_avatars.find(function (archetype) { return archetype.id === id; });
+		var crew = STTApi.getCrewAvatarById(id);
 		return {
 			id: crew.id, name: crew.name, short_name: crew.short_name, max_rarity: crew.max_rarity, symbol: crew.symbol,
 			level: 0, rarity: 0, frozen: 0, buyback: false, traits: '', rawTraits: [], portrait: crew.portrait.file,
@@ -67,7 +69,7 @@ export function matchCrew(dbCache, crew_avatars, character, token, trait_names, 
 	// Add all the crew in the active roster
 	character.crew.forEach(function (crew) {
 		rosterEntry = getDefaults(crew.archetype_id);
-		rosterFromCrew(rosterEntry, crew, trait_names);
+		rosterFromCrew(rosterEntry, crew);
 		roster.push(rosterEntry);
 	});
 
@@ -87,17 +89,8 @@ export function matchCrew(dbCache, crew_avatars, character, token, trait_names, 
 			rosterEntry.rarity = rosterEntry.max_rarity;
 			roster.push(rosterEntry);
 
-			loadFrozen(immortals, rosterEntry, token, trait_names, queue('frozen'));
+			loadFrozen(immortals, rosterEntry, queue('frozen'));
 		});
-
-		// This code will load all unowned crew as well ; but what's the point if we don't get any stats
-		/*var unowned = crew_avatars.filter(function (crew) { return !roster.find(function (rosterEntry) { return rosterEntry.name == crew.name; }); });
-		unowned.forEach(function (crew) {
-			rosterEntry = getDefaults(crew.id);
-			rosterEntry.level = 0;
-			rosterEntry.rarity = 0;
-			roster.push(rosterEntry);
-		});*/
 
 		queue.done('frozen', function () {
 			callback(roster);
@@ -117,40 +110,20 @@ export function getCrewIconFromCache(imageURLs, name) {
 	return '';
 }
 
-function loadFrozen(immortals, rosterEntry, token, trait_names, callback) {
+function loadFrozen(immortals, rosterEntry, callback) {
 	var result = immortals.findOne({ symbol: rosterEntry.symbol });
 	if (result) {
-		rosterFromCrew(rosterEntry, result.crew, trait_names);
+		rosterFromCrew(rosterEntry, result.crew);
 		callback();
 	}
 	else {
-		const reqOptions = {
-			method: 'POST',
-			uri: 'https://stt.disruptorbeam.com/stasis_vault/immortal_restore_info',
-			qs: {
+		STTApi.loadFrozenCrew(rosterEntry.symbol, function (crew) {
+			rosterFromCrew(rosterEntry, crew);
+			
+			immortals.insert({
 				symbol: rosterEntry.symbol,
-				client_api: CONFIG.client_api_version
-			},
-			headers: {
-				'Content-Type': 'application/x-www-form-urlencoded',
-				'Authorization': 'Bearer ' + new Buffer(token).toString('base64')
-			}
-		};
-
-		request(reqOptions, function (error, response, body) {
-			if (!error && response.statusCode == 200) {
-				var crewJson = JSON.parse(body);
-
-				rosterFromCrew(rosterEntry, crewJson.crew, trait_names);
-
-				immortals.insert({
-					symbol: rosterEntry.symbol,
-					crew: crewJson.crew
-				});
-			}
-			else {
-				console.error(error);
-			}
+				crew: crew
+			});
 			callback();
 		});
 	}

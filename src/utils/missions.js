@@ -1,6 +1,8 @@
 const request = require('electron').remote.require('request');
 const CONFIG = require('./config.js');
 
+import STTApi from '../api/STTApi.ts';
+
 function queue(name) {
 	queue.q[name]++ || (queue.q[name] = 1);
 	return function (err) {
@@ -21,7 +23,7 @@ queue.__proto__ = {
 	err: function (name, fn) { queue.e[name] = fn; }
 }
 
-function loadQuestData(completed, questCache, token, quest, callback) {
+function loadQuestData(completed, questCache, quest, callback) {
 	if (completed)
 	{
 		var result = questCache.findOne({ id: quest.id });
@@ -44,7 +46,7 @@ function loadQuestData(completed, questCache, token, quest, callback) {
 		uri: 'https://stt.disruptorbeam.com/quest/conflict_info',
 		qs: {
 			client_api: CONFIG.client_api_version,
-			access_token: token,
+			access_token: STTApi.accessToken,
 			id: quest.id
 		}
 	};
@@ -81,7 +83,7 @@ function loadQuestData(completed, questCache, token, quest, callback) {
 	});
 }
 
-export function loadMissionData(dbCache, token, accepted_missions, dispute_histories, callback) {
+export function loadMissionData(dbCache, accepted_missions, dispute_histories, callback) {
 	var mission_ids = accepted_missions.map(function (mission) { return mission.id; });
 
 	// Add all the episodes' missions (if not cadet)
@@ -103,7 +105,7 @@ export function loadMissionData(dbCache, token, accepted_missions, dispute_histo
 		uri: 'https://stt.disruptorbeam.com/mission/info',
 		qs: {
 			client_api: CONFIG.client_api_version,
-			access_token: token,
+			access_token: STTApi.accessToken,
 			ids: mission_ids
 		},
 		qsStringifyOptions: { arrayFormat: 'brackets' }
@@ -128,7 +130,7 @@ export function loadMissionData(dbCache, token, accepted_missions, dispute_histo
 						if ((!quest.locked) && quest.name) {
 							if (quest.quest_type == 'ConflictQuest')
 							{
-								loadQuestData(mission.stars_earned == mission.total_stars, questCache, token, quest, queue('quests'));
+								loadQuestData(mission.stars_earned == mission.total_stars, questCache, quest, queue('quests'));
 							}
 							else
 							{
@@ -152,7 +154,7 @@ export function loadMissionData(dbCache, token, accepted_missions, dispute_histo
 								mission.quests.forEach(function (quest) {
 									if ((!quest.locked) && quest.name && !dispute.quests.find(function (q) { return q.id == quest.id; })) {
 										if (quest.quest_type == 'ConflictQuest') {
-											loadQuestData(dispute.stars_earned == dispute.total_stars, questCache, token, quest, queue('quests'));
+											loadQuestData(dispute.stars_earned == dispute.total_stars, questCache, quest, queue('quests'));
 										}
 										else {
 											quest.description = 'Ship battle';

@@ -43,6 +43,7 @@
     "webpack-dev-server": "latest"
   },
   "dependencies": {
+    "@types/request": "^2.0.3",
     "electron-json-storage-sync": "latest",
     "exceljs": "latest",
     "json2csv": "latest",

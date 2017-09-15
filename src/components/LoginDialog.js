@@ -6,7 +6,7 @@ import { Checkbox, ICheckboxStyles } from 'office-ui-fabric-react/lib/Checkbox';
 import { Spinner, SpinnerSize } from 'office-ui-fabric-react/lib/Spinner';
 import { MessageBar, MessageBarType } from 'office-ui-fabric-react/lib/MessageBar';
 
-import { login } from '../utils/login.js';
+import STTApi from '../api/STTApi.ts';
 
 const CONFIG = require('../utils/config.js');
 
@@ -84,16 +84,16 @@ export class LoginDialog extends React.Component {
 	_closeDialog() {
 		this.setState({ showSpinner: true, errorMessage: null });
 
-		login(this.state.username, this.state.password, function (result) {
+		STTApi.login(this.state.username, this.state.password, function (error, success) {
 			this.setState({ showSpinner: false });
 
-			if (result.errorMsg || !result.loginDetails) {
-				this.setState({ hideDialog: false, errorMessage: result.errorMsg });
+			if (!success) {
+				this.setState({ hideDialog: false, errorMessage: error });
 			}
 			else
 			{
 				this.setState({ hideDialog: true });
-				this.props.onAccessToken(result.loginDetails.access_token, this.state.autoLogin);
+				this.props.onAccessToken(this.state.autoLogin);
 			}
 		}.bind(this));
 	}

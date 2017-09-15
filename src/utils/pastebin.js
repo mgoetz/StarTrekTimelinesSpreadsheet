@@ -3,6 +3,8 @@ const fs = require('electron').remote.require('fs');
 
 import { loadMissionData } from './missions.js';
 
+import STTApi from '../api/STTApi.ts';
+
 const CONFIG = require('./config.js');
 
 function pastebinPost(data, exportType, callback) {
@@ -28,7 +30,7 @@ function pastebinPost(data, exportType, callback) {
 export function shareCrew(dbCache, roster, options, missionHelperParams, cadetMissionHelperParams, callback) {
 
 	if (options.shareMissions) {
-		loadMissionData(dbCache, missionHelperParams.accesstoken, cadetMissionHelperParams.accepted_missions.concat(missionHelperParams.accepted_missions), missionHelperParams.dispute_histories, function (result) {
+		loadMissionData(dbCache, cadetMissionHelperParams.accepted_missions.concat(missionHelperParams.accepted_missions), missionHelperParams.dispute_histories, function (result) {
 			if (result.errorMsg || (result.statusCode && (result.statusCode != 200))) {
 
 			}
@@ -69,7 +71,7 @@ export function shareCrew(dbCache, roster, options, missionHelperParams, cadetMi
 								}
 
 								entry.traits = entry.traits.map(function (trait) {
-									return missionHelperParams.trait_names[trait] ? missionHelperParams.trait_names[trait] : trait;
+									return STTApi.getTraitName(trait);
 								}).join(', ');
 
 								if (challenge.locks && (challenge.locks.length > 0)) {
@@ -81,7 +83,7 @@ export function shareCrew(dbCache, roster, options, missionHelperParams, cadetMi
 								}
 
 								entry.lockedTraits = entry.lockedTraits.map(function (trait) {
-									return missionHelperParams.trait_names[trait] ? missionHelperParams.trait_names[trait] : trait;
+									return STTApi.getTraitName(trait);
 								}).join(', ');
 
 								allChallenges.push(entry);

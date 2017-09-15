@@ -8,6 +8,9 @@ import { CrewList } from './CrewList.js';
 import { CollapsibleSection } from './CollapsibleSection.js';
 
 import { loadMissionData } from '../utils/missions.js';
+
+import STTApi from '../api/STTApi.ts';
+
 const CONFIG = require('../utils/config.js');
 
 export class GuaranteedSuccess extends React.Component {
@@ -20,7 +23,7 @@ export class GuaranteedSuccess extends React.Component {
 						<span style={{ color: 'red' }}>No crew can complete this challenge!</span><br />
 						<span className='quest-mastery'>You need a crew with the <Image src={CONFIG.skillRes[recommendation.skill].url} height={18} /> {CONFIG.skillRes[recommendation.skill].name} skill of at least {recommendation.roll}
 							{(recommendation.lockedTraits.length > 0) &&
-								(<span>&nbsp;and one of these skills: {recommendation.lockedTraits.map(function (trait) { return (<span key={trait}>{this.props.trait_names[trait] ? this.props.trait_names[trait] : trait}</span>); }.bind(this)).reduce((prev, curr) => [prev, ', ', curr])}
+								(<span>&nbsp;and one of these skills: {recommendation.lockedTraits.map(function (trait) { return (<span key={trait}>{STTApi.getTraitName(trait)}</span>); }.bind(this)).reduce((prev, curr) => [prev, ', ', curr])}
 								</span>)}.</span>
 					</div>);
 				}
@@ -31,7 +34,7 @@ export class GuaranteedSuccess extends React.Component {
 						<span>Your best bet is {recommendation.crew[0].name} with a {recommendation.crew[0].success.toFixed(2)}% success chance.</span><br />
 						<span className='quest-mastery'>You need a crew with the <Image src={CONFIG.skillRes[recommendation.skill].url} height={18} /> {CONFIG.skillRes[recommendation.skill].name} skill of at least {recommendation.roll}
 							{(recommendation.lockedTraits.length > 0) &&
-								(<span>&nbsp;and one of these skills: {recommendation.lockedTraits.map(function (trait) { return (<span key={trait}>{this.props.trait_names[trait] ? this.props.trait_names[trait] : trait}</span>); }.bind(this)).reduce((prev, curr) => [prev, ', ', curr])}
+								(<span>&nbsp;and one of these skills: {recommendation.lockedTraits.map(function (trait) { return (<span key={trait}>{STTApi.getTraitName(trait)}</span>); }.bind(this)).reduce((prev, curr) => [prev, ', ', curr])}
 								</span>)}.</span>
 					</div>);
 				}
@@ -143,7 +146,7 @@ export class CrewRecommendations extends React.Component {
 			recommendations: []
 		};
 
-		loadMissionData(props.dbCache, props.cadetMissions.accesstoken, props.cadetMissions.accepted_missions.concat(props.missions.accepted_missions), props.missions.dispute_histories, function (result) {
+		loadMissionData(props.dbCache, props.cadetMissions.accepted_missions.concat(props.missions.accepted_missions), props.missions.dispute_histories, function (result) {
 			if (result.errorMsg || (result.statusCode && (result.statusCode != 200))) {
 
 			}
@@ -246,8 +249,8 @@ export class CrewRecommendations extends React.Component {
 		if (this.state.dataAvailable) {
 			return (
 				<div className='tab-panel' data-is-scrollable='true'>
-					<GuaranteedSuccess title='Cadet challenges without guaranteed success' trait_names={this.props.cadetMissions.trait_names} recommendations={this.state.recommendations.filter(function (recommendation) { return recommendation.cadet; })} />
-					<GuaranteedSuccess title='Missions without guaranteed success' trait_names={this.props.cadetMissions.trait_names} recommendations={this.state.recommendations.filter(function (recommendation) { return !recommendation.cadet; })} />
+					<GuaranteedSuccess title='Cadet challenges without guaranteed success' recommendations={this.state.recommendations.filter(function (recommendation) { return recommendation.cadet; })} />
+					<GuaranteedSuccess title='Missions without guaranteed success' recommendations={this.state.recommendations.filter(function (recommendation) { return !recommendation.cadet; })} />
 					<CrewDuplicates title='Crew duplicates' crew={this.props.crew} />
 					<MinimalComplement title='Minimal crew complement needed for cadet challenges' recommendations={this.state.recommendations} crew={this.props.crew} />
 

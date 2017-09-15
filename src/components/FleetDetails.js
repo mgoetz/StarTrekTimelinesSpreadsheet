@@ -164,7 +164,7 @@ export class FleetDetails extends React.Component {
 				starbase: null
 			};
 
-			loadFleetData(props.accessToken, props.id, function (fleetData, fleet, starbase) {
+			loadFleetData(props.id, function (fleetData, fleet, starbase) {
 				var members = new Array();
 
 				fleetData.members.forEach(function (member) {
@@ -217,7 +217,7 @@ export class FleetDetails extends React.Component {
 				}.bind(this));
 			}.bind(this));
 
-			/*loginPubNub(props.accessToken, function (pubnub) {
+			/*loginPubNub(function (pubnub) {
 				//
 			}.bind(this));*/
 		}

@@ -1,11 +1,13 @@
 const request = require('electron').remote.require('request');
 const CONFIG = require('./config.js');
 
-export function matchShips(ships, accesstoken, callback) {
+import STTApi from '../api/STTApi.ts';
+
+export function matchShips(ships, callback) {
 	const options = {
 		method: 'GET',
 		uri: 'https://stt.disruptorbeam.com/ship_schematic',
-		qs: { client_api: CONFIG.client_api_version, access_token: accesstoken }
+		qs: { client_api: CONFIG.client_api_version, access_token: STTApi.accessToken }
 	};
 
 	request(options, function (error, response, body) {
