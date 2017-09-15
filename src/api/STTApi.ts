@@ -99,6 +99,26 @@ class STTApi {
 		this._accessToken = accessToken;
 	}
 
+	loginWithFacebook(facebookAccessToken: string, facebookUserId: string): Promise<any> {
+		return this._net.post(CONFIG.URL_PLATFORM + "oauth2/token", {
+			"third_party.third_party": "facebook",
+			"third_party.access_token": facebookAccessToken,
+			"third_party.uid": facebookUserId,
+			"client_id": CONFIG.CLIENT_ID,
+			"grant_type": "third_party"
+		}).then((data: any) => {
+			if (data.error_description) {
+				return Promise.reject(data.error_description);
+			} else if (data.access_token) {
+				this._accessToken = data.access_token;
+				console.info("Logged in with access token " + data.access_token);
+				return Promise.resolve();
+			} else {
+				return Promise.reject("Invalid data for login!");
+			}
+		});
+	}
+
 	executeGetRequest(resourceUrl: string): Promise<any> {
 		if (this._accessToken === undefined) {
 			return Promise.reject("Not logged in!");

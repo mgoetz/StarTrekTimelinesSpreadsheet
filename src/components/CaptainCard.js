@@ -4,6 +4,8 @@ import React, { Component } from 'react';
 import { Image, ImageFit } from 'office-ui-fabric-react/lib/Image';
 import { DefaultButton } from 'office-ui-fabric-react/lib/Button';
 
+import STTApi from '../api/STTApi.ts';
+
 export class CaptainCard extends React.Component {
 	render() {
 		return (

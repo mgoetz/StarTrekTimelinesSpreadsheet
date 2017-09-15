@@ -76,7 +76,7 @@ class App extends React.Component {
 			this.state.showSpinner = true;
 			this.state.showLoginDialog = false;
 			STTApi.loginWithCachedAccessToken(CONFIG.UserConfig.getValue('accessToken'));
-			this._onAccessToken();
+			this._onAccessToken(true);
 		}
 		else {
 			this.state.showLoginDialog = true;

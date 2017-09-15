@@ -1,9 +1,10 @@
 'use strict';
 
 // Import parts of electron to use
-const {app, BrowserWindow} = require('electron');
+const {app, BrowserWindow, ipcMain} = require('electron');
 const path = require('path')
 const url = require('url')
+const FB = require('fb');
 
 // Keep a global reference of the window object, if you don't, the window will
 // be closed automatically when the JavaScript object is garbage collected.
@@ -62,6 +63,38 @@ function createWindow() {
     mainWindow = null;
   });
 }
+
+ipcMain.on("fb-authenticate",function (event, arg) {
+  var options = {
+    client_id: "322613001274224",
+    scopes: "public_profile",
+    redirect_uri: "https://www.facebook.com/connect/login_success.html"
+  };
+  var authWindow = new BrowserWindow({ width: 450, height: 300, show: false,
+    parent: mainWindow, modal: true, webPreferences: {nodeIntegration:false} });
+  var facebookAuthURL = "https://www.facebook.com/v2.8/dialog/oauth?client_id=" + options.client_id + "&redirect_uri=" + options.redirect_uri + "&response_type=token,granted_scopes&scope=" + options.scopes + "&display=popup";
+  authWindow.loadURL(facebookAuthURL);
+  authWindow.show();
+
+  authWindow.on('closed', function() {
+    mainWindow.webContents.send("fb_closed");
+  });
+
+  authWindow.webContents.on('did-get-redirect-request', function (event, oldUrl, newUrl) {
+    var raw_code = /access_token=([^&]*)/.exec(newUrl) || null;
+    var access_token = (raw_code && raw_code.length > 1) ? raw_code[1] : null;
+    var error = /\?error=(.+)$/.exec(newUrl);
+
+    if(access_token) {
+      FB.setAccessToken(access_token);
+      FB.api('/me', { fields: ['id', 'name', 'picture.width(200).height(200)'] }, function (res) {
+        res.access_token = access_token;
+        mainWindow.webContents.send("fb_access_token", res);
+      });
+      authWindow.close();
+    }
+  });
+});
 
 // This method will be called when Electron has finished
 // initialization and is ready to create browser windows.
