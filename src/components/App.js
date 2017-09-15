@@ -51,7 +51,6 @@ class App extends React.Component {
 			secondLine: '',
 			captainAvatarUrl: '',
 			captainAvatarBodyUrl: '',
-			fleetId: null,
 			crewList: [],
 			shipList: [],
 			itemList: [],
@@ -157,7 +156,7 @@ class App extends React.Component {
 							<GauntletHelper crew={this.state.crewList} imageURLs={this.imageURLs} />
 						</PivotItem>
 						<PivotItem linkText='Fleet' itemIcon='WindDirection'>
-							<FleetDetails id={this.state.fleetId} imageURLs={this.imageURLs} />
+							<FleetDetails imageURLs={this.imageURLs} />
 						</PivotItem>
 						<PivotItem linkText='About' itemIcon='Help'>
 							<AboutAndHelp />
@@ -284,48 +283,81 @@ class App extends React.Component {
 
 		this.setState({ showSpinner: true });
 
+		// TODO: instead of loki use IndexedDB or a wrapper like http://dexie.org/
+
 		this.dbCache = new loki(path.join(app.getPath('userData'), 'storage', 'cache.json'), { autosave: true, autoload: true });
 		this.imageURLs = this.dbCache.getCollection('imageURLs');
 		if (!this.imageURLs) {
 			this.imageURLs = this.dbCache.addCollection('imageURLs');
 		}
 
-		this.setState({ spinnerLabel: 'Loading crew information...' });
-		STTApi.loadCrewArchetypes(function (error, success) {
-			this.setState({ spinnerLabel: 'Loading server configuration...' });
-			if (success) {
-				STTApi.loadServerConfig(function (error, success) {
-					this.setState({ spinnerLabel: 'Loading platform configuration...' });
-					if (success) {
-						STTApi.loadPlatformConfig(function (error, success) {
-							this.setState({ spinnerLabel: 'Loading player data...' });
-							if (success) {
-								STTApi.loadPlayerData(function (error, success) {
-									this.setState({ spinnerLabel: 'Finishing up...' });
-									if (success) {
-										// Successfully loaded all the needed data
-										this._onDataFinished();
-									} else {
-										this._onDataError();
-									}
-								}.bind(this));
-							} else {
-								this._onDataError();
-							}
-						}.bind(this));
-					} else {
-						this._onDataError();
-					}
-				}.bind(this));
-			} else {
-				this._onDataError();
+		var mainResources = [
+			{
+				loader: STTApi.loadCrewArchetypes.bind(STTApi),
+				description: 'crew information'
+			},
+			{
+				loader: STTApi.loadServerConfig.bind(STTApi),
+				description: 'server configuration'
+			},
+			{
+				loader: STTApi.loadPlatformConfig.bind(STTApi),
+				description: 'platform configuration'
+			},
+			{
+				loader: STTApi.loadShipSchematics.bind(STTApi),
+				description: 'ship information'
+			},
+			{
+				loader: STTApi.loadPlayerData.bind(STTApi),
+				description: 'player data'
 			}
-		}.bind(this));
+		];
+
+		var fleetResources = [
+			{
+				loader: STTApi.loadFleetMemberInfo.bind(STTApi),
+				description: 'fleet members'
+			},
+			{
+				loader: STTApi.loadFleetData.bind(STTApi),
+				description: 'fleet data'
+			},
+			{
+				loader: STTApi.loadStarbaseData.bind(STTApi),
+				description: 'starbase data'
+			}
+		];
+
+		mainResources.reduce((prev, cur) => {
+			return prev.then(() => {
+				this.setState({ spinnerLabel: 'Loading ' + cur.description + '...' });
+				return cur.loader();
+			});
+		}, Promise.resolve())
+		.then(() => {
+			if (STTApi.playerData.fleet && STTApi.playerData.fleet.id != 0) {
+				return fleetResources.reduce((prev, cur) => {
+					return prev.then(() => {
+						this.setState({ spinnerLabel: 'Loading ' + cur.description + '...' });
+						return cur.loader(STTApi.playerData.fleet.id);
+					});
+				}, Promise.resolve());
+			}
+			else {
+				return Promise.resolve();
+			}
+		})
+		.then(() => {
+			this.setState({ spinnerLabel: 'Finishing up...' });
+		})
+		.then(this._onDataFinished)
+		.catch(this._onDataError);
 	}
 
-	_onDataError() {
+	_onDataError(reason) {
 		this.setState({ showSpinner: false });
-		this.refs.loginDialog._showDialog('Unknown network error, failed to load!');
+		this.refs.loginDialog._showDialog('Network error:' + reason);
 	}
 
 	_onDataFinished() {
@@ -334,7 +366,6 @@ class App extends React.Component {
 			captainName: STTApi.playerData.character.display_name,
 			secondLine: 'Level ' + STTApi.playerData.character.level,
 			itemList: STTApi.playerData.character.items,
-			fleetId: STTApi.playerData.fleet ? STTApi.playerData.fleet.id : nullptr,
 			missionHelperParams: {
 				accepted_missions: STTApi.playerData.character.accepted_missions,
 				dispute_histories: STTApi.playerData.character.dispute_histories

@@ -1,5 +1,4 @@
 import React, { Component } from 'react';
-import { Spinner, SpinnerSize } from 'office-ui-fabric-react/lib/Spinner';
 import { Label } from 'office-ui-fabric-react/lib/Label';
 import { Link } from 'office-ui-fabric-react/lib/Link';
 import { Icon } from 'office-ui-fabric-react/lib/Icon';
@@ -9,10 +8,11 @@ import { Rating, RatingSize } from 'office-ui-fabric-react/lib/Rating';
 
 import { CollapsibleSection } from './CollapsibleSection.js';
 
-import { loadFleetData } from '../utils/fleet.js';
 import { loginPubNub } from '../utils/chat.js';
 import { sortItems, columnClick } from '../utils/listUtils.js';
 import { getWikiImageUrl } from '../utils/wikiImage.js';
+
+import STTApi from '../api/STTApi.ts';
 
 export class MemberList extends React.Component {
 	constructor(props) {
@@ -125,18 +125,10 @@ export class MemberList extends React.Component {
 }
 
 export class Starbase extends React.Component {
-	constructor(props) {
-		super(props);
-
-		this.state = {
-			starbase_rooms: this.props.starbase[0].character.starbase_rooms
-		};
-	}
-
 	render() {
 		return (<CollapsibleSection title={this.props.title}>
 			<ul>
-				{this.state.starbase_rooms.map(function (room) {
+				{STTApi.starbaseRooms.map(function (room) {
 					return <li key={room.id}>
 						<span className='starbase-room'><span className='starbase-room-name'>{room.name}</span><Rating size={RatingSize.Small} min={1} max={room.max_level} rating={(room.level > 0) ? room.level : null} /></span>
 						{(room.level > 0) &&
@@ -156,65 +148,53 @@ export class FleetDetails extends React.Component {
 	constructor(props) {
 		super(props);
 
-		if (props.id) {
+		if (STTApi.playerData.fleet && STTApi.playerData.fleet.id != 0) {
+			var members = new Array();
+
+			STTApi.fleetMembers.forEach(function (member) {
+				var newMember = {
+					dbid: member.dbid,
+					display_name: member.display_name,
+					rank: member.rank,
+					last_active: Math.round(member.last_active / 60),
+					event_rank: member.event_rank,
+					starbase_activity: member.starbase_activity,
+					daily_activity: member.daily_activity,
+					iconUrl: null,
+					avatar: member.crew_avatar ? member.crew_avatar.name : null
+				};
+
+				if (member.squad_id)
+				{
+					newMember.squad_rank = member.squad_rank;
+
+					var squad = STTApi.fleetSquads.find(function (squad) { return squad.id == member.squad_id; });
+					newMember.squad_name = squad.name;
+					newMember.squad_event_rank = squad.event_rank;
+				}
+					
+				members.push(newMember);
+			});
+
 			this.state = {
-				dataAvailable: false,
-				members: null,
-				fleet: null,
-				starbase: null
+				members: members
 			};
 
-			loadFleetData(props.id, function (fleetData, fleet, starbase) {
-				var members = new Array();
+			this._mounted = false;
 
-				fleetData.members.forEach(function (member) {
-					var newMember = {
-						dbid: member.dbid,
-						display_name: member.display_name,
-						rank: member.rank,
-						last_active: Math.round(member.last_active / 60),
-						event_rank: member.event_rank,
-						starbase_activity: member.starbase_activity,
-						daily_activity: member.daily_activity,
-						iconUrl: null,
-						avatar: member.crew_avatar ? member.crew_avatar.name : null
-					};
+			this.state.members.forEach(function (member) {
+				if (member.avatar) {
+					getWikiImageUrl(this.props.imageURLs, member.avatar.split(' ').join('_') + '_Head.png', member.dbid, function (id, url) {
+						this.state.members.forEach(function (member) {
+							if (member.dbid === id)
+								member.iconUrl = url;
+						});
 
-					if (member.squad_id)
-					{
-						newMember.squad_rank = member.squad_rank;
-
-						var squad = fleetData.squads.find(function (squad) { return squad.id == member.squad_id; });
-						newMember.squad_name = squad.name;
-						newMember.squad_event_rank = squad.event_rank;
-					}
-					
-					members.push(newMember);
-				});
-
-				this.setState({
-					dataAvailable: true,
-					members: members,
-					fleet: fleet,
-					starbase: starbase
-				});
-
-				this._mounted = false;
-
-				this.state.members.forEach(function (member) {
-					if (member.avatar) {
-						getWikiImageUrl(this.props.imageURLs, member.avatar.split(' ').join('_') + '_Head.png', member.dbid, function (id, url) {
-							this.state.members.forEach(function (member) {
-								if (member.dbid === id)
-									member.iconUrl = url;
-							});
-
-							// Sometimes we get the callback before the component is even mounted, so no need to force update
-							if (this._mounted)
-								this.forceUpdate();
-						}.bind(this));
-					}
-				}.bind(this));
+						// Sometimes we get the callback before the component is even mounted, so no need to force update
+						if (this._mounted)
+							this.forceUpdate();
+					}.bind(this));
+				}
 			}.bind(this));
 
 			/*loginPubNub(function (pubnub) {
@@ -224,7 +204,6 @@ export class FleetDetails extends React.Component {
 		else
 		{
 			this.state = {
-				dataAvailable: true,
 				members: null
 			};
 		}
@@ -235,23 +214,18 @@ export class FleetDetails extends React.Component {
 	}
 
 	render() {
-		if (this.state.dataAvailable) {
-
-			if (!this.state.members) {
-				return <p>It looks like you are not part of a fleet yet!</p>;
-			}
-
-			return <div className='tab-panel' data-is-scrollable='true'>
-				<h2>{this.state.fleet.fleet.name}</h2>
-				<h3>{this.state.fleet.fleet.motd}</h3>
-
-				<MemberList title={'Members (' + this.state.fleet.fleet.cursize + ' / ' + this.state.fleet.fleet.maxsize + ')'} members={this.state.members} />
-
-				<Starbase title='Starbase rooms' starbase={this.state.starbase} />
-			</div>;
+		if (!this.state.members) {
+			return <p>It looks like you are not part of a fleet yet!</p>;
 		}
 		else {
-			return (<Spinner size={SpinnerSize.large} label='Loading data...' />);
+			return <div className='tab-panel' data-is-scrollable='true'>
+				<h2>{STTApi.fleetData.name}</h2>
+				<h3>{STTApi.fleetData.motd}</h3>
+
+				<MemberList title={'Members (' + STTApi.fleetData.cursize + ' / ' + STTApi.fleetData.maxsize + ')'} members={this.state.members} />
+
+				<Starbase title='Starbase rooms' />
+			</div>;
 		}
 	}
 }

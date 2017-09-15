@@ -1,5 +1,3 @@
-const request = require('electron').remote.require('request');
-
 const CONFIG = require('./config.js');
 
 import STTApi from '../api/STTApi.ts';
@@ -117,7 +115,7 @@ function loadFrozen(immortals, rosterEntry, callback) {
 		callback();
 	}
 	else {
-		STTApi.loadFrozenCrew(rosterEntry.symbol, function (crew) {
+		STTApi.loadFrozenCrew(rosterEntry.symbol).then(function (crew) {
 			rosterFromCrew(rosterEntry, crew);
 			
 			immortals.insert({

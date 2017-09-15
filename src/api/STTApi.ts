@@ -9,6 +9,10 @@ class STTApi {
 	private _serverConfig: any;
 	private _playerData: any;
 	private _platformConfig: any;
+	private _shipSchematics: any;
+	private _starbaseData: any;
+	private _fleetData: any;
+	private _fleetMemberInfo: any;
 
 	constructor() {
 		this._accessToken = undefined;
@@ -16,6 +20,11 @@ class STTApi {
 		this._serverConfig = null;
 		this._playerData = null;
 		this._platformConfig = null;
+		this._shipSchematics = null;
+		this._starbaseData = null;
+		this._fleetData = null;
+		this._fleetMemberInfo = null;
+
 		this._net = new NetworkFetch();
 	}
 
@@ -35,6 +44,26 @@ class STTApi {
 		return this._playerData.item_archetype_cache;
 	}
 
+	get shipSchematics(): any {
+		return this._shipSchematics;
+	}
+
+	get fleetData(): any {
+		return this._fleetData;
+	}
+
+	get fleetMembers(): any {
+		return this._fleetMemberInfo.members;
+	}
+
+	get fleetSquads(): any {
+		return this._fleetMemberInfo.squads;
+	}
+
+	get starbaseRooms(): any {
+		return this._starbaseData[0].character.starbase_rooms;
+	}
+
 	getTraitName(trait: string): string {
 		return this._platformConfig.config.trait_names[trait] ? this._platformConfig.config.trait_names[trait] : trait;
 	}
@@ -47,127 +76,148 @@ class STTApi {
 		return this._crewAvatars.find((avatar: any) => avatar.symbol === symbol);
 	}
 
-	private _loginResult(error: string | undefined, jsonBody: any, callback: (error: string | undefined, success: boolean) => void): void {
-		if (!error) {
-			let result: any = jsonBody;
-			if (result.error_description) {
-				callback(result.error_description, false);
-			} else if (result.access_token) {
-				this._accessToken = result.access_token;
-				callback(undefined, true);
-			} else {
-				callback("unknown error", false);
-			}
-		} else {
-			callback(error, false);
-		}
-	}
-
-	login(username: string, password: string, callback: (error: string | undefined, success: boolean) => void): void {
-		this._net.post(CONFIG.URL_PLATFORM + "oauth2/token", {
+	login(username: string, password: string): Promise<any> {
+		return this._net.post(CONFIG.URL_PLATFORM + "oauth2/token", {
 			"username": username,
 			"password": password,
 			"client_id": CONFIG.CLIENT_ID,
 			"grant_type": "password"
-		}, (error: string | undefined, jsonBody: any) => this._loginResult(error, jsonBody, callback));
+		}).then((data: any) => {
+			if (data.error_description) {
+				return Promise.reject(data.error_description);
+			} else if (data.access_token) {
+				this._accessToken = data.access_token;
+				console.info("Logged in with access token " + data.access_token);
+				return Promise.resolve();
+			} else {
+				return Promise.reject("Invalid data for login!");
+			}
+		});
 	}
 
 	loginWithCachedAccessToken(accessToken: string): void {
 		this._accessToken = accessToken;
 	}
 
-	private _finishRequest(error: string | undefined,
-		jsonBody: any,
-		callback: (error: string | undefined, success: boolean) => void,
-		dataCallback: (data: any) => boolean): void {
-		if (!error) {
-			if (jsonBody && dataCallback(jsonBody)) {
-				callback(undefined, true);
-			} else {
-				callback("unknown error", false);
-			}
-		} else {
-			callback(error, false);
-		}
-	}
-
-	executeGetRequest(resourceUrl: string,
-		callback: (error: string | undefined, success: boolean) => void,
-		dataCallback: (data: any) => boolean): void {
+	executeGetRequest(resourceUrl: string): Promise<any> {
 		if (this._accessToken === undefined) {
-			return callback("Not logged in!", false);
+			return Promise.reject("Not logged in!");
 		}
 
-		this._net.get(CONFIG.URL_SERVER + resourceUrl, {
+		return this._net.get(CONFIG.URL_SERVER + resourceUrl, {
 			client_api: CONFIG.CLIENT_API_VERSION,
 			access_token: this._accessToken
-		}, (error: string | undefined, jsonBody: any) => this._finishRequest(error, jsonBody, callback, dataCallback));
-	}
-
-	executePostRequest(resourceUrl: string, qs: any,
-		dataCallback: (data: any) => boolean,
-		callback: (error: string | undefined, success: boolean) => void): void {
-		if (this._accessToken === undefined) {
-			return callback("Not logged in!", false);
-		}
-
-		this._net.post(CONFIG.URL_SERVER + resourceUrl, Object.assign({ client_api: CONFIG.CLIENT_API_VERSION }, qs),
-			(error: string | undefined, jsonBody: any) => this._finishRequest(error, jsonBody, callback, dataCallback), this._accessToken);
-	}
-
-	loadServerConfig(callback: (error: string | undefined, success: boolean) => void): void {
-		return this.executeGetRequest("config", callback, (data: any): boolean => {
-			this._serverConfig = data;
-			return true;
 		});
 	}
 
-	loadCrewArchetypes(callback: (error: string | undefined, success: boolean) => void): void {
-		return this.executeGetRequest("character/get_avatar_crew_archetypes", callback, (data: any): boolean => {
+	executePostRequest(resourceUrl: string, qs: any): Promise<any> {
+		if (this._accessToken === undefined) {
+			return Promise.reject("Not logged in!");
+		}
+
+		return this._net.post(CONFIG.URL_SERVER + resourceUrl,
+			Object.assign({ client_api: CONFIG.CLIENT_API_VERSION }, qs),
+			this._accessToken
+		);
+	}
+
+	loadServerConfig(): Promise<any> {
+		return this.executeGetRequest("config").then((data: any) => {
+			this._serverConfig = data;
+			console.info("Loaded server config");
+			return Promise.resolve();
+		});
+	}
+
+	loadCrewArchetypes(): Promise<any> {
+		return this.executeGetRequest("character/get_avatar_crew_archetypes").then((data: any) => {
 			if (data.crew_avatars) {
 				this._crewAvatars = data.crew_avatars;
-				return true;
+				console.info("Loaded " + data.crew_avatars.length +" crew avatars");
+				return Promise.resolve();
 			} else {
-				return false;
+				return Promise.reject("Invalid data for crew avatars!");
 			}
 		});
 	}
 
-	loadPlatformConfig(callback: (error: string | undefined, success: boolean) => void): void {
-		return this.executeGetRequest("config/platform", callback, (data: any): boolean => {
+	loadPlatformConfig(): Promise<any> {
+		return this.executeGetRequest("config/platform").then((data: any) => {
 			this._platformConfig = data;
-			return true;
+			console.info("Loaded platform config");
+			return Promise.resolve();
 		});
 	}
 
-	loadPlayerData(callback: (error: string | undefined, success: boolean) => void): void {
-		return this.executeGetRequest("player", callback, (data: any): boolean => {
+	loadPlayerData(): Promise<any> {
+		return this.executeGetRequest("player").then((data: any) => {
 			if (data.player) {
 				this._playerData = data;
-				return true;
+				console.info("Loaded player data");
+				return Promise.resolve();
 			} else {
-				return false;
+				return Promise.reject("Invalid data for player!");
 			}
 		});
 	}
 
-	loadFrozenCrew(symbol: string,
-		dataCallback: (crew: any) => void,
-		callback?: (error: string | undefined, success: boolean) => void): void {
+	loadShipSchematics(): Promise<any> {
+		return this.executeGetRequest("ship_schematic").then((data: any) => {
+			if (data.schematics) {
+				this._shipSchematics = data.schematics;
+				console.info("Loaded " + data.schematics.length + " ship schematics");
+				return Promise.resolve();
+			} else {
+				return Promise.reject("Invalid data for ship schematics!");
+			}
+		});
+	}
 
-		if (callback === undefined) {
-			callback = (error: string | undefined, success: boolean): void => { if (!success) { console.error(error); } };
-		}
+	loadFrozenCrew(symbol: string): Promise<any> {
+		return this.executePostRequest("stasis_vault/immortal_restore_info", { symbol: symbol }).then((data: any) => {
+			if (data.crew) {
+				console.info("Loaded frozen crew stats for " + symbol);
+				return Promise.resolve(data.crew);
+			} else {
+				return Promise.reject("Invalid data for frozen crew!");
+			}
+		});
+	}
 
-		return this.executePostRequest("stasis_vault/immortal_restore_info", { symbol: symbol },
-			(data: any): boolean => {
-				if (data.crew) {
-					dataCallback(data.crew);
-					return true;
-				} else {
-					return false;
-				}
-			}, callback);
+	loadFleetMemberInfo(guildId: string): Promise<any> {
+		return this.executePostRequest("fleet/complete_member_info", { guild_id: guildId }).then((data: any) => {
+			if (data) {
+				this._fleetMemberInfo = data;
+				console.info("Loaded fleet member info");
+				return Promise.resolve();
+			} else {
+				return Promise.reject("Invalid data for fleet member info!");
+			}
+		});
+	}
+
+	loadFleetData(guildId: string): Promise<any> {
+		return this.executeGetRequest("fleet/" + guildId).then((data: any) => {
+			if (data.fleet) {
+				this._fleetData = data.fleet;
+				console.info("Loaded fleet data");
+				return Promise.resolve();
+			} else {
+				return Promise.reject("Invalid data for fleet!");
+			}
+		});
+	}
+
+	loadStarbaseData(guildId: string): Promise<any> {
+		return this.executeGetRequest("starbase/get").then((data: any) => {
+			if (data) {
+				this._starbaseData = data;
+				console.info("Loaded starbase data");
+				return Promise.resolve();
+			} else {
+				return Promise.reject("Invalid data for starbase!");
+			}
+		});
 	}
 }
 

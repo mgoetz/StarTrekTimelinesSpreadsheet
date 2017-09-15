@@ -6,8 +6,7 @@ import * as request from "request";
 import { NetworkInterface } from "./NetworkInterface";
 
 export class NetworkRequest implements NetworkInterface {
-	post(uri: string, form: any, callback: (error: string | undefined, body: any) => void, bearerToken?: string): void {
-
+	post(uri: string, form: any, bearerToken?: string): Promise<any> {
 		let headers: any = {
 			"Content-type": "application/x-www-form-urlencoded; charset=UTF-8"
 		};
@@ -22,15 +21,31 @@ export class NetworkRequest implements NetworkInterface {
 			headers: headers
 		};
 
-		request.post(uri, options, (error: string, _response: any, body: string): void => callback(error, body));
+		return new Promise((resolve, reject) => {
+			request.post(uri, options, (error: string, _response: any, body: string) => {
+				if (error) {
+					reject(error);
+				} else {
+					resolve(JSON.parse(body));
+				}
+			});
+		});
 	}
 
-	get(uri: string, qs: any, callback: (error: string | undefined, body: any) => void): void {
+	get(uri: string, qs: any): Promise<any> {
 		const options: request.CoreOptions = {
 			method: "GET",
 			qs: qs
 		};
 
-		request.get(uri, options, (error: string, _response: any, body: string): void => callback(error, body));
+		return new Promise((resolve, reject) => {
+			request.get(uri, options, (error: string, _response: any, body: string) => {
+				if (error) {
+					reject(error);
+				} else {
+					resolve(JSON.parse(body));
+				}
+			});
+		});
 	}
 }

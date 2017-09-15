@@ -84,17 +84,13 @@ export class LoginDialog extends React.Component {
 	_closeDialog() {
 		this.setState({ showSpinner: true, errorMessage: null });
 
-		STTApi.login(this.state.username, this.state.password, function (error, success) {
-			this.setState({ showSpinner: false });
-
-			if (!success) {
-				this.setState({ hideDialog: false, errorMessage: error });
-			}
-			else
-			{
-				this.setState({ hideDialog: true });
+		STTApi.login(this.state.username, this.state.password)
+			.then(() => {
+				this.setState({ showSpinner: false, hideDialog: true });
 				this.props.onAccessToken(this.state.autoLogin);
-			}
-		}.bind(this));
+			})
+			.catch((error) => {
+				this.setState({ showSpinner: false, hideDialog: false, errorMessage: error });
+			});
 	}
 }
