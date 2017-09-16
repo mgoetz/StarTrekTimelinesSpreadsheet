@@ -146,7 +146,7 @@ export class CrewRecommendations extends React.Component {
 			recommendations: []
 		};
 
-		loadMissionData(props.dbCache, props.cadetMissions.accepted_missions.concat(props.missions.accepted_missions), props.missions.dispute_histories, function (result) {
+		loadMissionData(props.cadetMissions.accepted_missions.concat(props.missions.accepted_missions), props.missions.dispute_histories, function (result) {
 			if (result.errorMsg || (result.statusCode && (result.statusCode != 200))) {
 
 			}

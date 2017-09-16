@@ -22,7 +22,7 @@ export class ItemDetails extends React.Component {
 		this.loadRecipeTree = this.loadRecipeTree.bind(this);
 
 		this.state = {
-			recipeTree: this.loadRecipeTree(this.props.equipment, 1)
+			equipment: null
 		};
 	}
 
@@ -41,17 +41,27 @@ export class ItemDetails extends React.Component {
 		return result;
 	}
 
+	changeEquipment(equipment) {
+		this.setState({
+			equipment: equipment,
+			recipeTree: this.loadRecipeTree(equipment, 1)
+		});
+	}
+
 	render() {
-		return (<div>
-			<span className='quest-mastery'><span style={{ paddingTop: '12px' }}>{this.props.equipment.name}</span><Rating min={1} max={5} rating={this.props.equipment.rarity} /></span>
-			<p>Sources: {this.props.equipment.item_sources && this.props.equipment.item_sources.length}</p>
-			<p>Recipe: {this.props.equipment.recipe && this.props.equipment.recipe.length}</p>
-			<div>
-				{this.state .recipeTree.map(function (item) {
-					return <span key={item.equipment.archetype_id}>{item.equipment.name} x {item.count}</span>;
-				}.bind(this))}
-			</div>
-		</div>);
+		if (this.state.equipment) {
+			return (<div>
+				<span className='quest-mastery'><span style={{ paddingTop: '12px' }}>{this.state.equipment.name}</span><Rating min={1} max={this.state.equipment.rarity} rating={this.state.equipment.rarity} /></span>
+				<p>Sources: {this.state.equipment.item_sources && this.state.equipment.item_sources.length}</p>
+
+				{this.state.equipment.recipe &&
+					<p>Recipe (incomplete): {this.state.recipeTree.map(function (item) { return item.count + 'x ' + item.equipment.name; }).join(', ')}
+				</p>}
+			</div>);
+		}
+		else {
+			return <span />;
+		}
 	}
 }
 
@@ -64,6 +74,7 @@ export class CrewEquipment extends React.Component {
 		};
 
 		this.findEquipment = this.findEquipment.bind(this);
+		this._changeSelection = this._changeSelection.bind(this);
 	}
 
 	findEquipment(archetype) {
@@ -71,6 +82,11 @@ export class CrewEquipment extends React.Component {
 
 		// If not already in the cache, we can load equipment details with 
 		//https://stt.disruptorbeam.com/item/description?ids[]=2242&ids[]=2248&client_api=8&access_token=
+	}
+
+	_changeSelection(index) {
+		this.setState({ selectedSlot: index });
+		this.refs.itemDetails.changeEquipment(this.findEquipment(this.props.crew.equipment_slots[index].archetype));
 	}
 
 	render() {
@@ -83,13 +99,13 @@ export class CrewEquipment extends React.Component {
 							<Image src={this.props.crew.iconBodyUrl} height={200} imageFit={ImageFit.contain} />
 						</td>
 						<td style={{ width: '52px' }}>
-							<EquipmentSlot iconUrl={this.findEquipment(this.props.crew.equipment_slots[0].archetype).iconUrl} have={this.props.crew.equipment_slots[0].have} selected={this.state.selectedSlot == 0} onClick={(e) => this.setState({ selectedSlot: 0 })} />
-							<EquipmentSlot iconUrl={this.findEquipment(this.props.crew.equipment_slots[1].archetype).iconUrl} have={this.props.crew.equipment_slots[1].have} selected={this.state.selectedSlot == 1} onClick={(e) => this.setState({ selectedSlot: 1 })} />
-							<EquipmentSlot iconUrl={this.findEquipment(this.props.crew.equipment_slots[2].archetype).iconUrl} have={this.props.crew.equipment_slots[2].have} selected={this.state.selectedSlot == 2} onClick={(e) => this.setState({ selectedSlot: 2 })} />
-							<EquipmentSlot iconUrl={this.findEquipment(this.props.crew.equipment_slots[3].archetype).iconUrl} have={this.props.crew.equipment_slots[3].have} selected={this.state.selectedSlot == 3} onClick={(e) => this.setState({ selectedSlot: 3 })} />
+							<EquipmentSlot iconUrl={this.findEquipment(this.props.crew.equipment_slots[0].archetype).iconUrl} have={this.props.crew.equipment_slots[0].have} selected={this.state.selectedSlot == 0} onClick={(e) => this._changeSelection(0)} />
+							<EquipmentSlot iconUrl={this.findEquipment(this.props.crew.equipment_slots[1].archetype).iconUrl} have={this.props.crew.equipment_slots[1].have} selected={this.state.selectedSlot == 1} onClick={(e) => this._changeSelection(1)} />
+							<EquipmentSlot iconUrl={this.findEquipment(this.props.crew.equipment_slots[2].archetype).iconUrl} have={this.props.crew.equipment_slots[2].have} selected={this.state.selectedSlot == 2} onClick={(e) => this._changeSelection(2)} />
+							<EquipmentSlot iconUrl={this.findEquipment(this.props.crew.equipment_slots[3].archetype).iconUrl} have={this.props.crew.equipment_slots[3].have} selected={this.state.selectedSlot == 3} onClick={(e) => this._changeSelection(3)} />
 						</td>
 						<td style={{ verticalAlign: 'top' }}>
-							<ItemDetails equipment={this.findEquipment(this.props.crew.equipment_slots[this.state.selectedSlot].archetype)} findEquipment={this.findEquipment} />
+							<ItemDetails ref='itemDetails' findEquipment={this.findEquipment} />
 						</td>
 					</tr>
 				</tbody>
@@ -115,7 +131,7 @@ export class EquipmentDetails extends React.Component {
 	render() {
 		return (<div className='tab-panel' data-is-scrollable='true'>
 			{this.state.filteredCrew.map(function (crew) {
-				return <CrewEquipment key={crew.id} allequipment={this.props.allequipment} crew={crew} />;
+				return <CrewEquipment key={crew.crew_id} allequipment={this.props.allequipment} crew={crew} />;
 			}.bind(this))}
 		</div>);
 	}

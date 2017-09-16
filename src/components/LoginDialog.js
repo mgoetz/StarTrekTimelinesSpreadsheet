@@ -104,7 +104,6 @@ export class LoginDialog extends React.Component {
 		});
 
 		ipcRenderer.on('fb_access_token', function (event, data) {
-			console.log(JSON.stringify(data));
 			this.setState({
 				waitingForFacebook: false,
 				facebookStatus: 'Authenticated with Facebook as ' + data.name + '. Press Login to connect to STT!',

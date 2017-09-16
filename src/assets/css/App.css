@@ -45,6 +45,7 @@
     margin: auto;
     padding: 5px;
     float: left;
+    text-align: center;
     box-shadow: 0 3px 5px rgba(0, 0, 0, 0.1);
 }
 
@@ -164,6 +165,48 @@
 
 .starbase-room-name {
     padding-top: 12px;
+}
+
+.gauntlet-match-crew-slot {
+    width: 140px;
+}
+
+.gauntlet-arrow {
+    width: 170px;
+    display: block;
+    background: #0078d7;
+    text-decoration: none;
+    position: relative;
+    height: 80px;
+    padding: 0 10px 0 5px;
+    text-align: center;
+    font-family: LCARS, "Helvetica Neue", Helvetica, Arial, sans-serif;
+    font-size: 28px;
+}
+
+.image-disabled {
+    opacity: 0.3;
+}
+
+.gauntlet-arrow:before, .gauntlet-arrow:after {
+    content: "";
+    position: absolute;
+    top: 0;
+    border: 0 solid #0078d7;
+    border-width: 40px 20px;
+    width: 0;
+    height: 0;
+}
+
+.gauntlet-arrow:before {
+    left: -20px;
+    border-left-color: transparent;
+}
+
+.gauntlet-arrow:after {
+    left: 100%;
+    border-color: transparent;
+    border-left-color: #0078d7;
 }
 
 .lcars {

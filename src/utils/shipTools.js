@@ -1,6 +1,3 @@
-const request = require('electron').remote.require('request');
-const CONFIG = require('./config.js');
-
 import STTApi from '../api/STTApi.ts';
 
 export function matchShips(ships, callback) {

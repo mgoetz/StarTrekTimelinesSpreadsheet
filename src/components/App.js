@@ -31,7 +31,6 @@ import { CaptainCard } from './CaptainCard.js';
 
 import STTApi from '../api/STTApi.ts';
 
-const loki = require('lokijs');
 const path = require('path');
 const electron = require('electron');
 const app = electron.app || electron.remote.app;
@@ -60,7 +59,6 @@ class App extends React.Component {
 			spinnerLabel: 'Loading...'
 		};
 
-		this.dbCache = null;
 		this._captainButtonElement = null;
 
 		this._onAccessToken = this._onAccessToken.bind(this);
@@ -143,13 +141,13 @@ class App extends React.Component {
 							<ShipList data={this.state.shipList} />
 						</PivotItem>
 						<PivotItem linkText='Missions' itemIcon='Ribbon'>
-							<MissionHelper params={this.state.missionHelperParams} dbCache={this.dbCache} />
+							<MissionHelper params={this.state.missionHelperParams} />
 						</PivotItem>
 						<PivotItem linkText='Cadet' itemIcon='Trophy'>
-							<MissionHelper params={this.state.cadetMissionHelperParams} dbCache={this.dbCache} />
+							<MissionHelper params={this.state.cadetMissionHelperParams} />
 						</PivotItem>
 						<PivotItem linkText='Recommendations' itemIcon='Lightbulb'>
-							<CrewRecommendations crew={this.state.crewList} cadetMissions={this.state.cadetMissionHelperParams} missions={this.state.missionHelperParams} dbCache={this.dbCache} />
+							<CrewRecommendations crew={this.state.crewList} cadetMissions={this.state.cadetMissionHelperParams} missions={this.state.missionHelperParams} />
 						</PivotItem>
 						<PivotItem linkText='Gauntlet' itemIcon='DeveloperTools'>
 							<GauntletHelper crew={this.state.crewList} />
@@ -265,15 +263,9 @@ class App extends React.Component {
 	}
 
 	_onShare(options) {
-		shareCrew(this.dbCache, this.state.crewList, options, this.state.missionHelperParams, this.state.cadetMissionHelperParams, function (url) {
+		shareCrew(this.state.crewList, options, this.state.missionHelperParams, this.state.cadetMissionHelperParams, function (url) {
 			shell.openItem(url);
 		});
-	}
-
-	componentWillUnmount() {
-		if (this.dbCache) {
-			this.dbCache.close();
-		}
 	}
 
 	_onAccessToken(autoLogin) {
@@ -281,10 +273,6 @@ class App extends React.Component {
 		CONFIG.UserConfig.setValue('accessToken', STTApi.accessToken);
 
 		this.setState({ showSpinner: true });
-
-		// TODO: instead of loki use IndexedDB or a wrapper like http://dexie.org/
-
-		this.dbCache = new loki(path.join(app.getPath('userData'), 'storage', 'cache.json'), { autosave: true, autoload: true });
 
 		var mainResources = [
 			{
@@ -413,7 +401,7 @@ class App extends React.Component {
 			}).catch((error) => {});
 		}.bind(this));
 
-		matchCrew(this.dbCache, STTApi.playerData.character, function (roster) {
+		matchCrew(STTApi.playerData.character, function (roster) {
 			roster.forEach(function (crew) {
 				crew.iconUrl = '';
 				crew.iconBodyUrl = '';
@@ -429,7 +417,7 @@ class App extends React.Component {
 					});
 
 					this.forceUpdate();
-				}).catch((error) => { console.warn(error); });
+				}).catch((error) => { /*console.warn(error);*/ });
 				getWikiImageUrl(crew.name.split(' ').join('_') + '.png', crew.id).then(({id, url}) => {
 					this.state.crewList.forEach(function (crew) {
 						if (crew.id === id)
@@ -437,7 +425,7 @@ class App extends React.Component {
 					});
 
 					this.forceUpdate();
-				}).catch((error) => { console.warn(error); });
+				}).catch((error) => { /*console.warn(error);*/ });
 			});
 		}.bind(this));
 

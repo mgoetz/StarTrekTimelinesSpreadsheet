@@ -179,7 +179,7 @@ export class MissionHelper extends React.Component {
 		this._selection = new Selection;
 
 		//TODO: Load on-demand
-		loadMissionData(props.dbCache, props.params.accepted_missions, props.params.dispute_histories, function (result) {
+		loadMissionData(props.params.accepted_missions, props.params.dispute_histories, function (result) {
 			if (result.errorMsg || (result.statusCode && (result.statusCode != 200)))
 			{
 
@@ -269,7 +269,6 @@ export class MissionHelper extends React.Component {
 	}
 
 	_onRenderCell(nestingDepth, challenge, itemIndex) {
-		//console.log(JSON.stringify(challenge));
 		return (
 			<div data-selection-index={itemIndex} data-is-focusable={true}>
 				<FocusZone direction={FocusZoneDirection.horizontal}>

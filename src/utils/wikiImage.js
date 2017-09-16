@@ -5,7 +5,7 @@ const CONFIG = require('./config.js');
 export function getWikiImageUrl(fileName, id) {
 	return STTApi.wikiImages.where('fileName').equals(fileName).first((entry) => {
 		if (entry) {
-			console.info('Found ' + fileName + ' in the cache with url ' + entry.url);
+			//console.info('Found ' + fileName + ' in the cache with url ' + entry.url);
 			return Promise.resolve({id: id, url: entry.url});
 		} else {
 			return STTApi.networkHelper.get('https://stt.wiki/w/api.php', {
@@ -30,7 +30,7 @@ export function getWikiImageUrl(fileName, id) {
 					return Promise.reject('The Wiki doesn\'t have an image yet for ' + fileName);
 				}
 			}).then((found) => {
-				console.info('Caching ' + fileName + ' with url ' + found.url);
+				//console.info('Caching ' + fileName + ' with url ' + found.url);
 
 				return STTApi.wikiImages.put({
 					fileName: fileName,

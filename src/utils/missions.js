@@ -3,87 +3,59 @@ const CONFIG = require('./config.js');
 
 import STTApi from '../api/STTApi.ts';
 
-function queue(name) {
-	queue.q[name]++ || (queue.q[name] = 1);
-	return function (err) {
-		if (err && queue.e[name]) queue.e[name](err);
-		else if (err) throw err;
-		process.nextTick(function () {
-			queue.q[name]--;
-			queue.check(name);
-		});
-	}
-}
-queue.__proto__ = {
-	q: {},
-	c: {},
-	e: {},
-	check: function (name) { queue.q[name] == 0 && queue.c[name](); },
-	done: function (name, fn) { queue.c[name] = fn; },
-	err: function (name, fn) { queue.e[name] = fn; }
-}
-
-function loadQuestData(completed, questCache, quest, callback) {
+function loadQuestData(completed, quest) {
 	if (completed)
 	{
-		var result = questCache.findOne({ id: quest.id });
-		if (result) {
-			quest.description = result.description;
-			quest.challenges = result.challenges;
-			quest.mastery_levels = result.mastery_levels;
+		return STTApi.quests.where('id').equals(quest.id).first((entry) => {
+			if (entry) {
+				//console.info('Found ' + quest.id + ' in the quest cache');
+				quest.description = entry.description;
+				quest.challenges = entry.challenges;
+				quest.mastery_levels = entry.mastery_levels;
 
-			// For cadet challenges
-			quest.cadet = result.cadet;
-			quest.crew_requirement = result.crew_requirement;
+				// For cadet challenges
+				quest.cadet = entry.cadet;
+				quest.crew_requirement = entry.crew_requirement;
 
-			callback();
-			return;
-		}
-	}
-
-	const reqOptions = {
-		method: 'GET',
-		uri: 'https://stt.disruptorbeam.com/quest/conflict_info',
-		qs: {
-			client_api: CONFIG.client_api_version,
-			access_token: STTApi.accessToken,
-			id: quest.id
-		}
-	};
-
-	request(reqOptions, function (error, response, body) {
-		if (!error && response.statusCode == 200) {
-			var newQuest = JSON.parse(body);
-			
-			quest.description = newQuest.description;
-			quest.challenges = newQuest.challenges;
-			quest.mastery_levels = newQuest.mastery_levels;
-
-			// For cadet challenges
-			quest.cadet = newQuest.cadet;
-			quest.crew_requirement = newQuest.crew_requirement;
-
-			if (completed) {
-				questCache.insert({
-					id: quest.id,
-					description: quest.description,
-					challenges: quest.challenges,
-					mastery_levels: quest.mastery_levels,
-					cadet: quest.cadet,
-					crew_requirement: quest.crew_requirement
-				});
+				return Promise.resolve();
+			} else {
+				return loadConflictInfo(quest);
 			}
-		}
-		else
-		{
-			//TODO: Report error
-		}
+		});
+	}
+	else {
+		return loadConflictInfo(quest);
+	}
+}
 
-		callback();
+function loadConflictInfo(quest) {
+	return STTApi.executeGetRequest("quest/conflict_info", { id: quest.id }).then((data) => {
+		if (data.mastery_levels) {
+			quest.description = data.description;
+			quest.challenges = data.challenges;
+			quest.mastery_levels = data.mastery_levels;
+
+			// For cadet challenges
+			quest.cadet = data.cadet;
+			quest.crew_requirement = data.crew_requirement;
+
+			return STTApi.quests.put({
+				id: quest.id,
+				description: quest.description,
+				challenges: quest.challenges,
+				mastery_levels: quest.mastery_levels,
+				cadet: quest.cadet,
+				crew_requirement: quest.crew_requirement
+			}).then((a) => {
+				return Promise.resolve();
+			});
+		} else {
+			return Promise.reject("Invalid data for quest conflict!");
+		}
 	});
 }
 
-export function loadMissionData(dbCache, accepted_missions, dispute_histories, callback) {
+export function loadMissionData(accepted_missions, dispute_histories, callback) {
 	var mission_ids = accepted_missions.map(function (mission) { return mission.id; });
 
 	// Add all the episodes' missions (if not cadet)
@@ -91,13 +63,6 @@ export function loadMissionData(dbCache, accepted_missions, dispute_histories, c
 		dispute_histories.forEach(function (dispute) {
 			mission_ids = mission_ids.concat(dispute.mission_ids);
 		});
-	}
-
-	// Use the cache wherever possible
-	// TODO: does DB ever change the stats of crew? If yes, we may need to ocasionally clear the cache - perhaps based on record's age
-	var questCache = dbCache.getCollection('quests');
-	if (!questCache) {
-		questCache = dbCache.addCollection('quests');
 	}
 
 	const reqOptions = {
@@ -115,6 +80,8 @@ export function loadMissionData(dbCache, accepted_missions, dispute_histories, c
 		if (!error && response.statusCode == 200) {
 			var missions = [];
 
+			let questPromises = [];
+
 			JSON.parse(body).character.accepted_missions.forEach(function (mission) {
 				if (mission.episode_title != null) {
 					var missionData = {
@@ -130,7 +97,7 @@ export function loadMissionData(dbCache, accepted_missions, dispute_histories, c
 						if ((!quest.locked) && quest.name) {
 							if (quest.quest_type == 'ConflictQuest')
 							{
-								loadQuestData(mission.stars_earned == mission.total_stars, questCache, quest, queue('quests'));
+								questPromises.push(loadQuestData(mission.stars_earned == mission.total_stars, quest));
 							}
 							else
 							{
@@ -154,7 +121,7 @@ export function loadMissionData(dbCache, accepted_missions, dispute_histories, c
 								mission.quests.forEach(function (quest) {
 									if ((!quest.locked) && quest.name && !dispute.quests.find(function (q) { return q.id == quest.id; })) {
 										if (quest.quest_type == 'ConflictQuest') {
-											loadQuestData(dispute.stars_earned == dispute.total_stars, questCache, quest, queue('quests'));
+											questPromises.push(loadQuestData(dispute.stars_earned == dispute.total_stars, quest));
 										}
 										else {
 											quest.description = 'Ship battle';
@@ -169,7 +136,7 @@ export function loadMissionData(dbCache, accepted_missions, dispute_histories, c
 				}
 			});
 
-			queue.done('quests', function () {
+			Promise.all(questPromises).then(() => {
 				if (dispute_histories) {
 					// Pretend the episodes (disputes) are missions too, to get them to show up
 					dispute_histories.forEach(function (dispute) {

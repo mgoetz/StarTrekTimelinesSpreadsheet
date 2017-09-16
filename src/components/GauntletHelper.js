@@ -24,7 +24,7 @@ class GauntletCrew extends React.Component {
 					</td>
 				</tr>
 				<tr>
-					<td>
+					<td className={this.props.crew.disabled ? 'image-disabled' : ''}>
 						<Image src={this.props.crew.iconUrl} height={200} style={{ display: 'inline-block' }} />
 					</td>
 				</tr>
@@ -68,22 +68,22 @@ class GauntletMatch extends React.Component {
 		return (<table className='table-GauntletMatch'>
 			<tbody>
 				<tr>
-					<td>
-						<center><span>Your <b>{STTApi.getCrewAvatarBySymbol(this.props.match.crewOdd.archetype_symbol).name}</b></span></center>
-						<Image src={this.props.match.crewOdd.iconUrl} height={128} />
-					</td>
-					<td style={{ verticalAlign: 'top' }}>
-						<span>has a {this.props.match.chance}% chance of beating</span>
+					<td className='gauntlet-match-crew-slot'>
+						<b>{STTApi.getCrewAvatarBySymbol(this.props.match.crewOdd.archetype_symbol).name}</b><br />
+						<Image src={this.props.match.crewOdd.iconUrl} height={128} style={{ display: 'inline-block' }} /><br />
+						Yours
 					</td>
 					<td>
-						<center><span>{this.props.match.opponent.name}'s <b>{STTApi.getCrewAvatarBySymbol(this.props.match.opponent.archetype_symbol).name}</b></span></center>
-						<Image src={this.props.match.opponent.iconUrl} height={128} />
-					</td>
-					<td style={{ verticalAlign: 'top' }}>
-						<span>for {this.props.match.opponent.value} points</span>
-					</td>
-					<td>
+						<div className='gauntlet-arrow'>
+							<span><b>{this.props.match.chance}%</b> chance</span><br />
+							<span><b>{this.props.match.opponent.value}</b> points</span>
+						</div>
 						<DefaultButton onClick={this._playMatch} text='Play this match!' iconProps={{ iconName: 'LightningBolt' }} />
+					</td>
+					<td className='gauntlet-match-crew-slot'>
+						<b>{STTApi.getCrewAvatarBySymbol(this.props.match.opponent.archetype_symbol).name}</b><br />
+						<Image src={this.props.match.opponent.iconUrl} height={128} style={{ display: 'inline-block' }}  />
+						{this.props.match.opponent.name}
 					</td>
 				</tr>
 			</tbody>
@@ -96,7 +96,8 @@ export class GauntletHelper extends React.Component {
 		super(props);
 
 		this.state = {
-			gauntlet: null
+			gauntlet: null,
+			lastResult: null
 		};
 
 		this._reloadGauntletData = this._reloadGauntletData.bind(this);
@@ -122,6 +123,7 @@ export class GauntletHelper extends React.Component {
 
 				this.setState({
 					gauntlet: data.gauntlet,
+					lastResult: null,
 					startsIn: Math.floor(data.gauntlet.seconds_to_join / 60),
 					featuredSkill: data.gauntlet.contest_data.featured_skill,
 					traits: data.gauntlet.contest_data.traits.map(function (trait) { return STTApi.getTraitName(trait); }.bind(this)),
@@ -144,7 +146,7 @@ export class GauntletHelper extends React.Component {
 								this.forceUpdate();
 							}
 						});
-					}).catch((error) => { console.warn(error); });
+					}).catch((error) => { /*console.warn(error);*/ });
 				});
 
 				result.matches.forEach((match) => {
@@ -155,7 +157,7 @@ export class GauntletHelper extends React.Component {
 								this.forceUpdate();
 							}
 						});
-					}).catch((error) => { console.warn(error); });
+					}).catch((error) => { /*console.warn(error);*/ });
 
 					getWikiImageUrl(STTApi.getCrewAvatarBySymbol(match.opponent.archetype_symbol).name.split(' ').join('_') + '.png', match.opponent.crew_id).then(({id, url}) => {
 						this.state.roundOdds.matches.forEach((match) => {
@@ -164,7 +166,7 @@ export class GauntletHelper extends React.Component {
 								this.forceUpdate();
 							}
 						});
-					}).catch((error) => { console.warn(error); });
+					}).catch((error) => { /*console.warn(error);*/ });
 				});
 			}
 			else {
@@ -175,10 +177,11 @@ export class GauntletHelper extends React.Component {
 		}
 		else if (data.lastResult) {
 			{
-				let playerRollTotal = data.lastResult.player_rolls.reduce(function(sum, value) { return sum + value; }, 0);
-				let opponentRollTotal = data.lastResult.opponent_rolls.reduce(function(sum, value) { return sum + value; }, 0);
+				this.setState({
+					lastResult: data.lastResult
+				});
 
-				alert('You ' + playerRollTotal + ' vs them ' + opponentRollTotal + '. Result: ' + ((data.lastResult.win == true) ? 'win' : 'lose'));
+				//alert('You ' + playerRollTotal + ' vs them ' + opponentRollTotal + '. Result: ' + ((data.lastResult.win == true) ? 'win' : 'lose'));
 				//"player_rolls":[137, 143, 147, 0, 1, 1], "opponent_rolls":[1, 0, 0, 218, 274, 206],
 				//"player_crit_rolls":[false, false, false, false, false, false],
 				//"opponent_crit_rolls":[false, false, false, false, false, false],
@@ -211,7 +214,27 @@ export class GauntletHelper extends React.Component {
 						})}
 					</div>
 					<h3>Gauntlet player - BETA</h3>
-					<DefaultButton onClick={this._payForNewOpponents} text='Pay merits for new opponents' iconProps={{ iconName: 'Money' }} />
+
+					{this.state.lastResult &&
+						(<table>
+							<tbody>
+								<tr>
+									<td style={{ rowSpan: 2 }}>
+										<b> {(this.state.lastResult.win == true) ? 'WIN' : 'LOSE'} </b>
+									</td>
+									<td>You got {this.state.lastResult.player_rolls.reduce(function (sum, value) { return sum + value; }, 0)}</td>
+								</tr>
+								<tr>
+									<td>They got {this.state.lastResult.opponent_rolls.reduce(function (sum, value) { return sum + value; }, 0)}</td>
+								</tr>
+							</tbody>
+						</table>)
+					}
+
+					{(this.state.roundOdds.matches.length > 0) &&
+						<DefaultButton onClick={this._payForNewOpponents} text='Pay merits for new opponents' iconProps={{ iconName: 'Money' }} />
+					}
+					<br />
 					{this.state.roundOdds.matches.map(function (match) {
 						return <GauntletMatch key={match.crewOdd.archetype_symbol + match.opponent.player_id} match={match} gauntletId={this.state.gauntlet.id} onNewData={this._gauntletDataRecieved} />;
 					}.bind(this))}

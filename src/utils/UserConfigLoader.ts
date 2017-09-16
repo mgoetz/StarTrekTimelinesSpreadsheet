@@ -1,8 +1,6 @@
 import * as storage from "electron-json-storage-sync";
 
-// https://caolan.github.io/async/docs.html#parallel
-// http://fredkschott.com/post/2014/03/understanding-error-first-callbacks-in-node-js/
-
+// TODO: switch this over to Dexie too
 export class UserConfigLoader {
 	userConfig: any;
 

@@ -26,6 +26,7 @@ function rosterFromCrew(rosterEntry, crew) {
 	rosterEntry.level = crew.level;
 	rosterEntry.rarity = crew.rarity;
 	rosterEntry.buyback = crew.in_buy_back_state;
+	rosterEntry.crew_id = crew.id;
 
 	for (var skill in crew.skills) {
 		rosterEntry[skill].core = crew.skills[skill].core;
@@ -49,7 +50,7 @@ function rosterFromCrew(rosterEntry, crew) {
 	rosterEntry.rawTraits = crew.traits.concat(crew.traits_hidden);
 }
 
-export function matchCrew(dbCache, character, callback) {
+export function matchCrew(character, callback) {
 	function getDefaults(id) {
 		var crew = STTApi.getCrewAvatarById(id);
 		return {
@@ -99,7 +100,7 @@ export function matchCrew(dbCache, character, callback) {
 function loadFrozen(rosterEntry, callback) {
 	return STTApi.immortals.where('symbol').equals(rosterEntry.symbol).first((entry) => {
 		if (entry) {
-			console.info('Found ' + rosterEntry.symbol + ' in the immortalized crew cache');
+			//console.info('Found ' + rosterEntry.symbol + ' in the immortalized crew cache');
 			rosterFromCrew(rosterEntry, entry.crew);
 			return Promise.resolve();
 		} else {

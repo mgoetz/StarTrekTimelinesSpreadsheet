@@ -216,7 +216,7 @@ class STTApi {
 	loadFrozenCrew(symbol: string): Promise<any> {
 		return this.executePostRequest("stasis_vault/immortal_restore_info", { symbol: symbol }).then((data: any) => {
 			if (data.crew) {
-				console.info("Loaded frozen crew stats for " + symbol);
+				//console.info("Loaded frozen crew stats for " + symbol);
 				return Promise.resolve(data.crew);
 			} else {
 				return Promise.reject("Invalid data for frozen crew!");

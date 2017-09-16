@@ -3,7 +3,7 @@ const CONFIG = require('./config.js');
 
 import STTApi from '../api/STTApi.ts';
 
-export function loadGauntlet(callback) {
+export function loadGauntlet() {
 	return STTApi.executeGetRequest("gauntlet/status", {gauntlet_id: -1}).then((data) => {
 		if (data.character) {
 			return Promise.resolve(data.character.gauntlets[0]);
