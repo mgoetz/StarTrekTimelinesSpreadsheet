@@ -1,51 +1,44 @@
-const request = require('electron').remote.require('request');
+import STTApi from '../api/STTApi.ts';
 
 const CONFIG = require('./config.js');
 
-export function getWikiImageUrl(imageURLs, fileName, id, callback, errCallback) {
-	var result = imageURLs.findOne({ fileName: fileName });
-	if (result) {
-		callback(id, result.url);
-		return;
-	}
-
-	//TODO: why are there so many we can't find?
-	//console.info('Didn\'t find ' + fileName + ' in cache');
-
-	const reqOptions = {
-		method: 'GET',
-		uri: 'https://stt.wiki/w/api.php',
-		qs: {
-			action: 'query',
-			titles: 'File:' + fileName,
-			prop: 'imageinfo',
-			iiprop: 'url|metadata',
-			format: 'json'
-		}
-	};
-
-	request(reqOptions, function (error, response, body) {
-		if (!error && response.statusCode == 200) {
-			var url = '';
-
-			try {
-				var imageInfo = JSON.parse(body).query.pages;
-				if ((Object.keys(imageInfo).length > 0) && imageInfo[Object.keys(imageInfo)[0]].imageinfo) {
-					url = imageInfo[Object.keys(imageInfo)[0]].imageinfo[0].url;
-				}
-
-				imageURLs.insert({
-					fileName: fileName,
-					url: url
+export function getWikiImageUrl(fileName, id) {
+	return STTApi.wikiImages.where('fileName').equals(fileName).first((entry) => {
+		if (entry) {
+			console.info('Found ' + fileName + ' in the cache with url ' + entry.url);
+			return Promise.resolve({id: id, url: entry.url});
+		} else {
+			return STTApi.networkHelper.get('https://stt.wiki/w/api.php', {
+				action: 'query',
+				titles: 'File:' + fileName + "|File:" + fileName.replace('png','PNG') + "|File:" + fileName.replace('.png','_Full.png' )+ "|File:" + fileName.replace('_','-'),
+				prop: 'imageinfo',
+				iiprop: 'url|metadata',
+				format: 'json'
+			}).then((data) => {
+				var foundUrl = null;
+				Object.values(data.query.pages).forEach((page) => {
+					if (page.imageinfo) {
+						page.imageinfo.forEach((imgInfo) => {
+							foundUrl = imgInfo.url;
+						});
+					}
 				});
+		
+				if (foundUrl) {
+					return Promise.resolve({id: id, url: foundUrl});
+				} else {
+					return Promise.reject('The Wiki doesn\'t have an image yet for ' + fileName);
+				}
+			}).then((found) => {
+				console.info('Caching ' + fileName + ' with url ' + found.url);
 
-				callback(id, url);
-			}
-			catch (e) {
-				console.error(e);
-				if (errCallback)
-					errCallback(e);
-			}
+				return STTApi.wikiImages.put({
+					fileName: fileName,
+					url: found.url
+				}).then((a) => {
+					return Promise.resolve(found);
+				});
+			});
 		}
 	});
 }

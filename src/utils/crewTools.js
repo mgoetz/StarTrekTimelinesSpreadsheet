@@ -75,10 +75,7 @@ export function matchCrew(dbCache, character, callback) {
 	if (character.stored_immortals && character.stored_immortals.length > 0) {
 		// Use the cache wherever possible
 		// TODO: does DB ever change the stats of crew? If yes, we may need to ocasionally clear the cache - perhaps based on record's age
-		var immortals = dbCache.getCollection('immortals');
-		if (!immortals) {
-			immortals = dbCache.addCollection('immortals');
-		}
+		let frozenPromises = [];
 
 		character.stored_immortals.forEach(function (crew) {
 			rosterEntry = getDefaults(crew.id);
@@ -87,11 +84,11 @@ export function matchCrew(dbCache, character, callback) {
 			rosterEntry.rarity = rosterEntry.max_rarity;
 			roster.push(rosterEntry);
 
-			loadFrozen(immortals, rosterEntry, queue('frozen'));
+			frozenPromises.push(loadFrozen(rosterEntry));
 		});
 
-		queue.done('frozen', function () {
-			callback(roster);
+		Promise.all(frozenPromises).then( () => {
+			callback(roster);	
 		});
 	}
 	else {
@@ -99,30 +96,23 @@ export function matchCrew(dbCache, character, callback) {
 	}
 }
 
-export function getCrewIconFromCache(imageURLs, name) {
-	var result = imageURLs.findOne({ fileName: name.split(' ').join('_') + '_Head.png' });
-	if (result) {
-		return result.url;
-	}
+function loadFrozen(rosterEntry, callback) {
+	return STTApi.immortals.where('symbol').equals(rosterEntry.symbol).first((entry) => {
+		if (entry) {
+			console.info('Found ' + rosterEntry.symbol + ' in the immortalized crew cache');
+			rosterFromCrew(rosterEntry, entry.crew);
+			return Promise.resolve();
+		} else {
+			return STTApi.loadFrozenCrew(rosterEntry.symbol).then((crew) => {
+				rosterFromCrew(rosterEntry, crew);
 
-	return '';
-}
-
-function loadFrozen(immortals, rosterEntry, callback) {
-	var result = immortals.findOne({ symbol: rosterEntry.symbol });
-	if (result) {
-		rosterFromCrew(rosterEntry, result.crew);
-		callback();
-	}
-	else {
-		STTApi.loadFrozenCrew(rosterEntry.symbol).then(function (crew) {
-			rosterFromCrew(rosterEntry, crew);
-			
-			immortals.insert({
-				symbol: rosterEntry.symbol,
-				crew: crew
+				return STTApi.immortals.put({
+					symbol: rosterEntry.symbol,
+					crew: crew
+				}).then((a) => {
+					return Promise.resolve();
+				});
 			});
-			callback();
-		});
-	}
+		}
+	});
 }

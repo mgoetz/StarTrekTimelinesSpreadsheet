@@ -3,16 +3,55 @@ import { Label } from 'office-ui-fabric-react/lib/Label';
 import { Image, ImageFit } from 'office-ui-fabric-react/lib/Image';
 import { MessageBar, MessageBarType } from 'office-ui-fabric-react/lib/MessageBar';
 import { DefaultButton, IButtonProps } from 'office-ui-fabric-react/lib/Button';
+import { Icon } from 'office-ui-fabric-react/lib/Icon';
+
 import { CrewList } from './CrewList.js';
 
 import { loadGauntlet, gauntletCrewSelection, gauntletRoundOdds, payToGetNewOpponents, playContest } from '../utils/gauntlet.js';
-import { getCrewIconFromCache } from '../utils/crewTools.js';
+import { getWikiImageUrl } from '../utils/wikiImage.js';
 
 import STTApi from '../api/STTApi.ts';
 
 const CONFIG = require('../utils/config.js');
 
-export class GauntletMatch extends React.Component {
+class GauntletCrew extends React.Component {
+	render() {
+		return (<table className='table-GauntletCrew'>
+			<tbody>
+				<tr>
+					<td>
+						<b>{STTApi.getCrewAvatarBySymbol(this.props.crew.archetype_symbol).name}</b>
+					</td>
+				</tr>
+				<tr>
+					<td>
+						<Image src={this.props.crew.iconUrl} height={200} style={{ display: 'inline-block' }} />
+					</td>
+				</tr>
+				<tr>
+					<td>
+					{this.props.crew.disabled ?
+						(<span>Disabled <Icon iconName='Dislike' /> ({this.props.crew.debuff/4} battles)</span>) :
+						(<span>Active <Icon iconName='Like' /> ({this.props.crew.debuff/4} battles)</span>)
+					}
+					</td>
+				</tr>
+				<tr>
+					<td>
+						{this.props.crew.skills.map(function (skill) {
+							return <span className='gauntletCrew-statline' key={skill.skill}>
+								<Image src={CONFIG.skillRes[skill.skill].url} height={18} /> {CONFIG.skillRes[skill.skill].name} ({skill.min} - {skill.max})
+							</span>;
+						})}
+						<span className='gauntletCrew-statline'>Crit chance {this.props.crew.crit_chance}%</span>
+					</td>
+				</tr>
+			</tbody>
+		</table>);
+	}
+}
+
+class GauntletMatch extends React.Component {
 	constructor(props) {
 		super(props);
 
@@ -26,22 +65,19 @@ export class GauntletMatch extends React.Component {
 	}
 
 	render() {
-		var yourCrew = STTApi.getCrewAvatarBySymbol(this.props.match.crewOdd.archetype_symbol);
-		var theirCrew = STTApi.getCrewAvatarBySymbol(this.props.match.opponent.archetype_symbol);
-
 		return (<table className='table-GauntletMatch'>
 			<tbody>
 				<tr>
 					<td>
-						<center><span>Your <b>{yourCrew.name}</b></span></center>
-						<Image src={getCrewIconFromCache(this.props.imageURLs, yourCrew.name)} height={128} />
+						<center><span>Your <b>{STTApi.getCrewAvatarBySymbol(this.props.match.crewOdd.archetype_symbol).name}</b></span></center>
+						<Image src={this.props.match.crewOdd.iconUrl} height={128} />
 					</td>
 					<td style={{ verticalAlign: 'top' }}>
 						<span>has a {this.props.match.chance}% chance of beating</span>
 					</td>
 					<td>
-						<center><span>{this.props.match.opponent.name}'s <b>{theirCrew.name}</b></span></center>
-						<Image src={getCrewIconFromCache(this.props.imageURLs, theirCrew.name)} height={128} />
+						<center><span>{this.props.match.opponent.name}'s <b>{STTApi.getCrewAvatarBySymbol(this.props.match.opponent.archetype_symbol).name}</b></span></center>
+						<Image src={this.props.match.opponent.iconUrl} height={128} />
 					</td>
 					<td style={{ verticalAlign: 'top' }}>
 						<span>for {this.props.match.opponent.value} points</span>
@@ -70,9 +106,7 @@ export class GauntletHelper extends React.Component {
 	}
 
 	_reloadGauntletData() {
-		loadGauntlet(function (data) {
-			this._gauntletDataRecieved(data);
-		}.bind(this));
+		loadGauntlet().then((data) => this._gauntletDataRecieved({ gauntlet: data }));
 	}
 
 	_payForNewOpponents() {
@@ -97,10 +131,40 @@ export class GauntletHelper extends React.Component {
 			}
 			else if (data.gauntlet.state == 'STARTED') {
 				var result = gauntletRoundOdds(data.gauntlet);
-
 				this.setState({
 					gauntlet: data.gauntlet,
 					roundOdds: result
+				});
+
+				data.gauntlet.contest_data.selected_crew.forEach((crew) => {
+					getWikiImageUrl(STTApi.getCrewAvatarBySymbol(crew.archetype_symbol).name.split(' ').join('_') + '.png', crew.crew_id).then(({id, url}) => {
+						this.state.gauntlet.contest_data.selected_crew.forEach((crew) => {
+							if (crew.crew_id === id) {
+								crew.iconUrl = url;
+								this.forceUpdate();
+							}
+						});
+					}).catch((error) => { console.warn(error); });
+				});
+
+				result.matches.forEach((match) => {
+					getWikiImageUrl(STTApi.getCrewAvatarBySymbol(match.crewOdd.archetype_symbol).name.split(' ').join('_') + '.png', match.crewOdd.crew_id).then(({id, url}) => {
+						this.state.roundOdds.matches.forEach((match) => {
+							if (match.crewOdd.crew_id === id) {
+								match.crewOdd.iconUrl = url;
+								this.forceUpdate();
+							}
+						});
+					}).catch((error) => { console.warn(error); });
+
+					getWikiImageUrl(STTApi.getCrewAvatarBySymbol(match.opponent.archetype_symbol).name.split(' ').join('_') + '.png', match.opponent.crew_id).then(({id, url}) => {
+						this.state.roundOdds.matches.forEach((match) => {
+							if (match.opponent.crew_id === id) {
+								match.opponent.iconUrl = url;
+								this.forceUpdate();
+							}
+						});
+					}).catch((error) => { console.warn(error); });
 				});
 			}
 			else {
@@ -137,12 +201,19 @@ export class GauntletHelper extends React.Component {
 		else if (this.state.gauntlet && ((this.state.gauntlet.state == 'STARTED') && this.state.roundOdds)) {
 			return (
 				<div className='tab-panel' data-is-scrollable='true'>
-					<h2>Next gauntlet round</h2>
-					<DefaultButton onClick={this._reloadGauntletData} text='Reload data' iconProps={{ iconName: 'Refresh' }} />
+					<h3>Current gauntlet stats</h3>
+					<Label>Crew refeshes in {Math.floor(this.state.gauntlet.seconds_to_next_crew_refresh / 60)} minutes and the gauntlet ends in {Math.floor(this.state.gauntlet.seconds_to_end / 60)} minutes</Label>
+					<Label>Your rank is {this.state.roundOdds.rank} and you have {this.state.roundOdds.consecutive_wins} consecutive wins</Label>
+					<span><h3>Your crew stats <DefaultButton onClick={this._reloadGauntletData} text='Reload data' iconProps={{ iconName: 'Refresh' }} /></h3></span>
+					<div style={{display: 'flex'}} >
+						{this.state.gauntlet.contest_data.selected_crew.map(function (crew) {
+							return <GauntletCrew key={crew.crew_id} crew={crew} />;
+						})}
+					</div>
+					<h3>Gauntlet player - BETA</h3>
 					<DefaultButton onClick={this._payForNewOpponents} text='Pay merits for new opponents' iconProps={{ iconName: 'Money' }} />
-					<Label>Your rank is {this.state.roundOdds.rank} and you have {this.state.roundOdds.consecutive_wins} consecutive wins.</Label>
 					{this.state.roundOdds.matches.map(function (match) {
-						return <GauntletMatch key={match.crewOdd.archetype_symbol + match.opponent.player_id} match={match} gauntletId={this.state.gauntlet.id} imageURLs={this.props.imageURLs} onNewData={this._gauntletDataRecieved} />;
+						return <GauntletMatch key={match.crewOdd.archetype_symbol + match.opponent.player_id} match={match} gauntletId={this.state.gauntlet.id} onNewData={this._gauntletDataRecieved} />;
 					}.bind(this))}
 				</div>
 			);

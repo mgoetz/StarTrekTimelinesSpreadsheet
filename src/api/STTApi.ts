@@ -1,5 +1,7 @@
 import { NetworkInterface } from "./NetworkInterface";
 import { NetworkFetch } from "./NetworkFetch.ts";
+import { DexieCache, QuestsTable, ImmortalsTable, WikiImageTable } from "./Cache.ts";
+import Dexie from "dexie";
 import CONFIG from "./CONFIG.ts";
 
 class STTApi {
@@ -13,6 +15,7 @@ class STTApi {
 	private _starbaseData: any;
 	private _fleetData: any;
 	private _fleetMemberInfo: any;
+	private _cache: DexieCache;
 
 	constructor() {
 		this._accessToken = undefined;
@@ -26,6 +29,25 @@ class STTApi {
 		this._fleetMemberInfo = null;
 
 		this._net = new NetworkFetch();
+
+		// TODO: Dexie uses IndexedDB, so doesn't work in plain node.js without polyfill - should the caching be an interface?
+		this._cache = new DexieCache("sttcache");
+	}
+
+	get networkHelper(): NetworkInterface {
+		return this._net;
+	}
+
+	get quests(): Dexie.Table<QuestsTable, number> {
+		return this._cache.quests;
+    }
+    
+    get immortals(): Dexie.Table<ImmortalsTable, string> {
+		return this._cache.immortals;
+    }
+    
+    get wikiImages(): Dexie.Table<WikiImageTable, string> {
+		return this._cache.wikiImages;
 	}
 
 	get accessToken(): string | undefined {
@@ -119,15 +141,13 @@ class STTApi {
 		});
 	}
 
-	executeGetRequest(resourceUrl: string): Promise<any> {
+	executeGetRequest(resourceUrl: string, qs: any = {}): Promise<any> {
 		if (this._accessToken === undefined) {
 			return Promise.reject("Not logged in!");
 		}
 
-		return this._net.get(CONFIG.URL_SERVER + resourceUrl, {
-			client_api: CONFIG.CLIENT_API_VERSION,
-			access_token: this._accessToken
-		});
+		return this._net.get(CONFIG.URL_SERVER + resourceUrl,
+			Object.assign({ client_api: CONFIG.CLIENT_API_VERSION, access_token: this._accessToken}, qs));
 	}
 
 	executePostRequest(resourceUrl: string, qs: any): Promise<any> {

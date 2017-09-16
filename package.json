@@ -44,6 +44,7 @@
   },
   "dependencies": {
     "@types/request": "^2.0.3",
+    "dexie": "^1.5.1",
     "electron-json-storage-sync": "latest",
     "exceljs": "latest",
     "fb": "^2.0.0",

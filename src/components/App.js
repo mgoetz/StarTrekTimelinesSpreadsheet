@@ -61,7 +61,6 @@ class App extends React.Component {
 		};
 
 		this.dbCache = null;
-		this.imageURLs = null;
 		this._captainButtonElement = null;
 
 		this._onAccessToken = this._onAccessToken.bind(this);
@@ -135,13 +134,13 @@ class App extends React.Component {
 							<CrewList data={this.state.crewList} grouped={false} ref='crewList' />
 						</PivotItem>
 						<PivotItem linkText='Items' itemIcon='Boards'>
-							<ItemList data={this.state.itemList} imageURLs={this.imageURLs} />
+							<ItemList data={this.state.itemList} />
 						</PivotItem>
 						<PivotItem linkText='Equipment' itemIcon='CheckList'>
 							<EquipmentDetails crewList={this.state.crewList} allequipment={this.state.allequipment} />
 						</PivotItem>
 						<PivotItem linkText='Ships' itemIcon='Airplane'>
-							<ShipList data={this.state.shipList} imageURLs={this.imageURLs} />
+							<ShipList data={this.state.shipList} />
 						</PivotItem>
 						<PivotItem linkText='Missions' itemIcon='Ribbon'>
 							<MissionHelper params={this.state.missionHelperParams} dbCache={this.dbCache} />
@@ -153,10 +152,10 @@ class App extends React.Component {
 							<CrewRecommendations crew={this.state.crewList} cadetMissions={this.state.cadetMissionHelperParams} missions={this.state.missionHelperParams} dbCache={this.dbCache} />
 						</PivotItem>
 						<PivotItem linkText='Gauntlet' itemIcon='DeveloperTools'>
-							<GauntletHelper crew={this.state.crewList} imageURLs={this.imageURLs} />
+							<GauntletHelper crew={this.state.crewList} />
 						</PivotItem>
 						<PivotItem linkText='Fleet' itemIcon='WindDirection'>
-							<FleetDetails imageURLs={this.imageURLs} />
+							<FleetDetails />
 						</PivotItem>
 						<PivotItem linkText='About' itemIcon='Help'>
 							<AboutAndHelp />
@@ -286,10 +285,6 @@ class App extends React.Component {
 		// TODO: instead of loki use IndexedDB or a wrapper like http://dexie.org/
 
 		this.dbCache = new loki(path.join(app.getPath('userData'), 'storage', 'cache.json'), { autosave: true, autoload: true });
-		this.imageURLs = this.dbCache.getCollection('imageURLs');
-		if (!this.imageURLs) {
-			this.imageURLs = this.dbCache.addCollection('imageURLs');
-		}
 
 		var mainResources = [
 			{
@@ -376,13 +371,13 @@ class App extends React.Component {
 		});
 
 		if (STTApi.playerData.character.crew_avatar) {
-			getWikiImageUrl(this.imageURLs, STTApi.playerData.character.crew_avatar.name.split(' ').join('_') + '_Head.png', 0, function (id, url) {
+			getWikiImageUrl(STTApi.playerData.character.crew_avatar.name.split(' ').join('_') + '_Head.png', 0).then(({id, url}) => {
 				this.setState({ captainAvatarUrl: url });
-			}.bind(this));
+			}).catch((error) => {});
 
-			getWikiImageUrl(this.imageURLs, STTApi.playerData.character.crew_avatar.name.split(' ').join('_') + '.png', 0, function (id, url) {
+			getWikiImageUrl(STTApi.playerData.character.crew_avatar.name.split(' ').join('_') + '.png', 0).then(({id, url}) => {
 				this.setState({ captainAvatarBodyUrl: url });
-			}.bind(this));
+			}).catch((error) => {});
 		}
 
 		// all the equipment available in the game, along with sources and recipes
@@ -410,12 +405,12 @@ class App extends React.Component {
 			fileName = fileName.split(' ').join('');
 			fileName = fileName.split('\'').join('');
 
-			getWikiImageUrl(this.imageURLs, fileName, equipment.id, function (id, url) {
+			getWikiImageUrl(fileName, equipment.id).then(({id, url}) => {
 				this.state.allequipment.forEach(function (item) {
 					if ((item.id === id) && url)
 						item.iconUrl = url;
 				});
-			}.bind(this));
+			}).catch((error) => {});
 		}.bind(this));
 
 		matchCrew(this.dbCache, STTApi.playerData.character, function (roster) {
@@ -426,24 +421,24 @@ class App extends React.Component {
 
 			this.setState({ dataLoaded: true, crewList: roster });
 
-			roster.forEach(function (crew) {
-				getWikiImageUrl(this.imageURLs, crew.name.split(' ').join('_') + '_Head.png', crew.id, function (id, url) {
+			roster.forEach((crew) => {
+				getWikiImageUrl(crew.name.split(' ').join('_') + '_Head.png', crew.id).then(({id, url}) => {
 					this.state.crewList.forEach(function (crew) {
 						if (crew.id === id)
 							crew.iconUrl = url;
 					});
 
 					this.forceUpdate();
-				}.bind(this));
-				getWikiImageUrl(this.imageURLs, crew.name.split(' ').join('_') + '.png', crew.id, function (id, url) {
+				}).catch((error) => { console.warn(error); });
+				getWikiImageUrl(crew.name.split(' ').join('_') + '.png', crew.id).then(({id, url}) => {
 					this.state.crewList.forEach(function (crew) {
 						if (crew.id === id)
 							crew.iconBodyUrl = url;
 					});
 
 					this.forceUpdate();
-				}.bind(this));
-			}.bind(this));
+				}).catch((error) => { console.warn(error); });
+			});
 		}.bind(this));
 
 		matchShips(STTApi.playerData.character.ships, function (ships) {

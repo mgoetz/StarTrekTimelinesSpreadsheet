@@ -4,17 +4,11 @@ const CONFIG = require('./config.js');
 import STTApi from '../api/STTApi.ts';
 
 export function loadGauntlet(callback) {
-	const options = { method: 'GET', qs: { client_api: CONFIG.client_api_version, access_token: STTApi.accessToken, gauntlet_id: -1 } };
-
-	options.uri = 'https://stt.disruptorbeam.com/gauntlet/status';
-	request(options, function (error, response, body) {
-		if (!error && response.statusCode == 200) {
-			var gauntlet = JSON.parse(body);
-			var currentGauntlet = gauntlet.character.gauntlets[0];
-			callback({ gauntlet: currentGauntlet });
-		}
-		else {
-			callback({ errorMsg: error, statusCode: response.statusCode });
+	return STTApi.executeGetRequest("gauntlet/status", {gauntlet_id: -1}).then((data) => {
+		if (data.character) {
+			return Promise.resolve(data.character.gauntlets[0]);
+		} else {
+			return Promise.reject("Invalid data for gauntlet!");
 		}
 	});
 }
@@ -91,6 +85,8 @@ export function gauntletRoundOdds(currentGauntlet) {
 	};
 
 	currentGauntlet.contest_data.selected_crew.forEach(function(crew) {
+		crew.iconUrl = '';
+
 		if (!crew.disabled) {
 			var crewOdd = {
 				archetype_symbol: crew.archetype_symbol,
@@ -98,7 +94,8 @@ export function gauntletRoundOdds(currentGauntlet) {
 				crit_chance: crew.crit_chance,
 				used: crew.debuff / 4,
 				max: [],
-				min: []
+				min: [],
+				iconUrl: ''
 			};
 
 			crew.skills.forEach(function(skillStats) {
@@ -121,6 +118,7 @@ export function gauntletRoundOdds(currentGauntlet) {
 			crew_id: opponent.crew_contest_data.crew[0].crew_id,
 			archetype_symbol: opponent.crew_contest_data.crew[0].archetype_symbol,
 			crit_chance: opponent.crew_contest_data.crew[0].crit_chance,
+			iconUrl: '',
 			max: [],
 			min: []
 		};

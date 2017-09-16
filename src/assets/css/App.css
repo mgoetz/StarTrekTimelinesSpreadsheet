@@ -48,6 +48,22 @@
     box-shadow: 0 3px 5px rgba(0, 0, 0, 0.1);
 }
 
+.table-GauntletCrew {
+    border-radius: 3px;
+    border-collapse: collapse;
+    margin: auto;
+    float: left;
+    width: 18%;
+    max-width: 200px;
+    padding: 5px;
+    text-align: center;
+    box-shadow: 0 3px 5px rgba(0, 0, 0, 0.1);
+}
+
+.gauntletCrew-statline {
+    display: inline-flex;
+}
+
 .data-grid {
     -webkit-overflow-scrolling: touch;
     max-height: calc(100vh - 170px);

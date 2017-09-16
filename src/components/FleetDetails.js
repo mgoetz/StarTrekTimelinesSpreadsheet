@@ -182,9 +182,9 @@ export class FleetDetails extends React.Component {
 
 			this._mounted = false;
 
-			this.state.members.forEach(function (member) {
+			this.state.members.forEach((member) => {
 				if (member.avatar) {
-					getWikiImageUrl(this.props.imageURLs, member.avatar.split(' ').join('_') + '_Head.png', member.dbid, function (id, url) {
+					getWikiImageUrl(member.avatar.split(' ').join('_') + '_Head.png', member.dbid).then(({id, url}) => {
 						this.state.members.forEach(function (member) {
 							if (member.dbid === id)
 								member.iconUrl = url;
@@ -193,9 +193,9 @@ export class FleetDetails extends React.Component {
 						// Sometimes we get the callback before the component is even mounted, so no need to force update
 						if (this._mounted)
 							this.forceUpdate();
-					}.bind(this));
+					}).catch((error) => { });
 				}
-			}.bind(this));
+			});
 
 			/*loginPubNub(function (pubnub) {
 				//

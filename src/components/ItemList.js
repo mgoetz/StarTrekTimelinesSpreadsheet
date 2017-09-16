@@ -106,12 +106,12 @@ export class ItemList extends React.Component {
 
 		this._mounted = false;
 
-		items.forEach(function (item) {
+		items.forEach((item) => {
 			var fileName = item.name + CONFIG.rarityRes[item.rarity].name + '.png';
 			fileName = fileName.split(' ').join('');
 			fileName = fileName.split('\'').join('');
 
-			getWikiImageUrl(this.props.imageURLs, fileName, item.id, function (id, url) {
+			getWikiImageUrl(fileName, item.id).then(({id, url}) => {
 				this.state.items.forEach(function (item) {
 					if (item.id === id)
 						item.iconUrl = url;
@@ -120,8 +120,8 @@ export class ItemList extends React.Component {
 				// Sometimes we get the callback before the component is even mounted, so no need to force update
 				if (this._mounted)
 					this.forceUpdate();
-			}.bind(this));
-		}.bind(this));
+			}).catch((error) => {});
+		});
 	}
 
 	componentDidMount() {

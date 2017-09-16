@@ -7,23 +7,10 @@ import STTApi from '../api/STTApi.ts';
 
 const CONFIG = require('./config.js');
 
-function pastebinPost(data, exportType, callback) {
-	const reqOptions = {
-		method: 'POST',
-		uri: 'https://ptpb.pw/',
-		formData: {
-			'c': data
-		}
-	};
-
-	request(reqOptions, function (error, response, body) {
-		if (!error && response.statusCode == 200) {
-			var match = /url: (.*)/g.exec(body);
-			callback(match[1] + '.' + exportType);
-		}
-		else {
-			// TODO: notify user
-		}
+function pastebinPost(data, exportType) {
+	return STTApi.networkHelper.post('https://ptpb.pw/', { 'c': data }, undefined, false).then((data) => {
+		var match = /url: (.*)/g.exec(data);
+		return Promise.resolve(match[1] + '.' + exportType);
 	});
 }
 
@@ -160,6 +147,6 @@ function shareCrewInternal(roster, options, missionList, callback) {
 		});
 	}
 	else {
-		pastebinPost(data, options.exportType, callback);
+		pastebinPost(data, options.exportType).then((data) => callback(data));
 	}
 }
