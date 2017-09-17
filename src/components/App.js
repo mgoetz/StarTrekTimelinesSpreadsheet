@@ -1,4 +1,4 @@
-/*
+﻿/*
     StarTrekTimelinesSpreadsheet - A tool to help with crew management in Star Trek Timelines
     Copyright (C) 2017 IAmPicard
 
@@ -25,6 +25,7 @@ import { Spinner, SpinnerSize } from 'office-ui-fabric-react/lib/Spinner';
 import { Pivot, PivotItem, PivotLinkFormat, PivotLinkSize } from 'office-ui-fabric-react/lib/Pivot';
 import { Image, ImageFit } from 'office-ui-fabric-react/lib/Image';
 import { Callout } from 'office-ui-fabric-react/lib/Callout';
+import { IconButton, IButtonProps } from 'office-ui-fabric-react/lib/Button';
 
 import { getWikiImageUrl } from '../utils/wikiImage.js';
 import { exportExcel } from '../utils/excelExporter.js';
@@ -32,6 +33,8 @@ import { exportCsv } from '../utils/csvExporter.js';
 import { shareCrew } from '../utils/pastebin.js';
 import { matchCrew } from '../utils/crewTools.js';
 import { matchShips } from '../utils/shipTools.js';
+
+var compareSemver = require('compare-semver');
 
 import { LoginDialog } from './LoginDialog.js';
 import { ShipList } from './ShipList.js';
@@ -45,6 +48,7 @@ import { FleetDetails } from './FleetDetails.js';
 import { ShareDialog } from './ShareDialog.js';
 import { EquipmentDetails } from './EquipmentDetails.js';
 import { CaptainCard } from './CaptainCard.js';
+import { FeedbackPanel } from './FeedbackPanel.js';
 
 import STTApi from '../api/STTApi.ts';
 
@@ -77,6 +81,7 @@ class App extends React.Component {
 		};
 
 		this._captainButtonElement = null;
+		this._feedbackButton = null;
 
 		this._onAccessToken = this._onAccessToken.bind(this);
 		this._getCommandItems = this._getCommandItems.bind(this);
@@ -85,6 +90,7 @@ class App extends React.Component {
 		this._onCaptainCalloutDismiss = this._onCaptainCalloutDismiss.bind(this);
 		this._onDataFinished = this._onDataFinished.bind(this);
 		this._onDataError = this._onDataError.bind(this);
+		this._tick = this._tick.bind(this);
 
 		if (CONFIG.UserConfig.getValue('autoLogin') == true) {
 			this.state.showSpinner = true;
@@ -106,6 +112,34 @@ class App extends React.Component {
 		this.setState({
 			isCaptainCalloutVisible: false
 		});
+	}
+
+	componentDidMount() {
+		this.interval = setInterval(this._tick, 4000);
+	}
+
+	componentWillUnmount() {
+		clearInterval(this.interval);
+	}
+
+	_tick() {
+		if (this.state.dataLoaded) {
+			var distance = 6;
+			var keyframes = [
+				{ transform: 'translate3d(0, 0, 0)', offset: 0 },
+				{ transform: 'translate3d(-' + distance + 'px, 0, 0)', offset: 0.1 },
+				{ transform: 'translate3d(' + distance + 'px, 0, 0)', offset: 0.2 },
+				{ transform: 'translate3d(-' + distance + 'px, 0, 0)', offset: 0.3 },
+				{ transform: 'translate3d(' + distance + 'px, 0, 0)', offset: 0.4 },
+				{ transform: 'translate3d(-' + distance + 'px, 0, 0)', offset: 0.5 },
+				{ transform: 'translate3d(' + distance + 'px, 0, 0)', offset: 0.6 },
+				{ transform: 'translate3d(-' + distance + 'px, 0, 0)', offset: 0.7 },
+				{ transform: 'translate3d(' + distance + 'px, 0, 0)', offset: 0.8 },
+				{ transform: 'translate3d(-' + distance + 'px, 0, 0)', offset: 0.9 },
+				{ transform: 'translate3d(0, 0, 0)', offset: 1 }];
+			var timing = { duration: 900, iterations: 1 };
+			this._feedbackButton.animate(keyframes, timing);
+		}
 	}
 
 	render() {
@@ -131,12 +165,18 @@ class App extends React.Component {
 							</Callout>
 						)}
 					</div>
-					<div className='lcars-box' />
+					<div className='lcars-ellipse' />
 					<div className='lcars-content-text'>
 						{this.state.secondLine}
 					</div>
+					<div className='lcars-box' />
+					<div className='lcars-content' ref={(feedbackButton) => this._feedbackButton = feedbackButton}>
+						<IconButton iconProps={{ iconName: 'Emoji2' }} title='Feedback' onClick={() => this.refs.feedbackPanel.show() } />
+					</div>
 					<div className='lcars-corner-right' />
 				</div>
+
+				<FeedbackPanel ref='feedbackPanel' />
 
 				{this.state.showSpinner && (
 					<Spinner size={SpinnerSize.large} label={this.state.spinnerLabel} /> 
@@ -372,6 +412,14 @@ class App extends React.Component {
 			},
 			cadetMissionHelperParams: {
 				accepted_missions: STTApi.playerData.character.cadet_schedule.missions
+			}
+		});
+
+		STTApi.getGithubReleases().then((data) => {
+			let versions = data.map((release) => release.tag_name.replace('v', ''));
+
+			if (compareSemver.max(versions) != app.getVersion()) {
+				var n = new Notification('STT Tool - Update available!', { body: 'A new release of the Star Trek Tool (' + data[0].tag_name + ' ' + data[0].name + ') has been made available. Please check the About tab for download instructions!' });
 			}
 		});
 

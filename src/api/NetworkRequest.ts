@@ -32,6 +32,10 @@ export class NetworkRequest implements NetworkInterface {
 		});
 	}
 
+	postjson(uri: string, form: any): Promise<any> {
+		return Promise.reject("Not yet implemented!");
+	}
+
 	get(uri: string, qs: any): Promise<any> {
 		const options: request.CoreOptions = {
 			method: "GET",

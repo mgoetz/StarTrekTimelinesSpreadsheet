@@ -276,6 +276,14 @@ class STTApi {
 			}
 		});
 	}
+
+	submitUserFeedback(feedback: any): Promise<any> {
+		return this._net.postjson(CONFIG.URL_USERFEEDBACK, feedback);
+	}
+
+	getGithubReleases(): Promise<any> {
+		return this._net.get(CONFIG.URL_GITHUBRELEASES, {})
+	}
 }
 
 export default (new STTApi());
