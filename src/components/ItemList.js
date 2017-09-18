@@ -104,28 +104,22 @@ export class ItemList extends React.Component {
 
 		this._onColumnClick = this._onColumnClick.bind(this);
 
-		this._mounted = false;
-
+		let iconPromises = [];
 		items.forEach((item) => {
 			var fileName = item.name + CONFIG.rarityRes[item.rarity].name + '.png';
 			fileName = fileName.split(' ').join('');
 			fileName = fileName.split('\'').join('');
 
-			getWikiImageUrl(fileName, item.id).then(({id, url}) => {
+			iconPromises.push(getWikiImageUrl(fileName, item.id).then(({id, url}) => {
 				this.state.items.forEach(function (item) {
 					if (item.id === id)
 						item.iconUrl = url;
 				});
 
-				// Sometimes we get the callback before the component is even mounted, so no need to force update
-				if (this._mounted)
-					this.forceUpdate();
-			}).catch((error) => {});
+				return Promise.resolve();
+			}).catch((error) => {}));
 		});
-	}
-
-	componentDidMount() {
-		this._mounted = true;
+		Promise.all(iconPromises).then(() => this.forceUpdate());
 	}
 
 	render() {

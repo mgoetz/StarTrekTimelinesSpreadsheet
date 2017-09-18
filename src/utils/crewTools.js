@@ -50,7 +50,7 @@ function rosterFromCrew(rosterEntry, crew) {
 	rosterEntry.rawTraits = crew.traits.concat(crew.traits_hidden);
 }
 
-export function matchCrew(character, callback) {
+export function matchCrew(character) {
 	function getDefaults(id) {
 		var crew = STTApi.getCrewAvatarById(id);
 		return {
@@ -88,16 +88,16 @@ export function matchCrew(character, callback) {
 			frozenPromises.push(loadFrozen(rosterEntry));
 		});
 
-		Promise.all(frozenPromises).then( () => {
-			callback(roster);	
+		return Promise.all(frozenPromises).then(() => {
+			return Promise.resolve(roster);
 		});
 	}
 	else {
-		callback(roster);
+		return Promise.resolve(roster);
 	}
 }
 
-function loadFrozen(rosterEntry, callback) {
+function loadFrozen(rosterEntry) {
 	return STTApi.immortals.where('symbol').equals(rosterEntry.symbol).first((entry) => {
 		if (entry) {
 			//console.info('Found ' + rosterEntry.symbol + ' in the immortalized crew cache');

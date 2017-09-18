@@ -1,6 +1,6 @@
 const Excel = require('electron').remote.require('exceljs');
 
-export function exportExcel(roster, itemList, shipList, fileName, callback) {
+export function exportExcel(roster, itemList, shipList, fileName) {
 	var workbook = new Excel.Workbook();
 	var worksheet = workbook.addWorksheet('Crew stats');
 
@@ -132,8 +132,5 @@ export function exportExcel(roster, itemList, shipList, fileName, callback) {
 		});
 	});
 
-	workbook.xlsx.writeFile(fileName)
-		.then(function () {
-			callback(fileName);
-		});
+	return workbook.xlsx.writeFile(fileName).then(() => Promise.resolve(fileName));
 }

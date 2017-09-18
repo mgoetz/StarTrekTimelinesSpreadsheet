@@ -127,28 +127,22 @@ export class ShipList extends React.Component {
 			]
 		};
 
-		this._mounted = false;
-
+		let iconPromises = [];
 		this.state.items.forEach((ship) => {
 			var fileName = ship.name.split(' ').join('_').split('.').join('') + '.png';
-			getWikiImageUrl(fileName, ship.name).then(({id, url}) => {
+			iconPromises.push(getWikiImageUrl(fileName, ship.name).then(({id, url}) => {
 				this.state.items.forEach(function (item) {
 					if (item.name === id) {
 						item.iconUrl = url;
 					}
 				});
 
-				// Sometimes we get the callback before the component is even mounted, so no need to force update
-				if (this._mounted)
-					this.forceUpdate();
-			}).catch((error) => {});
+				return Promise.resolve();
+			}).catch((error) => {}));
 		});
+		Promise.all(iconPromises).then(() => this.forceUpdate());
 
 		this._onColumnClick = this._onColumnClick.bind(this);
-	}
-
-	componentDidMount() {
-		this._mounted = true;
 	}
 
 	render() {

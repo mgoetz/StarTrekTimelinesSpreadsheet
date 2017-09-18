@@ -59,9 +59,8 @@ class GauntletMatch extends React.Component {
 	}
 
 	_playMatch() {
-		playContest(this.props.gauntletId, this.props.match.crewOdd.crew_id, this.props.match.opponent.player_id, this.props.match.opponent.crew_id, function (data) {
-			this.props.onNewData(data);
-		}.bind(this));
+		playContest(this.props.gauntletId, this.props.match.crewOdd.crew_id, this.props.match.opponent.player_id, this.props.match.opponent.crew_id).
+			then((data) => this.props.onNewData(data));
 	}
 
 	render() {
@@ -97,7 +96,8 @@ export class GauntletHelper extends React.Component {
 
 		this.state = {
 			gauntlet: null,
-			lastResult: null
+			lastResult: null,
+			merits: null
 		};
 
 		this._reloadGauntletData = this._reloadGauntletData.bind(this);
@@ -111,9 +111,7 @@ export class GauntletHelper extends React.Component {
 	}
 
 	_payForNewOpponents() {
-		payToGetNewOpponents(this.state.gauntlet.id, function (data) {
-			this._gauntletDataRecieved(data);
-		}.bind(this));
+		payToGetNewOpponents(this.state.gauntlet.id).then((data) => this._gauntletDataRecieved(data));
 	}
 
 	_gauntletDataRecieved(data) {
@@ -182,17 +180,17 @@ export class GauntletHelper extends React.Component {
 				});
 			}
 		}
-		else if (data.lastResult) {
+		if (data.lastResult) {
 			{
 				this.setState({
 					lastResult: data.lastResult
 				});
-
-				//alert('You ' + playerRollTotal + ' vs them ' + opponentRollTotal + '. Result: ' + ((data.lastResult.win == true) ? 'win' : 'lose'));
-				//"player_rolls":[137, 143, 147, 0, 1, 1], "opponent_rolls":[1, 0, 0, 218, 274, 206],
-				//"player_crit_rolls":[false, false, false, false, false, false],
-				//"opponent_crit_rolls":[false, false, false, false, false, false],
 			}
+		}
+		if (data.merits) {
+			this.setState({
+				merits: data.merits
+			});
 		}
 	}
 
@@ -222,17 +220,33 @@ export class GauntletHelper extends React.Component {
 					</div>
 					<h3>Gauntlet player - BETA</h3>
 
+					{this.state.merits &&
+						(<p>Merits left: {this.state.merits}</p>)
+					}
+
 					{this.state.lastResult &&
 						(<table>
 							<tbody>
-								<tr>
-									<td style={{ rowSpan: 2 }}>
+							<tr>
+								<td rowSpan={2}>
 										<b> {(this.state.lastResult.win == true) ? 'WIN' : 'LOSE'} </b>
 									</td>
 									<td>You got {this.state.lastResult.player_rolls.reduce(function (sum, value) { return sum + value; }, 0)}</td>
+									<td>{this.state.lastResult.player_rolls[0]} {this.state.lastResult.player_crit_rolls[0] ? '*' : ''}</td>
+									<td>{this.state.lastResult.player_rolls[1]} {this.state.lastResult.player_crit_rolls[1] ? '*' : ''}</td>
+									<td>{this.state.lastResult.player_rolls[2]} {this.state.lastResult.player_crit_rolls[2] ? '*' : ''}</td>
+									<td>{this.state.lastResult.player_rolls[3]} {this.state.lastResult.player_crit_rolls[3] ? '*' : ''}</td>
+									<td>{this.state.lastResult.player_rolls[4]} {this.state.lastResult.player_crit_rolls[4] ? '*' : ''}</td>
+									<td>{this.state.lastResult.player_rolls[5]} {this.state.lastResult.player_crit_rolls[5] ? '*' : ''}</td>
 								</tr>
 								<tr>
 									<td>They got {this.state.lastResult.opponent_rolls.reduce(function (sum, value) { return sum + value; }, 0)}</td>
+									<td>{this.state.lastResult.opponent_rolls[0]} {this.state.lastResult.opponent_crit_rolls[0] ? '*' : ''}</td>
+									<td>{this.state.lastResult.opponent_rolls[1]} {this.state.lastResult.opponent_crit_rolls[1] ? '*' : ''}</td>
+									<td>{this.state.lastResult.opponent_rolls[2]} {this.state.lastResult.opponent_crit_rolls[2] ? '*' : ''}</td>
+									<td>{this.state.lastResult.opponent_rolls[3]} {this.state.lastResult.opponent_crit_rolls[3] ? '*' : ''}</td>
+									<td>{this.state.lastResult.opponent_rolls[4]} {this.state.lastResult.opponent_crit_rolls[4] ? '*' : ''}</td>
+									<td>{this.state.lastResult.opponent_rolls[5]} {this.state.lastResult.opponent_crit_rolls[5] ? '*' : ''}</td>
 								</tr>
 							</tbody>
 						</table>)

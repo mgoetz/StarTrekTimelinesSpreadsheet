@@ -179,68 +179,62 @@ export class MissionHelper extends React.Component {
 		this._selection = new Selection;
 
 		//TODO: Load on-demand
-		loadMissionData(props.params.accepted_missions, props.params.dispute_histories, function (result) {
-			if (result.errorMsg || (result.statusCode && (result.statusCode != 200)))
-			{
+		loadMissionData(props.params.accepted_missions, props.params.dispute_histories).then((missions) => {
+			var allChallenges = [];
+			var allMissions = [];
+			var startIndex = 0;
+			missions.forEach(function (mission) {
+				var newMission = mission;
+				newMission.key = newMission.id;
+				newMission.name = newMission.episode_title;
+				newMission.count = newMission.quests.reduce(function (sum, value) {
+					return sum + (value.challenges ? value.challenges.length : 0);
+				}, 0);
+				newMission.startIndex = startIndex;
+				newMission.level = 0;
+				newMission.children = [];
 
-			}
-			else {
-				var allChallenges = [];
-				var allMissions = [];
-				var startIndex = 0;
-				result.missionList.forEach(function (mission) {
-					var newMission = mission;
-					newMission.key = newMission.id;
-					newMission.name = newMission.episode_title;
-					newMission.count = newMission.quests.reduce(function (sum, value) {
-						return sum + (value.challenges ? value.challenges.length : 0);
-					}, 0);
-					newMission.startIndex = startIndex;
-					newMission.level = 0;
-					newMission.children = [];
+				newMission.quests.forEach(function (quest) {
+					if (quest.quest_type == 'ConflictQuest') {
+						var newQuest = quest;
+						newQuest.key = quest.id;
+						newQuest.count = newQuest.challenges ? newQuest.challenges.length : 0;
+						newQuest.startIndex = startIndex;
+						startIndex += newQuest.count;
+						newQuest.level = 1;
 
-					newMission.quests.forEach(function (quest) {
-						if (quest.quest_type == 'ConflictQuest') {
-							var newQuest = quest;
-							newQuest.key = quest.id;
-							newQuest.count = newQuest.challenges ? newQuest.challenges.length : 0;
-							newQuest.startIndex = startIndex;
-							startIndex += newQuest.count;
-							newQuest.level = 1;
+						if (newQuest.challenges) {
+							allChallenges = allChallenges.concat(newQuest.challenges.map(function (challenge) {
+								var newChallenge = challenge;
+								newChallenge.key = challenge.id;
+								return newChallenge;
+							}));
+						}
 
-							if (newQuest.challenges) {
-								allChallenges = allChallenges.concat(newQuest.challenges.map(function (challenge) {
-									var newChallenge = challenge;
-									newChallenge.key = challenge.id;
-									return newChallenge;
-								}));
+						// Get the numbers from the first challenge that has them (since they match across the quest)
+						newQuest.challenges.forEach(function (challenge) {
+							if (challenge.difficulty_by_mastery) {
+								newQuest.difficulty_by_mastery = challenge.difficulty_by_mastery;
 							}
 
-							// Get the numbers from the first challenge that has them (since they match across the quest)
-							newQuest.challenges.forEach(function (challenge) {
-								if (challenge.difficulty_by_mastery) {
-									newQuest.difficulty_by_mastery = challenge.difficulty_by_mastery;
-								}
+							if (challenge.critical && challenge.critical.threshold) {
+								newQuest.critical_threshold = challenge.critical.threshold;
+							}
 
-								if (challenge.critical && challenge.critical.threshold) {
-									newQuest.critical_threshold = challenge.critical.threshold;
-								}
+							if (challenge.trait_bonuses && (challenge.trait_bonuses.length > 0)) {
+								newQuest.trait_bonuses = challenge.trait_bonuses[0].bonuses;
+							}
+						});
 
-								if (challenge.trait_bonuses && (challenge.trait_bonuses.length > 0)) {
-									newQuest.trait_bonuses = challenge.trait_bonuses[0].bonuses;
-								}
-							});
-
-							newMission.children.push(newQuest);
-						}
-					});
-					
-					allMissions.push(newMission);
+						newMission.children.push(newQuest);
+					}
 				});
 
-				this.setState({ dataAvailable: true, missions: allMissions, challenges: allChallenges });
-			}
-		}.bind(this));
+				allMissions.push(newMission);
+			});
+
+			this.setState({ dataAvailable: true, missions: allMissions, challenges: allChallenges });
+		});
 	}
 
 	render() {

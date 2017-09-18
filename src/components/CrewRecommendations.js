@@ -146,103 +146,97 @@ export class CrewRecommendations extends React.Component {
 			recommendations: []
 		};
 
-		loadMissionData(props.cadetMissions.accepted_missions.concat(props.missions.accepted_missions), props.missions.dispute_histories, function (result) {
-			if (result.errorMsg || (result.statusCode && (result.statusCode != 200))) {
+		loadMissionData(props.cadetMissions.accepted_missions.concat(props.missions.accepted_missions), props.missions.dispute_histories).then((missions) => {
+			var log = [];
 
-			}
-			else {
-				var log = [];
+			missions.forEach(function (mission) {
+				mission.quests.forEach(function (quest) {
+					if (quest.quest_type == 'ConflictQuest') {
+						quest.challenges.forEach(function (challenge) {
+							var entry = {
+								name: mission.episode_title + ' - ' + quest.name + ' - ' + challenge.name,
+								roll: 0,
+								skill: challenge.skill,
+								cadet: quest.cadet,
+								crew_requirement: quest.crew_requirement,
+								traits: [],
+								lockedTraits: [],
+								crew: []
+							};
 
-				result.missionList.forEach(function (mission) {
-					mission.quests.forEach(function (quest) {
-						if (quest.quest_type == 'ConflictQuest') {
-							quest.challenges.forEach(function (challenge) {
-								var entry = {
-									name: mission.episode_title + ' - ' + quest.name + ' - ' + challenge.name,
-									roll: 0,
-									skill : challenge.skill,
-									cadet: quest.cadet,
-									crew_requirement: quest.crew_requirement,
-									traits: [],
-									lockedTraits: [],
-									crew: []
-								};
+							if (challenge.difficulty_by_mastery) {
+								entry.roll += challenge.difficulty_by_mastery[2];
+							}
 
-								if (challenge.difficulty_by_mastery) {
-									entry.roll += challenge.difficulty_by_mastery[2];
-								}
+							if (challenge.critical && challenge.critical.threshold) {
+								entry.roll += challenge.critical.threshold;
+							}
 
-								if (challenge.critical && challenge.critical.threshold) {
-									entry.roll += challenge.critical.threshold;
-								}
+							if (challenge.trait_bonuses && (challenge.trait_bonuses.length > 0)) {
+								challenge.trait_bonuses.forEach(function (traitBonus) {
+									entry.traits.push({ trait: traitBonus.trait, bonus: traitBonus.bonuses[2] });
+								});
+							}
 
-								if (challenge.trait_bonuses && (challenge.trait_bonuses.length > 0)) {
-									challenge.trait_bonuses.forEach(function (traitBonus) {
-										entry.traits.push({ trait: traitBonus.trait, bonus: traitBonus.bonuses[2] });
-									});
-								}
-
-								if (challenge.locks && (challenge.locks.length > 0)) {
-									challenge.locks.forEach(function (lock) {
-										if (lock.trait) {
-											entry.lockedTraits.push(lock.trait);
-										}
-									});
-								}
-
-								this.props.crew.forEach(function (crew) {
-									let rawTraits = new Set(crew.rawTraits);
-
-									if (entry.cadet) {
-										if ((crew.rarity < entry.crew_requirement.min_stars) || (crew.rarity > entry.crew_requirement.max_stars)) {
-											return; // Doesn't meet rarity requirements
-										}
-										
-										if (entry.crew_requirement.traits && (entry.crew_requirement.traits.length > 0)) {
-											var matchingTraits = entry.crew_requirement.traits.filter(trait => rawTraits.has(trait)).length;
-											if (matchingTraits == 0)
-												return; // Doesn't meet trait requirements
-										}
-									}
-
-									if (entry.lockedTraits.length > 0)
-									{
-										var matchingTraits = entry.lockedTraits.filter(trait => rawTraits.has(trait)).length;
-										if (matchingTraits == 0)
-											return; // Node is locked by a trait which this crew doesn't have
-									}
-
-									// Compute roll for crew
-									var rollCrew = crew[entry.skill].core;
-
-									if (entry.traits && (entry.traits.length > 0)) {
-										var matchingTraits = entry.traits.filter(traitBonus => rawTraits.has(traitBonus.trait)).length;
-										rollCrew += matchingTraits * entry.traits[0].bonus;
-									}
-
-									if (rollCrew + crew[entry.skill].max > entry.roll) // Does this crew even have a chance?
-									{
-										var successPercentage = (rollCrew + crew[entry.skill].max - entry.roll) * 100 / (crew[entry.skill].max - crew[entry.skill].min);
-										if (successPercentage > 100) successPercentage = 100;
-
-										entry.crew.push({ id: crew.id, name: crew.name, frozen: crew.frozen, success: successPercentage });
+							if (challenge.locks && (challenge.locks.length > 0)) {
+								challenge.locks.forEach(function (lock) {
+									if (lock.trait) {
+										entry.lockedTraits.push(lock.trait);
 									}
 								});
+							}
 
-								entry.crew.sort(function (a, b) { return b.success - a.success; });
+							this.props.crew.forEach(function (crew) {
+								let rawTraits = new Set(crew.rawTraits);
 
-								log.push(entry);
-							}.bind(this));
-						}
-					}.bind(this));
+								if (entry.cadet) {
+									if ((crew.rarity < entry.crew_requirement.min_stars) || (crew.rarity > entry.crew_requirement.max_stars)) {
+										return; // Doesn't meet rarity requirements
+									}
+
+									if (entry.crew_requirement.traits && (entry.crew_requirement.traits.length > 0)) {
+										var matchingTraits = entry.crew_requirement.traits.filter(trait => rawTraits.has(trait)).length;
+										if (matchingTraits == 0)
+											return; // Doesn't meet trait requirements
+									}
+								}
+
+								if (entry.lockedTraits.length > 0) {
+									var matchingTraits = entry.lockedTraits.filter(trait => rawTraits.has(trait)).length;
+									if (matchingTraits == 0)
+										return; // Node is locked by a trait which this crew doesn't have
+								}
+
+								// Compute roll for crew
+								var rollCrew = crew[entry.skill].core;
+
+								if (entry.traits && (entry.traits.length > 0)) {
+									var matchingTraits = entry.traits.filter(traitBonus => rawTraits.has(traitBonus.trait)).length;
+									rollCrew += matchingTraits * entry.traits[0].bonus;
+								}
+
+								if (rollCrew + crew[entry.skill].max > entry.roll) // Does this crew even have a chance?
+								{
+									var successPercentage = (rollCrew + crew[entry.skill].max - entry.roll) * 100 / (crew[entry.skill].max - crew[entry.skill].min);
+									if (successPercentage > 100) successPercentage = 100;
+
+									entry.crew.push({ id: crew.id, name: crew.name, frozen: crew.frozen, success: successPercentage });
+								}
+							});
+
+							entry.crew.sort(function (a, b) { return b.success - a.success; });
+
+							log.push(entry);
+						}.bind(this));
+					}
 				}.bind(this));
+			}.bind(this));
 
-				this.setState({
-					dataAvailable: true,
-					recommendations: log
-				});
-			}
-		}.bind(this));
+			this.setState({
+				dataAvailable: true,
+				recommendations: log
+			});
+		});
 	}
 
 	render() {

@@ -1,6 +1,6 @@
 import STTApi from '../api/STTApi.ts';
 
-export function matchShips(ships, callback) {
+export function matchShips(ships) {
 	var newShips = [];
 	STTApi.shipSchematics.forEach(function (schematic) {
 		var owned = ships.find(function (ship) { return ship.name == schematic.ship.name; });
@@ -13,5 +13,5 @@ export function matchShips(ships, callback) {
 
 		newShips.push(schematic.ship);
 	});
-	callback(newShips);
+	return Promise.resolve(newShips);
 }

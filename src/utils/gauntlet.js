@@ -1,11 +1,10 @@
-const request = require('electron').remote.require('request');
 const CONFIG = require('./config.js');
 
 import STTApi from '../api/STTApi.ts';
 
 export function loadGauntlet() {
 	return STTApi.executeGetRequest("gauntlet/status", {gauntlet_id: -1}).then((data) => {
-		if (data.character) {
+		if (data.character && data.character.gauntlets) {
 			return Promise.resolve(data.character.gauntlets[0]);
 		} else {
 			return Promise.reject("Invalid data for gauntlet!");
@@ -13,66 +12,50 @@ export function loadGauntlet() {
 	});
 }
 
-export function payToGetNewOpponents(gauntlet_id, callback) {
-	const reqOptions = {
-		method: 'POST',
-		uri: 'https://stt.disruptorbeam.com/gauntlet/refresh_opp_pool_and_revive_crew',
-		qs: {
-			gauntlet_id: gauntlet_id,
-			pay: true,
-			client_api: CONFIG.client_api_version
-		},
-		headers: {
-			'Content-Type': 'application/x-www-form-urlencoded',
-			'Authorization': 'Bearer ' + new Buffer(STTApi.accessToken).toString('base64')
-		}
-	};
+export function payToGetNewOpponents(gauntlet_id) {
+	return STTApi.executePostRequest("gauntlet/refresh_opp_pool_and_revive_crew", { gauntlet_id: gauntlet_id, pay: true }).then((data) => {
+		let currentGauntlet = null;
+		let merits = null;
+		data.forEach(function (item) {
+			if (item.character && item.character.gauntlets) {
+				currentGauntlet = item.character.gauntlets[0];
+			} else if (item.player && item.player.premium_earnable) {
+				// TODO: this should update the global state in STTApi (in fact, these kind of updates can come in at any time and could be handled in the request api itself)
+				merits = item.player.premium_earnable;
+			}
+		});
 
-	request(reqOptions, function (error, response, body) {
-		if (!error && response.statusCode == 200) {
-			var resp = JSON.parse(body);
-			resp.forEach(function (item) {
-				if (item.character) {
-					var currentGauntlet = item.character.gauntlets[0];
-					callback({ gauntlet: currentGauntlet });
-				}
-			});
+		if (currentGauntlet) {
+			return Promise.resolve({ gauntlet: currentGauntlet, merits: merits });
+		} else {
+			return Promise.reject("Invalid data for gauntlet!");
 		}
-		callback({ errorMsg: error, statusCode: response.statusCode });
 	});
 }
 
-export function playContest(gauntlet_id, crew_id, opponent_id, op_crew_id, callback) {
-	const reqOptions = {
-		method: 'POST',
-		uri: 'https://stt.disruptorbeam.com/gauntlet/execute_crew_contest',
-		qs: {
-			gauntlet_id: gauntlet_id,
-			crew_id: crew_id,
-			opponent_id: opponent_id,
-			op_crew_id: op_crew_id,
-			boost: false,
-			client_api: CONFIG.client_api_version
-		},
-		headers: {
-			'Content-Type': 'application/x-www-form-urlencoded',
-			'Authorization': 'Bearer ' + new Buffer(STTApi.accessToken).toString('base64')
-		}
-	};
+export function playContest(gauntlet_id, crew_id, opponent_id, op_crew_id) {
+	return STTApi.executePostRequest("gauntlet/execute_crew_contest", {
+		gauntlet_id: gauntlet_id,
+		crew_id: crew_id,
+		opponent_id: opponent_id,
+		op_crew_id: op_crew_id,
+		boost: false
+	}).then((data) => {
+		let currentGauntlet = null;
+		let contest = null;
+		data.forEach(function (item) {
+			if (item.character && item.character.gauntlets) {
+				currentGauntlet = item.character.gauntlets[0];
+			} else if (item.contest) {
+				contest = item.contest;
+			}
+		});
 
-	request(reqOptions, function (error, response, body) {
-		if (!error && response.statusCode == 200) {
-			var resp = JSON.parse(body);
-			resp.forEach(function (item) {
-				if (item.character && item.character.gauntlets) {
-					var currentGauntlet = item.character.gauntlets[0];
-					callback({ gauntlet: currentGauntlet });
-				} else if (item.contest) {
-					callback({ lastResult: item.contest });
-				}
-			});
+		if (currentGauntlet && contest) {
+			return Promise.resolve({ gauntlet: currentGauntlet, lastResult: contest });
+		} else {
+			return Promise.reject("Invalid data for gauntlet!");
 		}
-		callback({ errorMsg: error, statusCode: response.statusCode });
 	});
 }
 

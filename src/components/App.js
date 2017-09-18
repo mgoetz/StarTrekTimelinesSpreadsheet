@@ -245,7 +245,7 @@ class App extends React.Component {
 							if (fileName === undefined)
 								return;
 
-							exportExcel(this.state.crewList, this.state.itemList, this.state.shipList, fileName, function (filePath) {
+							exportExcel(this.state.crewList, this.state.itemList, this.state.shipList, fileName).then((filePath) => {
 								shell.openItem(filePath);
 							});
 						}.bind(this));
@@ -270,7 +270,7 @@ class App extends React.Component {
 							if (fileName === undefined)
 								return;
 
-							exportCsv(this.state.crewList, fileName, function (filePath) {
+							exportCsv(this.state.crewList, fileName).then((filePath) => {
 								shell.openItem(filePath);
 							});
 						}.bind(this));
@@ -320,7 +320,7 @@ class App extends React.Component {
 	}
 
 	_onShare(options) {
-		shareCrew(this.state.crewList, options, this.state.missionHelperParams, this.state.cadetMissionHelperParams, function (url) {
+		shareCrew(this.state.crewList, options, this.state.missionHelperParams, this.state.cadetMissionHelperParams).then((url) => {
 			shell.openItem(url);
 		});
 	}
@@ -466,7 +466,7 @@ class App extends React.Component {
 			}).catch((error) => {});
 		}.bind(this));
 
-		matchCrew(STTApi.playerData.character, function (roster) {
+		matchCrew(STTApi.playerData.character).then((roster) => {
 			roster.forEach(function (crew) {
 				crew.iconUrl = '';
 				crew.iconBodyUrl = '';
@@ -492,11 +492,11 @@ class App extends React.Component {
 					this.forceUpdate();
 				}).catch((error) => { /*console.warn(error);*/ });
 			});
-		}.bind(this));
+		});
 
-		matchShips(STTApi.playerData.character.ships, function (ships) {
+		matchShips(STTApi.playerData.character.ships).then((ships) => {
 			this.setState({ shipList: ships });
-		}.bind(this));
+		});
 	}
 }
 

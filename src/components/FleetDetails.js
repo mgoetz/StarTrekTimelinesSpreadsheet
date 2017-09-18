@@ -161,7 +161,7 @@ export class FleetDetails extends React.Component {
 					starbase_activity: member.starbase_activity,
 					daily_activity: member.daily_activity,
 					iconUrl: null,
-					avatar: member.crew_avatar ? member.crew_avatar.name : null
+					crew_avatar: member.crew_avatar
 				};
 
 				if (member.squad_id)
@@ -180,26 +180,24 @@ export class FleetDetails extends React.Component {
 				members: members
 			};
 
-			this._mounted = false;
-
+			let iconPromises = [];
 			this.state.members.forEach((member) => {
-				if (member.avatar) {
-					getWikiImageUrl(member.avatar.split(' ').join('_') + '_Head.png', member.dbid).then(({id, url}) => {
+				if (member.crew_avatar) {
+					iconPromises.push(getWikiImageUrl(member.crew_avatar.name.split(' ').join('_') + '_Head.png', member.dbid).then(({id, url}) => {
 						this.state.members.forEach(function (member) {
 							if (member.dbid === id)
 								member.iconUrl = url;
 						});
 
-						// Sometimes we get the callback before the component is even mounted, so no need to force update
-						if (this._mounted)
-							this.forceUpdate();
-					}).catch((error) => { });
+						return Promise.resolve();
+					}).catch((error) => { }));
 				}
 			});
+			Promise.all(iconPromises).then(() => this.forceUpdate());
 
-			/*loginPubNub(function (pubnub) {
+			/*loginPubNub().then(pubnub) => {
 				//
-			}.bind(this));*/
+			});*/
 		}
 		else
 		{
@@ -207,10 +205,6 @@ export class FleetDetails extends React.Component {
 				members: null
 			};
 		}
-	}
-
-	componentDidMount() {
-		this._mounted = true;
 	}
 
 	render() {

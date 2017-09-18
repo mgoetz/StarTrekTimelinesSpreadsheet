@@ -13,78 +13,72 @@ function pastebinPost(data, exportType) {
 	});
 }
 
-export function shareCrew(roster, options, missionHelperParams, cadetMissionHelperParams, callback) {
-
+export function shareCrew(roster, options, missionHelperParams, cadetMissionHelperParams) {
 	if (options.shareMissions) {
-		loadMissionData(cadetMissionHelperParams.accepted_missions.concat(missionHelperParams.accepted_missions), missionHelperParams.dispute_histories, function (result) {
-			if (result.errorMsg || (result.statusCode && (result.statusCode != 200))) {
+		return loadMissionData(cadetMissionHelperParams.accepted_missions.concat(missionHelperParams.accepted_missions), missionHelperParams.dispute_histories).then((missions) => {
+			var allChallenges = [];
 
-			}
-			else {
-				var allChallenges = [];
+			missions.forEach(function (mission) {
+				mission.quests.forEach(function (quest) {
+					if (quest.quest_type == 'ConflictQuest') {
+						quest.challenges.forEach(function (challenge) {
+							var entry = {
+								missionname: mission.episode_title,
+								questname: quest.name,
+								challengename: challenge.name,
+								roll: 0,
+								goal_progress: quest.mastery_levels[0].progress.goal_progress + quest.mastery_levels[1].progress.goal_progress + quest.mastery_levels[2].progress.goal_progress,
+								skill: challenge.skill,
+								cadet: quest.cadet,
+								crew_requirement: quest.crew_requirement ? quest.crew_requirement.description.replace(/<#([0-9A-F]{6})>/gi, '<span style="color:#$1">').replace(/<\/color>/g, '</span>') : '',
+								traits: [],
+								traitBonus: 0,
+								lockedTraits: []
+							};
 
-				result.missionList.forEach(function (mission) {
-					mission.quests.forEach(function (quest) {
-						if (quest.quest_type == 'ConflictQuest') {
-							quest.challenges.forEach(function (challenge) {
-								var entry = {
-									missionname: mission.episode_title,
-									questname: quest.name,
-									challengename: challenge.name,
-									roll: 0,
-									goal_progress: quest.mastery_levels[0].progress.goal_progress + quest.mastery_levels[1].progress.goal_progress + quest.mastery_levels[2].progress.goal_progress,
-									skill: challenge.skill,
-									cadet: quest.cadet,
-									crew_requirement: quest.crew_requirement ? quest.crew_requirement.description.replace(/<#([0-9A-F]{6})>/gi, '<span style="color:#$1">').replace(/<\/color>/g, '</span>') : '',
-									traits: [],
-									traitBonus: 0,
-									lockedTraits: []
-								};
+							if (challenge.difficulty_by_mastery) {
+								entry.roll += challenge.difficulty_by_mastery[2];
+							}
 
-								if (challenge.difficulty_by_mastery) {
-									entry.roll += challenge.difficulty_by_mastery[2];
-								}
+							if (challenge.critical && challenge.critical.threshold) {
+								entry.roll += challenge.critical.threshold;
+							}
 
-								if (challenge.critical && challenge.critical.threshold) {
-									entry.roll += challenge.critical.threshold;
-								}
+							if (challenge.trait_bonuses && (challenge.trait_bonuses.length > 0)) {
+								challenge.trait_bonuses.forEach(function (traitBonus) {
+									entry.traits.push(traitBonus.trait);
+									entry.traitBonus = traitBonus.bonuses[2];
+								});
+							}
 
-								if (challenge.trait_bonuses && (challenge.trait_bonuses.length > 0)) {
-									challenge.trait_bonuses.forEach(function (traitBonus) {
-										entry.traits.push(traitBonus.trait);
-										entry.traitBonus = traitBonus.bonuses[2];
-									});
-								}
+							entry.traits = entry.traits.map(function (trait) {
+								return STTApi.getTraitName(trait);
+							}).join(', ');
 
-								entry.traits = entry.traits.map(function (trait) {
-									return STTApi.getTraitName(trait);
-								}).join(', ');
+							if (challenge.locks && (challenge.locks.length > 0)) {
+								challenge.locks.forEach(function (lock) {
+									if (lock.trait) {
+										entry.lockedTraits.push(lock.trait);
+									}
+								});
+							}
 
-								if (challenge.locks && (challenge.locks.length > 0)) {
-									challenge.locks.forEach(function (lock) {
-										if (lock.trait) {
-											entry.lockedTraits.push(lock.trait);
-										}
-									});
-								}
+							entry.lockedTraits = entry.lockedTraits.map(function (trait) {
+								return STTApi.getTraitName(trait);
+							}).join(', ');
 
-								entry.lockedTraits = entry.lockedTraits.map(function (trait) {
-									return STTApi.getTraitName(trait);
-								}).join(', ');
-
-								allChallenges.push(entry);
-							});
-						}
-					});
+							allChallenges.push(entry);
+						});
+					}
 				});
+			});
 
-				shareCrewInternal(roster, options, allChallenges, callback);
-			}
+			return shareCrewInternal(roster, options, allChallenges);
 		});
 	}
 	else
 	{
-		shareCrewInternal(roster, options, null, callback);
+		return shareCrewInternal(roster, options, null);
 	}
 }
 
@@ -111,7 +105,7 @@ function sillyTemplatizer(html, options) {
 	return result;
 }
 
-function shareCrewInternal(roster, options, missionList, callback) {
+function shareCrewInternal(roster, options, missionList) {
 	var data = '';
 
 	if (options.exportType == 'html') {
@@ -141,11 +135,16 @@ function shareCrewInternal(roster, options, missionList, callback) {
 	}
 
 	if (options.exportWhere == 'L') {
-		fs.writeFile('export.' + options.exportType, data, function (err) {
-			callback('export.' + options.exportType);
-		});
+		return new Promise(function (resolve, reject) {
+			fs.writeFile('export.' + options.exportType, data, function (err) {
+				if (err) { reject(err); }
+				else { resolve(); }
+			});
+		}).then(() => {
+			return Promise.resolve('export.' + options.exportType);
+			});
 	}
 	else {
-		pastebinPost(data, options.exportType).then((data) => callback(data));
+		return pastebinPost(data, options.exportType);
 	}
 }

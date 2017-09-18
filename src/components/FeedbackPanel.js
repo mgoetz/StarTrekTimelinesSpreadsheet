@@ -2,7 +2,7 @@
 import { Panel, PanelType } from 'office-ui-fabric-react/lib/Panel';
 import { TextField } from 'office-ui-fabric-react/lib/TextField';
 import { Spinner, SpinnerSize } from 'office-ui-fabric-react/lib/Spinner';
-import { DefaultButton } from 'office-ui-fabric-react/lib/Button';
+import { PrimaryButton } from 'office-ui-fabric-react/lib/Button';
 
 import STTApi from '../api/STTApi.ts';
 
@@ -59,7 +59,7 @@ export class FeedbackPanel extends React.Component {
 				<TextField label='Do you have a name suggestion better than "Tool" ? 😁' onChanged={(text) => this.userFeedback.nameSuggestion = text} />
 				<TextField label='(Optional) Your e-mail address' onChanged={(text) => this.userFeedback.email = text} />
 				<i>I won't share this with anyone; I'll only use it to contact you if I have questions about your feedback</i><br />
-				<DefaultButton text='Send feedback' onClick={this._sendFeedback} iconProps={{ iconName: 'ChatInviteFriend' }} style={{ width: '100%', marginBottom: '20px' }} />
+				<PrimaryButton text='Send feedback' onClick={this._sendFeedback} iconProps={{ iconName: 'ChatInviteFriend' }} style={{ width: '100%', marginBottom: '20px' }} />
 				{this.state.showSpinner && (
 					<Spinner size={SpinnerSize.small} label='Sending feedback...' />
 				)}
