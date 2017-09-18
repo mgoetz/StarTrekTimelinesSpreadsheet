@@ -69,7 +69,7 @@ export class CrewList extends React.Component {
 				maxWidth: 50,
 				fieldName: 'name',
 				onRender: (item) => {
-					return (<Image src={item.iconUrl} width={50} height={50} imageFit={ImageFit.contain} />);
+					return (<Image src={item.iconUrl} width={50} height={50} imageFit={ImageFit.contain} shouldStartVisible={true} />);
 				}
 			},
 			{

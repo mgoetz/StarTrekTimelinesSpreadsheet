@@ -138,36 +138,43 @@ export class GauntletHelper extends React.Component {
 					roundOdds: result
 				});
 
+				let iconPromises = [];
+
 				data.gauntlet.contest_data.selected_crew.forEach((crew) => {
+					iconPromises.push(
 					getWikiImageUrl(STTApi.getCrewAvatarBySymbol(crew.archetype_symbol).name.split(' ').join('_') + '.png', crew.crew_id).then(({id, url}) => {
 						this.state.gauntlet.contest_data.selected_crew.forEach((crew) => {
 							if (crew.crew_id === id) {
 								crew.iconUrl = url;
-								this.forceUpdate();
 							}
-						});
-					}).catch((error) => { /*console.warn(error);*/ });
+							});
+						return Promise.resolve();
+					}).catch((error) => { /*console.warn(error);*/ }));
 				});
-
+				
 				result.matches.forEach((match) => {
+					iconPromises.push(
 					getWikiImageUrl(STTApi.getCrewAvatarBySymbol(match.crewOdd.archetype_symbol).name.split(' ').join('_') + '.png', match.crewOdd.crew_id).then(({id, url}) => {
 						this.state.roundOdds.matches.forEach((match) => {
 							if (match.crewOdd.crew_id === id) {
 								match.crewOdd.iconUrl = url;
-								this.forceUpdate();
 							}
 						});
-					}).catch((error) => { /*console.warn(error);*/ });
+						return Promise.resolve();
+					}).catch((error) => { /*console.warn(error);*/ }));
 
+					iconPromises.push(
 					getWikiImageUrl(STTApi.getCrewAvatarBySymbol(match.opponent.archetype_symbol).name.split(' ').join('_') + '.png', match.opponent.crew_id).then(({id, url}) => {
 						this.state.roundOdds.matches.forEach((match) => {
 							if (match.opponent.crew_id === id) {
 								match.opponent.iconUrl = url;
-								this.forceUpdate();
 							}
 						});
-					}).catch((error) => { /*console.warn(error);*/ });
+						return Promise.resolve();
+					}).catch((error) => { /*console.warn(error);*/ }));
 				});
+
+				Promise.all(iconPromises).then(() => this.forceUpdate());
 			}
 			else {
 				this.setState({
