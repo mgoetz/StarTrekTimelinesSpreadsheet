@@ -22,7 +22,7 @@ export class DexieCache extends Dexie {
         this.version(1).stores({
             _questsTable: 'id,description,challenges,mastery_levels,cadet,crew_requirement',
             _immortalsTable: 'symbol,crew',
-            _wikiImageTable: 'fileName,url'
+            _wikiImageTable: 'fileName,url,lastQueried'
         });
     }
 }
@@ -43,5 +43,6 @@ export interface ImmortalsTable {
 
 export interface WikiImageTable {
     fileName: string,
-    url: string
+    url: string,
+    lastQueried: Date
 }

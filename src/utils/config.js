@@ -30,3 +30,6 @@ export const client_api_version = 8;
 
 // Default client_id of the Steam Windows version of STT
 export const client_id = '4fc852d7-d602-476a-a292-d243022a475d';
+
+// Every 10 days, check the wiki again for updated / new images
+export const hours_to_requery = 24 * 10;

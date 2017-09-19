@@ -183,6 +183,9 @@ export class GauntletHelper extends React.Component {
 		else if (data.gauntlet.state == 'UNSTARTED') {
 			// You joined a gauntled and are waiting for opponents
 		}
+		else if (data.gauntlet.state == 'ENDED_WITH_REWARDS') {
+			// The gauntlet ended and you got some rewards
+		}
 
 		if (data.lastResult) {
 			{
