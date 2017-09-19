@@ -180,6 +180,10 @@ export class GauntletHelper extends React.Component {
 				});
 			}
 		}
+		else if (data.gauntlet.state == 'UNSTARTED') {
+			// You joined a gauntled and are waiting for opponents
+		}
+
 		if (data.lastResult) {
 			{
 				this.setState({

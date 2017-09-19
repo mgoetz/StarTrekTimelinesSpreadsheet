@@ -16,6 +16,9 @@ export function payToGetNewOpponents(gauntlet_id) {
 	return STTApi.executePostRequest("gauntlet/refresh_opp_pool_and_revive_crew", { gauntlet_id: gauntlet_id, pay: true }).then((data) => {
 		let currentGauntlet = null;
 		let merits = null;
+		if (data.message) {
+			// TODO: insufficient funds
+		}
 		data.forEach(function (item) {
 			if (item.character && item.character.gauntlets) {
 				currentGauntlet = item.character.gauntlets[0];

@@ -13,7 +13,7 @@ export class NetworkFetch implements NetworkInterface {
 		};
 
 		if (bearerToken !== undefined) {
-			headers.Authorization = "Bearer " + new Buffer(bearerToken).toString("base64");
+			headers.Authorization = "Bearer " + btoa(bearerToken);
 		}
 
 		let promiseFetch = window.fetch(uri, {

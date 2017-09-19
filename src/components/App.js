@@ -74,7 +74,6 @@ class App extends React.Component {
 			crewList: [],
 			shipList: [],
 			itemList: [],
-			allequipment: [],
 			missionHelperParams: {},
 			cadetMissionHelperParams: {},
 			spinnerLabel: 'Loading...'
@@ -192,7 +191,7 @@ class App extends React.Component {
 							<ItemList data={this.state.itemList} />
 						</PivotItem>
 						<PivotItem linkText='Equipment' itemIcon='CheckList'>
-							<EquipmentDetails crewList={this.state.crewList} allequipment={this.state.allequipment} />
+							<EquipmentDetails crewList={this.state.crewList} />
 						</PivotItem>
 						<PivotItem linkText='Ships' itemIcon='Airplane'>
 							<ShipList data={this.state.shipList} />
@@ -432,39 +431,6 @@ class App extends React.Component {
 				this.setState({ captainAvatarBodyUrl: url });
 			}).catch((error) => {});
 		}
-
-		// all the equipment available in the game, along with sources and recipes
-		var allequipment = [];
-		STTApi.itemArchetypeCache.archetypes.forEach(function (archetype) {
-			var newEquipment = {
-				name: archetype.name,
-				id: archetype.id,
-				rarity: archetype.rarity,
-				type: archetype.type, // 3 - no recipe, can only get from sources; 2 - otherwise
-				short_name: archetype.short_name, // only for type 3
-				recipe: archetype.recipe ? archetype.recipe.demands : null, //optional
-				item_sources: archetype.item_sources,
-				icon: archetype.icon.file,
-				iconUrl: CONFIG.defaultItemIconUrl
-			};
-
-			allequipment.push(newEquipment);
-		});
-
-		this.setState({ allequipment: allequipment });
-
-		allequipment.forEach(function (equipment) {
-			var fileName = equipment.name + CONFIG.rarityRes[equipment.rarity].name + '.png';
-			fileName = fileName.split(' ').join('');
-			fileName = fileName.split('\'').join('');
-
-			getWikiImageUrl(fileName, equipment.id).then(({id, url}) => {
-				this.state.allequipment.forEach(function (item) {
-					if ((item.id === id) && url)
-						item.iconUrl = url;
-				});
-			}).catch((error) => {});
-		}.bind(this));
 
 		matchCrew(STTApi.playerData.character).then((roster) => {
 			roster.forEach(function (crew) {
