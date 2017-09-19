@@ -43,6 +43,8 @@ export function columnClick(items, columns, column) {
 			}
 
 			return col;
-		})
+		}),
+		sortColumn: column.fieldName,
+		sortedDescending : isSortedDescending
 	};
 }

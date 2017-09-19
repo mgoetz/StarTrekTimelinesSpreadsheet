@@ -90,12 +90,18 @@ export class ItemDetails extends React.Component {
 	render() {
 		if (this.state.equipment) {
 			return (<div>
-				<span className='quest-mastery'><span style={{ paddingTop: '12px' }}>{this.state.equipment.name}</span><Rating min={1} max={this.state.equipment.rarity} rating={this.state.equipment.rarity} /></span>
-				<p>Sources: {this.state.equipment.item_sources && this.state.equipment.item_sources.length}</p>
+				<span className='quest-mastery'><span style={{ paddingTop: '12px', color: CONFIG.rarityRes[this.state.equipment.rarity].color }}>{CONFIG.rarityRes[this.state.equipment.rarity].name} {this.state.equipment.name}</span></span>
+
+				{this.state.equipment.item_sources && (this.state.equipment.item_sources.length > 0) &&
+					<div>Sources:
+					{this.state.equipment.item_sources.map(function (source) {
+						return <span key={source.id}>{source.name} ({source.chance_grade}/5 chance)</span>;
+						})}
+				</div>}
 
 				{this.state.equipment.recipe &&
 					<div className='recipe-container'><span className='recipe-item-span'>Recipe:</span>{this.state.recipeTree.map(function (item) {
-						return <span key={item.equipment.id} className='recipe-item-span'><span>{item.count} x {item.equipment.name}</span><Image className='recipe-item-image' shouldFadeIn={false} src={item.equipment.iconUrl} width={20} height={20} imageFit={ImageFit.contain} /> </span>;
+						return <span key={item.equipment.id} className='recipe-item-span'><span style={{ color: CONFIG.rarityRes[item.equipment.rarity].color }} >{item.count} x {CONFIG.rarityRes[item.equipment.rarity].name} {item.equipment.name}</span><Image className='recipe-item-image' shouldFadeIn={false} src={item.equipment.iconUrl} width={20} height={20} imageFit={ImageFit.contain} /> </span>;
 						})}
 				</div>}
 			</div>);

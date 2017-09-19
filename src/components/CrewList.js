@@ -46,21 +46,6 @@ export class CrewList extends React.Component {
 	constructor(props) {
 		super(props);
 
-		var items = props.data;
-
-		var sortColumn = props.sortColumn ? props.sortColumn : 'max_rarity';
-
-		items = sortItems(items, sortColumn);
-
-		items.forEach(function (item) {
-			item.command_skill_core = item.command_skill.core;
-			item.science_skill_core = item.science_skill.core;
-			item.security_skill_core = item.security_skill.core;
-			item.engineering_skill_core = item.engineering_skill.core;
-			item.diplomacy_skill_core = item.diplomacy_skill.core;
-			item.medicine_skill_core = item.medicine_skill.core;
-		});
-
 		const _columns = [
 			{
 				key: 'icon',
@@ -222,6 +207,8 @@ export class CrewList extends React.Component {
 			}
 		];
 
+		let sortColumn = props.sortColumn ? props.sortColumn : 'max_rarity';
+
 		_columns.forEach(function (column) {
 			if (column.key == sortColumn) {
 				column.isSorted = true;
@@ -229,23 +216,25 @@ export class CrewList extends React.Component {
 			}
 		});
 
-		if (props.grouped === false)
-		{
+		if (props.grouped === false) {
 			this.state = {
-				items: items,
+				items: sortItems(props.data, sortColumn),
 				columns: _columns,
 				groups: null,
 				groupedColumn: '',
+				sortColumn: sortColumn,
+				sortedDescending: false,
 				isCompactMode: true
 			};
 		}
-		else
-		{
+		else {
 			this.state = {
-				items: items,
+				items: sortItems(props.data, sortColumn),
 				columns: _columns,
-				groups: groupBy(items, 'max_rarity'),
+				groups: groupBy(props.data, 'max_rarity'),
 				groupedColumn: 'max_rarity',
+				sortColumn: sortColumn,
+				sortedDescending: false,
 				isCompactMode: true
 			};
 		}
@@ -269,6 +258,35 @@ export class CrewList extends React.Component {
 				/>
 			</div>
 		);
+	}
+
+	_filterCrew(crew, searchString) {
+		return searchString.split(' ').every(text => {
+			// search the name first
+			if (crew.name.toLowerCase().indexOf(text) > -1) {
+				return true;
+			}
+
+			// now search the traits
+			if (crew.traits.toLowerCase().indexOf(text) > -1) {
+				return true;
+			}
+
+			// now search the raw traits
+			if (crew.rawTraits.find(trait => { trait.toLowerCase().indexOf(text) > -1 })) {
+				return true;
+			}
+
+			return false;
+		});
+	}
+
+	filter(newValue) {
+		this.setState({
+			items: sortItems((newValue ?
+				this.props.data.filter(i => this._filterCrew(i, newValue)) :
+				this.props.data), this.state.sortColumn, this.state.sortedDescending)
+		});
 	}
 
 	getGroupedColumn() {

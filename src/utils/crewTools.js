@@ -34,6 +34,13 @@ function rosterFromCrew(rosterEntry, crew) {
 		rosterEntry[skill].max = crew.skills[skill].range_max;
 	}
 
+	rosterEntry.command_skill_core = rosterEntry.command_skill.core;
+	rosterEntry.science_skill_core = rosterEntry.science_skill.core;
+	rosterEntry.security_skill_core = rosterEntry.security_skill.core;
+	rosterEntry.engineering_skill_core = rosterEntry.engineering_skill.core;
+	rosterEntry.diplomacy_skill_core = rosterEntry.diplomacy_skill.core;
+	rosterEntry.medicine_skill_core = rosterEntry.medicine_skill.core;
+
 	rosterEntry.ship_battle = crew.ship_battle;
 
 	rosterEntry.equipment_slots = crew.equipment_slots;

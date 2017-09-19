@@ -26,6 +26,7 @@ import { Pivot, PivotItem, PivotLinkFormat, PivotLinkSize } from 'office-ui-fabr
 import { Image, ImageFit } from 'office-ui-fabric-react/lib/Image';
 import { Callout } from 'office-ui-fabric-react/lib/Callout';
 import { IconButton, IButtonProps } from 'office-ui-fabric-react/lib/Button';
+import { SearchBox } from 'office-ui-fabric-react/lib/SearchBox';
 
 import { getWikiImageUrl } from '../utils/wikiImage.js';
 import { exportExcel } from '../utils/excelExporter.js';
@@ -72,6 +73,7 @@ class App extends React.Component {
 			captainAvatarUrl: '',
 			captainAvatarBodyUrl: '',
 			crewList: [],
+			filteredCrewList: [],
 			shipList: [],
 			itemList: [],
 			missionHelperParams: {},
@@ -185,7 +187,11 @@ class App extends React.Component {
 					<Pivot linkFormat={PivotLinkFormat.tabs} linkSize={PivotLinkSize.large}>
 						<PivotItem linkText='Crew' itemIcon='Teamwork'>
 							<CommandBar items={this._getCommandItems()} />
-							<CrewList data={this.state.crewList} grouped={false} ref='crewList' />
+							<SearchBox labelText='Search by name or trait...'
+								onChange={ (newValue) => this.refs.crewList.filter(newValue) }
+								onSearch={ (newValue) => this.refs.crewList.filter(newValue) }
+        					/>
+							<CrewList data={this.state.filteredCrewList} grouped={false} ref='crewList' />
 						</PivotItem>
 						<PivotItem linkText='Items' itemIcon='Boards'>
 							<ItemList data={this.state.itemList} />
@@ -438,7 +444,7 @@ class App extends React.Component {
 				crew.iconBodyUrl = '';
 			});
 
-			this.setState({ dataLoaded: true, crewList: roster });
+			this.setState({ dataLoaded: true, crewList: roster, filteredCrewList: roster });
 
 			roster.forEach((crew) => {
 				getWikiImageUrl(crew.name.split(' ').join('_') + '_Head.png', crew.id).then(({id, url}) => {

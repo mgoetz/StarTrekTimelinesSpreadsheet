@@ -209,7 +209,7 @@ export class GauntletHelper extends React.Component {
 					<span className='quest-mastery'>Featured skill: <Image src={CONFIG.skillRes[this.state.featuredSkill].url} height={18} /> {CONFIG.skillRes[this.state.featuredSkill].name}</span>
 					<Label>Featured traits: {this.state.traits.join(', ')}</Label>
 					<h2>Recommeded crew selection:</h2>
-					<CrewList data={this.state.recommendations} ref='recommendedCrew' />
+					<CrewList data={this.state.recommendations} grouped={false} ref='recommendedCrew' overrideClassName='embedded-crew-grid' />
 				</div>
 			);
 		}
