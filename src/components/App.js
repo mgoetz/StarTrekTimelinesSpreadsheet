@@ -28,12 +28,9 @@ import { Callout } from 'office-ui-fabric-react/lib/Callout';
 import { IconButton, IButtonProps } from 'office-ui-fabric-react/lib/Button';
 import { SearchBox } from 'office-ui-fabric-react/lib/SearchBox';
 
-import { getWikiImageUrl } from '../utils/wikiImage.js';
 import { exportExcel } from '../utils/excelExporter.js';
 import { exportCsv } from '../utils/csvExporter.js';
 import { shareCrew } from '../utils/pastebin.js';
-import { matchCrew } from '../utils/crewTools.js';
-import { matchShips } from '../utils/shipTools.js';
 
 var compareSemver = require('compare-semver');
 
@@ -52,6 +49,9 @@ import { CaptainCard } from './CaptainCard.js';
 import { FeedbackPanel } from './FeedbackPanel.js';
 
 import STTApi from '../../shared/api/STTApi.ts';
+import { matchCrew } from '../../shared/api/CrewTools.ts';
+import { matchShips } from '../../shared/api/ShipTools.ts';
+import { getWikiImageUrl } from '../../shared/api/WikiImageTools.ts';
 
 const path = require('path');
 const electron = require('electron');

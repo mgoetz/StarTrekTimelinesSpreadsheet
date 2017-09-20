@@ -45,7 +45,7 @@
   "dependencies": {
     "@types/request": "^2.0.3",
     "compare-semver": "^1.1.0",
-    "dexie": "^1.5.1",
+    "dexie": "latest",
     "electron-json-storage-sync": "latest",
     "exceljs": "latest",
     "fb": "^2.0.0",

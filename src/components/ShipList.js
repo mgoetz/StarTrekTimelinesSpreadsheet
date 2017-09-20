@@ -4,7 +4,7 @@ import { Rating, RatingSize } from 'office-ui-fabric-react/lib/Rating';
 import { Image, ImageFit } from 'office-ui-fabric-react/lib/Image';
 
 import { sortItems, columnClick } from '../utils/listUtils.js';
-import { getWikiImageUrl } from '../utils/wikiImage.js';
+import { getWikiImageUrl } from '../../shared/api/WikiImageTools.ts';
 
 export class ShipList extends React.Component {
 	constructor(props) {

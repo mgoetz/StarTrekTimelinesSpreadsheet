@@ -1,28 +1,6 @@
-const CONFIG = require('./config.js');
+import STTApi from './STTApi.ts';
 
-import STTApi from '../../shared/api/STTApi.ts';
-
-function queue(name) {
-	queue.q[name]++ || (queue.q[name] = 1);
-	return function (err) {
-		if (err && queue.e[name]) queue.e[name](err);
-		else if (err) throw err;
-		process.nextTick(function () {
-			queue.q[name]--;
-			queue.check(name);
-		});
-	}
-}
-queue.__proto__ = {
-	q: {},
-	c: {},
-	e: {},
-	check: function (name) { queue.q[name] == 0 && queue.c[name](); },
-	done: function (name, fn) { queue.c[name] = fn; },
-	err: function (name, fn) { queue.e[name] = fn; }
-}
-
-function rosterFromCrew(rosterEntry, crew) {
+function rosterFromCrew(rosterEntry: any, crew: any): void {
 	rosterEntry.level = crew.level;
 	rosterEntry.rarity = crew.rarity;
 	rosterEntry.buyback = crew.in_buy_back_state;
@@ -45,20 +23,20 @@ function rosterFromCrew(rosterEntry, crew) {
 
 	rosterEntry.equipment_slots = crew.equipment_slots;
 
-	rosterEntry.equipment_slots.forEach(function (equipment) {
+	rosterEntry.equipment_slots.forEach((equipment: any) => {
 		equipment.have = false;
 	});
 
-	crew.equipment.forEach(function (equipment) {
+	crew.equipment.forEach((equipment: any) => {
 		rosterEntry.equipment_slots[equipment[0]].have = true;
 	});
 
-	rosterEntry.traits = crew.traits.concat(crew.traits_hidden).map(function (trait) { return STTApi.getTraitName(trait); }).join();
+	rosterEntry.traits = crew.traits.concat(crew.traits_hidden).map((trait: any) => { return STTApi.getTraitName(trait); }).join();
 	rosterEntry.rawTraits = crew.traits.concat(crew.traits_hidden);
 }
 
-export function matchCrew(character) {
-	function getDefaults(id) {
+export function matchCrew(character: any): Promise<any> {
+	function getDefaults(id: number): any {
 		var crew = STTApi.getCrewAvatarById(id);
 		return {
 			id: crew.id, name: crew.name, short_name: crew.short_name, max_rarity: crew.max_rarity, symbol: crew.symbol,
@@ -69,11 +47,11 @@ export function matchCrew(character) {
 		};
 	}
 
-	var roster = [];
-	var rosterEntry = {};
+	let roster: any[] = [];
+	let rosterEntry: any = {};
 
 	// Add all the crew in the active roster
-	character.crew.forEach(function (crew) {
+	character.crew.forEach((crew: any) => {
 		rosterEntry = getDefaults(crew.archetype_id);
 		rosterFromCrew(rosterEntry, crew);
 		roster.push(rosterEntry);
@@ -83,9 +61,9 @@ export function matchCrew(character) {
 	if (character.stored_immortals && character.stored_immortals.length > 0) {
 		// Use the cache wherever possible
 		// TODO: does DB ever change the stats of crew? If yes, we may need to ocasionally clear the cache - perhaps based on record's age
-		let frozenPromises = [];
+		let frozenPromises: Promise<any>[] = [];
 
-		character.stored_immortals.forEach(function (crew) {
+		character.stored_immortals.forEach((crew: any) => {
 			rosterEntry = getDefaults(crew.id);
 			rosterEntry.frozen = crew.quantity;
 			rosterEntry.level = 100;
@@ -104,20 +82,20 @@ export function matchCrew(character) {
 	}
 }
 
-function loadFrozen(rosterEntry) {
-	return STTApi.immortals.where('symbol').equals(rosterEntry.symbol).first((entry) => {
+function loadFrozen(rosterEntry: any): Promise<void> {
+	return STTApi.immortals.where('symbol').equals(rosterEntry.symbol).first((entry: any) => {
 		if (entry) {
 			//console.info('Found ' + rosterEntry.symbol + ' in the immortalized crew cache');
 			rosterFromCrew(rosterEntry, entry.crew);
 			return Promise.resolve();
 		} else {
-			return STTApi.loadFrozenCrew(rosterEntry.symbol).then((crew) => {
+			return STTApi.loadFrozenCrew(rosterEntry.symbol).then((crew: any) => {
 				rosterFromCrew(rosterEntry, crew);
 
 				return STTApi.immortals.put({
 					symbol: rosterEntry.symbol,
 					crew: crew
-				}).then((a) => {
+				}).then(() => {
 					return Promise.resolve();
 				});
 			});

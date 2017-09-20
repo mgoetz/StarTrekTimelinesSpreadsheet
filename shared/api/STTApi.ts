@@ -83,7 +83,7 @@ class STTApi {
 		return this._crewAvatars;
 	}
 
-	get itemArchetypeCache(): boolean {
+	get itemArchetypeCache(): any {
 		return this._playerData.item_archetype_cache;
 	}
 

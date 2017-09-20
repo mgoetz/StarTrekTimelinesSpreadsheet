@@ -10,9 +10,8 @@ import { DefaultButton } from 'office-ui-fabric-react/lib/Button';
 import { Callout } from 'office-ui-fabric-react/lib/Callout';
 import { Spinner, SpinnerSize } from 'office-ui-fabric-react/lib/Spinner';
 
-import { loadMissionData } from '../utils/missions.js';
-
 import STTApi from '../../shared/api/STTApi.ts';
+import { loadMissionData } from '../../shared/api/MissionTools.ts';
 
 const CONFIG = require('../utils/config.js');
 

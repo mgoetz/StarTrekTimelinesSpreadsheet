@@ -43,6 +43,6 @@ export interface ImmortalsTable {
 
 export interface WikiImageTable {
     fileName: string,
-    url: string,
-    lastQueried: Date
+    url: string | undefined,
+    lastQueried: number
 }

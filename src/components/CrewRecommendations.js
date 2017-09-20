@@ -7,9 +7,8 @@ import { Image, ImageFit } from 'office-ui-fabric-react/lib/Image';
 import { CrewList } from './CrewList.js';
 import { CollapsibleSection } from './CollapsibleSection.js';
 
-import { loadMissionData } from '../utils/missions.js';
-
 import STTApi from '../../shared/api/STTApi.ts';
+import { loadMissionData } from '../../shared/api/MissionTools.ts';
 
 const CONFIG = require('../utils/config.js');
 

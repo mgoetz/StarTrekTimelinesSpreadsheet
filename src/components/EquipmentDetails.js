@@ -6,11 +6,10 @@ import { Spinner, SpinnerSize } from 'office-ui-fabric-react/lib/Spinner';
 
 import { CollapsibleSection } from './CollapsibleSection.js';
 
-import { loadFullTree } from '../utils/equipment.js';
-import { getWikiImageUrl } from '../utils/wikiImage.js';
-
 const CONFIG = require('../utils/config.js');
 import STTApi from '../../shared/api/STTApi.ts';
+import { loadFullTree } from '../../shared/api/EquipmentTools.ts';
+import { getWikiImageUrl } from '../../shared/api/WikiImageTools.ts';
 
 export class EquipmentSlot extends React.Component {
 	constructor(props) {

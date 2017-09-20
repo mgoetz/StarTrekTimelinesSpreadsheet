@@ -1,11 +1,9 @@
-const CONFIG = require('./config.js');
+import STTApi from './STTApi.ts';
 
-import STTApi from '../../shared/api/STTApi.ts';
-
-function loadQuestData(completed, quest) {
+function loadQuestData(completed: boolean, quest: any): Promise<void> {
 	if (completed)
 	{
-		return STTApi.quests.where('id').equals(quest.id).first((entry) => {
+		return STTApi.quests.where('id').equals(quest.id).first((entry: any) => {
 			if (entry) {
 				//console.info('Found ' + quest.id + ' in the quest cache');
 				quest.description = entry.description;
@@ -27,8 +25,8 @@ function loadQuestData(completed, quest) {
 	}
 }
 
-function loadConflictInfo(quest) {
-	return STTApi.executeGetRequest("quest/conflict_info", { id: quest.id }).then((data) => {
+function loadConflictInfo(quest: any): Promise<void> {
+	return STTApi.executeGetRequest("quest/conflict_info", { id: quest.id }).then((data: any) => {
 		if (data.mastery_levels) {
 			quest.description = data.description;
 			quest.challenges = data.challenges;
@@ -45,7 +43,7 @@ function loadConflictInfo(quest) {
 				mastery_levels: quest.mastery_levels,
 				cadet: quest.cadet,
 				crew_requirement: quest.crew_requirement
-			}).then((a) => {
+			}).then(() => {
 				return Promise.resolve();
 			});
 		} else {
@@ -54,23 +52,23 @@ function loadConflictInfo(quest) {
 	});
 }
 
-export function loadMissionData(accepted_missions, dispute_histories) {
-	var mission_ids = accepted_missions.map(function (mission) { return mission.id; });
+export function loadMissionData(accepted_missions: any, dispute_histories: any): Promise<any> {
+	var mission_ids = accepted_missions.map((mission: any) => mission.id);
 
 	// Add all the episodes' missions (if not cadet)
 	if (dispute_histories) {
-		dispute_histories.forEach(function (dispute) {
+		dispute_histories.forEach((dispute: any) => {
 			mission_ids = mission_ids.concat(dispute.mission_ids);
 		});
 	}
 
-	return STTApi.executeGetRequest("mission/info", { ids: mission_ids }).then((data) => {
-		var missions = [];
-		let questPromises = [];
+	return STTApi.executeGetRequest("mission/info", { ids: mission_ids }).then((data: any) => {
+		let missions: any[] = [];
+		let questPromises: Promise<void>[] = [];
 
-		data.character.accepted_missions.forEach(function (mission) {
+		data.character.accepted_missions.forEach((mission: any) => {
 			if (mission.episode_title != null) {
-				var missionData = {
+				let missionData = {
 					id: mission.id,
 					episode_title: mission.episode_title,
 					description: mission.description,
@@ -79,7 +77,7 @@ export function loadMissionData(accepted_missions, dispute_histories) {
 					quests: []
 				};
 
-				mission.quests.forEach(function (quest) {
+				mission.quests.forEach((quest: any) => {
 					if ((!quest.locked) && quest.name) {
 						if (quest.quest_type == 'ConflictQuest') {
 							questPromises.push(loadQuestData(mission.stars_earned == mission.total_stars, quest));
@@ -97,13 +95,13 @@ export function loadMissionData(accepted_missions, dispute_histories) {
 			else {
 				// Could be one of the episodes
 				if (dispute_histories) {
-					dispute_histories.forEach(function (dispute) {
+					dispute_histories.forEach((dispute: any) => {
 						if (dispute.mission_ids.includes(mission.id)) {
 							if (!dispute.quests)
 								dispute.quests = [];
 
-							mission.quests.forEach(function (quest) {
-								if ((!quest.locked) && quest.name && !dispute.quests.find(function (q) { return q.id == quest.id; })) {
+							mission.quests.forEach((quest: any) => {
+								if ((!quest.locked) && quest.name && !dispute.quests.find((q: any) => q.id == quest.id)) {
 									if (quest.quest_type == 'ConflictQuest') {
 										questPromises.push(loadQuestData(dispute.stars_earned == dispute.total_stars, quest));
 									}
@@ -123,7 +121,7 @@ export function loadMissionData(accepted_missions, dispute_histories) {
 		return Promise.all(questPromises).then(() => {
 			if (dispute_histories) {
 				// Pretend the episodes (disputes) are missions too, to get them to show up
-				dispute_histories.forEach(function (dispute) {
+				dispute_histories.forEach((dispute: any) => {
 					var missionData = {
 						id: dispute.mission_ids[0],
 						episode_title: 'Episode ' + dispute.episode + ' : ' + dispute.name,

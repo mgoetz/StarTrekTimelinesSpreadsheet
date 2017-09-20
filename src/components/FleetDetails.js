@@ -10,9 +10,9 @@ import { CollapsibleSection } from './CollapsibleSection.js';
 
 import { loginPubNub } from '../utils/chat.js';
 import { sortItems, columnClick } from '../utils/listUtils.js';
-import { getWikiImageUrl } from '../utils/wikiImage.js';
 
 import STTApi from '../../shared/api/STTApi.ts';
+import { getWikiImageUrl } from '../../shared/api/WikiImageTools.ts';
 
 export class MemberList extends React.Component {
 	constructor(props) {

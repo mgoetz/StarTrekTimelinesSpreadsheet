@@ -1,16 +1,16 @@
-import STTApi from '../../shared/api/STTApi.ts';
+import STTApi from './STTApi.ts';
 
-export function loadFullTree() {
-    let mapEquipment = new Set();
-    let missingEquipment = [];
+export function loadFullTree(): Promise<void> {
+    let mapEquipment: Set<number> = new Set();
+    let missingEquipment: any[] = [];
 
-    STTApi.itemArchetypeCache.archetypes.forEach(function (equipment) {
+    STTApi.itemArchetypeCache.archetypes.forEach((equipment: any) => {
         mapEquipment.add(equipment.id);
     });
 
-    STTApi.itemArchetypeCache.archetypes.forEach(function (equipment) {
+    STTApi.itemArchetypeCache.archetypes.forEach((equipment: any) => {
         if (equipment.recipe && equipment.recipe.demands && (equipment.recipe.demands.length > 0)) {
-            equipment.recipe.demands.forEach(function (item) {
+            equipment.recipe.demands.forEach((item: any) => {
                 if (!mapEquipment.has(item.archetype_id)) {
                     missingEquipment.push(item.archetype_id);
                 }
@@ -23,7 +23,7 @@ export function loadFullTree() {
         return Promise.resolve();
     }
 
-    return STTApi.executeGetRequest("item/description", { ids: missingEquipment.slice(0,20) }).then((data) => {
+    return STTApi.executeGetRequest("item/description", { ids: missingEquipment.slice(0,20) }).then((data: any) => {
         if (data.item_archetype_cache && data.item_archetype_cache.archetypes) {
             STTApi.itemArchetypeCache.archetypes = STTApi.itemArchetypeCache.archetypes.concat(data.item_archetype_cache.archetypes);
             return loadFullTree();
