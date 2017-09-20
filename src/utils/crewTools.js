@@ -1,6 +1,6 @@
 const CONFIG = require('./config.js');
 
-import STTApi from '../api/STTApi.ts';
+import STTApi from '../../shared/api/STTApi.ts';
 
 function queue(name) {
 	queue.q[name]++ || (queue.q[name] = 1);

@@ -10,7 +10,7 @@ import { CrewList } from './CrewList.js';
 import { loadGauntlet, gauntletCrewSelection, gauntletRoundOdds, payToGetNewOpponents, playContest } from '../utils/gauntlet.js';
 import { getWikiImageUrl } from '../utils/wikiImage.js';
 
-import STTApi from '../api/STTApi.ts';
+import STTApi from '../../shared/api/STTApi.ts';
 
 const CONFIG = require('../utils/config.js');
 

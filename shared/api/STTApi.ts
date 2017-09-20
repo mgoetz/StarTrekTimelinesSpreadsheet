@@ -75,8 +75,12 @@ class STTApi {
 		return this._accessToken != null;
 	}
 
-	get playerData(): boolean {
+	get playerData(): any {
 		return this._playerData.player;
+	}
+
+	get crewAvatars(): any {
+		return this._crewAvatars;
 	}
 
 	get itemArchetypeCache(): boolean {
@@ -105,10 +109,6 @@ class STTApi {
 
 	getTraitName(trait: string): string {
 		return this._platformConfig.config.trait_names[trait] ? this._platformConfig.config.trait_names[trait] : trait;
-	}
-
-	get crewAvatars(): any {
-		return this._crewAvatars;
 	}
 
 	getCrewAvatarById(id: number): any {

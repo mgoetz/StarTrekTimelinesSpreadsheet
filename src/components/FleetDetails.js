@@ -12,7 +12,7 @@ import { loginPubNub } from '../utils/chat.js';
 import { sortItems, columnClick } from '../utils/listUtils.js';
 import { getWikiImageUrl } from '../utils/wikiImage.js';
 
-import STTApi from '../api/STTApi.ts';
+import STTApi from '../../shared/api/STTApi.ts';
 
 export class MemberList extends React.Component {
 	constructor(props) {

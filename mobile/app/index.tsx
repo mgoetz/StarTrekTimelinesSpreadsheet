@@ -1,6 +1,6 @@
 import * as React from "react";
 import * as ReactDOM from "react-dom";
-import STTApi from './STTApi';
+import STTApi from '../../shared/api/STTApi';
 
 import { Spinner, SpinnerSize } from 'office-ui-fabric-react/lib/Spinner';
 import { DetailsList, DetailsListLayoutMode, Selection, IColumn } from 'office-ui-fabric-react/lib/DetailsList';

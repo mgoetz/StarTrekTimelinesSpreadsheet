@@ -51,7 +51,7 @@ import { EquipmentDetails } from './EquipmentDetails.js';
 import { CaptainCard } from './CaptainCard.js';
 import { FeedbackPanel } from './FeedbackPanel.js';
 
-import STTApi from '../api/STTApi.ts';
+import STTApi from '../../shared/api/STTApi.ts';
 
 const path = require('path');
 const electron = require('electron');

@@ -2,7 +2,7 @@ const fs = require('electron').remote.require('fs');
 
 import { loadMissionData } from './missions.js';
 
-import STTApi from '../api/STTApi.ts';
+import STTApi from '../../shared/api/STTApi.ts';
 
 const CONFIG = require('./config.js');
 

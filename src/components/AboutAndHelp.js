@@ -7,7 +7,7 @@ const electron = require('electron');
 const app = electron.app || electron.remote.app;
 const shell = electron.shell || electron.remote.shell;
 
-import STTApi from '../api/STTApi.ts';
+import STTApi from '../../shared/api/STTApi.ts';
 
 export class AboutAndHelp extends React.Component {
 	constructor(props) {

@@ -1,6 +1,6 @@
 const CONFIG = require('./config.js');
 
-import STTApi from '../api/STTApi.ts';
+import STTApi from '../../shared/api/STTApi.ts';
 
 function loadQuestData(completed, quest) {
 	if (completed)

@@ -5,8 +5,8 @@
     "author": "IAmPicard",
     "homepage": "https://github.com/IAmPicard/StarTrekTimelinesSpreadsheet",
     "repository": {
-      "type": "git",
-      "url": "https://github.com/IAmPicard/StarTrekTimelinesSpreadsheet.git"
+        "type": "git",
+        "url": "https://github.com/IAmPicard/StarTrekTimelinesSpreadsheet.git"
     },
     "license": "GPL-3.0",
     "main": "index.js",

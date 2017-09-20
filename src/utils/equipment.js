@@ -1,4 +1,4 @@
-import STTApi from '../api/STTApi.ts';
+import STTApi from '../../shared/api/STTApi.ts';
 
 export function loadFullTree() {
     let mapEquipment = new Set();

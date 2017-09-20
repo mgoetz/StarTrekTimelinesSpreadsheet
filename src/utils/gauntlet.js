@@ -1,6 +1,6 @@
 const CONFIG = require('./config.js');
 
-import STTApi from '../api/STTApi.ts';
+import STTApi from '../../shared/api/STTApi.ts';
 
 export function loadGauntlet() {
 	return STTApi.executeGetRequest("gauntlet/status", {gauntlet_id: -1}).then((data) => {

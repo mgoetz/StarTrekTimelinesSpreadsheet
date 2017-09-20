@@ -9,7 +9,7 @@ import { CollapsibleSection } from './CollapsibleSection.js';
 
 import { loadMissionData } from '../utils/missions.js';
 
-import STTApi from '../api/STTApi.ts';
+import STTApi from '../../shared/api/STTApi.ts';
 
 const CONFIG = require('../utils/config.js');
 

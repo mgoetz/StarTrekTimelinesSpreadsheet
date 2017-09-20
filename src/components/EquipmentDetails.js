@@ -10,7 +10,7 @@ import { loadFullTree } from '../utils/equipment.js';
 import { getWikiImageUrl } from '../utils/wikiImage.js';
 
 const CONFIG = require('../utils/config.js');
-import STTApi from '../api/STTApi.ts';
+import STTApi from '../../shared/api/STTApi.ts';
 
 export class EquipmentSlot extends React.Component {
 	constructor(props) {
