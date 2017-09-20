@@ -1,0 +1,22 @@
+<?xml version='1.0' encoding='utf-8'?>
+<widget id="startrektimelines-companion" version="0.0.1" xmlns="http://www.w3.org/ns/widgets" xmlns:cdv="http://cordova.apache.org/ns/1.0">
+    <name>startrektimelines-companion</name>
+    <description>Mobile companion for Star Trek Timelines</description>
+    <author email="" href="https://github.com/IAmPicard/StarTrekTimelinesSpreadsheet">IAmPicard</author>
+    <content src="index.html" />
+    <access origin="*" />
+    <preference name="SplashScreen" value="screen" />
+    <preference name="windows-target-version" value="10.0" />
+    <allow-intent href="http://*/*" />
+    <allow-intent href="https://*/*" />
+    <allow-intent href="mailto:*" />
+    <platform name="android">
+        <allow-intent href="market:*" />
+    </platform>
+    <platform name="ios">
+        <allow-intent href="itms:*" />
+        <allow-intent href="itms-apps:*" />
+    </platform>
+    <engine name="browser" spec="latest" />
+    <plugin name="cordova-plugin-whitelist" spec="latest" />
+</widget>

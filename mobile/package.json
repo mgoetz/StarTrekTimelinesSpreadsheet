@@ -1,0 +1,43 @@
+{
+    "name": "startrektimelines-companion",
+    "version": "0.0.1",
+    "description": "Mobile companion for Star Trek Timelines",
+    "author": "IAmPicard",
+    "homepage": "https://github.com/IAmPicard/StarTrekTimelinesSpreadsheet",
+    "repository": {
+      "type": "git",
+      "url": "https://github.com/IAmPicard/StarTrekTimelinesSpreadsheet.git"
+    },
+    "license": "GPL-3.0",
+    "main": "index.js",
+    "dependencies": {
+        "cordova-browser": "latest",
+        "cordova-plugin-whitelist": "latest",
+        "dexie": "latest",
+        "office-ui-fabric-react": "latest",
+        "react": "latest",
+        "react-dom": "latest"
+    },
+    "devDependencies": {
+        "@types/prop-types": "latest",
+        "@types/react": "latest",
+        "@types/react-dom": "latest",
+        "source-map-loader": "latest",
+        "ts-loader": "latest",
+        "typescript": "latest",
+        "typings": "latest",
+        "webpack": "latest"
+    },
+    "scripts": {
+        "postinstall": "node_modules/.bin/typings install",
+        "bundle": "node_modules/.bin/webpack"
+    },
+    "cordova": {
+        "plugins": {
+            "cordova-plugin-whitelist": {}
+        },
+        "platforms": [
+            "browser"
+        ]
+    }
+}
