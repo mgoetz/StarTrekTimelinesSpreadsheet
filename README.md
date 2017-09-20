@@ -73,6 +73,12 @@ Basic information about your fleet such as a member list with their last online 
 
 You can export a formatted html page with your crew stats and (optionally) your mission completion stats either to the local PC or directly upload it online, ready to send a link wherever you want - maybe your fleet-mates or to the forum / reddit / discord to ask for advice or just brag :wink: .
 
+### Crew active state
+
+![Screenshot Voyage](/docs/Screenshot-Voyage.png "Voyage screenshot")
+
+You can inspect the active state of crew by clicking on the little "baloon" icon. This can tell you whether the crew is currently on a shuttle adventure or on a voyage as well as details about remaining time, loot, etc.
+
 ## Development environment
 
 ### To get started:

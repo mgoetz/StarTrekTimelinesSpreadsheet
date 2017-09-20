@@ -1,4 +1,4 @@
-import STTApi from './STTApi.ts';
+import STTApi from "./STTApi.ts";
 
 export function matchShips(ships: any): Promise<any> {
 	let newShips: any[] = [];

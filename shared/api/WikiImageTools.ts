@@ -1,4 +1,4 @@
-import STTApi from './STTApi.ts';
+import STTApi from "./STTApi.ts";
 import CONFIG from "./CONFIG.ts";
 
 export interface IFoundResult {

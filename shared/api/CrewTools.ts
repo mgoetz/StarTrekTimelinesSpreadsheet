@@ -1,4 +1,4 @@
-import STTApi from './STTApi.ts';
+import STTApi from "./STTApi.ts";
 
 function rosterFromCrew(rosterEntry: any, crew: any): void {
 	rosterEntry.level = crew.level;
