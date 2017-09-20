@@ -446,24 +446,26 @@ class App extends React.Component {
 
 			this.setState({ dataLoaded: true, crewList: roster, filteredCrewList: roster });
 
+			let iconPromises = [];
 			roster.forEach((crew) => {
-				getWikiImageUrl(crew.name.split(' ').join('_') + '_Head.png', crew.id).then(({id, url}) => {
+				iconPromises.push(getWikiImageUrl(crew.name.split(' ').join('_') + '_Head.png', crew.id).then(({id, url}) => {
 					this.state.crewList.forEach(function (crew) {
 						if (crew.id === id)
 							crew.iconUrl = url;
 					});
 
-					this.forceUpdate();
-				}).catch((error) => { /*console.warn(error);*/ });
-				getWikiImageUrl(crew.name.split(' ').join('_') + '.png', crew.id).then(({id, url}) => {
+					return Promise.resolve();
+				}).catch((error) => { /*console.warn(error);*/ }));
+				iconPromises.push(getWikiImageUrl(crew.name.split(' ').join('_') + '.png', crew.id).then(({id, url}) => {
 					this.state.crewList.forEach(function (crew) {
 						if (crew.id === id)
 							crew.iconBodyUrl = url;
 					});
 
-					this.forceUpdate();
-				}).catch((error) => { /*console.warn(error);*/ });
+					return Promise.resolve();
+				}).catch((error) => { /*console.warn(error);*/ }));
 			});
+			Promise.all(iconPromises).then(() => this.forceUpdate());
 		});
 
 		matchShips(STTApi.playerData.character.ships).then((ships) => {

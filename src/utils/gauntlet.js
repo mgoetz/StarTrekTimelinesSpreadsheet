@@ -1,5 +1,3 @@
-const CONFIG = require('./config.js');
-
 import STTApi from '../../shared/api/STTApi.ts';
 
 export function loadGauntlet() {
