@@ -68,6 +68,7 @@ class App extends React.Component {
 			showSpinner: false,
 			dataLoaded: false,
 			isCaptainCalloutVisible: false,
+			showLoginDialog: false,
 			captainName: 'Welcome!',
 			secondLine: '',
 			captainAvatarUrl: '',
@@ -93,15 +94,15 @@ class App extends React.Component {
 		this._onDataError = this._onDataError.bind(this);
 		this._tick = this._tick.bind(this);
 
-		if (CONFIG.UserConfig.getValue('autoLogin') == true) {
-			this.state.showSpinner = true;
-			this.state.showLoginDialog = false;
-			STTApi.loginWithCachedAccessToken(CONFIG.UserConfig.getValue('accessToken'));
-			this._onAccessToken(true);
-		}
-		else {
-			this.state.showLoginDialog = true;
-		}
+		STTApi.loginWithCachedAccessToken().then((success) => {
+			if (success) {
+				this.setState({ showSpinner: true, showLoginDialog: false});
+				this._onAccessToken();
+			}
+			else {
+				this.setState({ showLoginDialog: true});
+			}
+		});
 	}
 
 	_onCaptainClicked() {
@@ -330,10 +331,7 @@ class App extends React.Component {
 		});
 	}
 
-	_onAccessToken(autoLogin) {
-		CONFIG.UserConfig.setValue('autoLogin', autoLogin);
-		CONFIG.UserConfig.setValue('accessToken', STTApi.accessToken);
-
+	_onAccessToken() {
 		this.setState({ showSpinner: true });
 
 		var mainResources = [

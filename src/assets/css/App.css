@@ -40,6 +40,12 @@
     max-width: 550px !important;
 }
 
+.activedialogMainOverride {
+    max-width: 700px !important;
+    color: white !important;
+    background: black !important;
+}
+
 .equipment-slot {
     border: 0px;
     margin: 2px;

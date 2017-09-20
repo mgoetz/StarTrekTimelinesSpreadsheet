@@ -2,8 +2,8 @@ import STTApi from './STTApi.ts';
 import CONFIG from "./CONFIG.ts";
 
 export interface IFoundResult {
-    id: any;
-    url: string | undefined;
+	id: any;
+	url: string | undefined;
 }
 
 export function getWikiImageUrl(fileName: string, id: any): Promise<IFoundResult> {
@@ -11,7 +11,11 @@ export function getWikiImageUrl(fileName: string, id: any): Promise<IFoundResult
 		if (entry) {
 			if (entry.url) {
 				//console.info('Found ' + fileName + ' in the cache with url ' + entry.url);
-				return Promise.resolve({ id: id, url: entry.url });
+				let result: IFoundResult = {
+					id: id,
+					url: entry.url
+				};
+				return Promise.resolve(result);
 			} else {
 				if ((Date.now() - entry.lastQueried) / 3600000 < CONFIG.HOURS_TO_RECOVERY) {
 					return Promise.reject('The Wiki didn\'t have an image for ' + fileName);
@@ -27,7 +31,8 @@ export function getWikiImageUrl(fileName: string, id: any): Promise<IFoundResult
 			format: 'json'
 		}).then((data: any) => {
 			let foundUrl = undefined;
-			Object.values(data.query.pages).forEach((page: any) => {
+			Object.keys(data.query.pages).forEach((pageKey: any) => {
+				let page = data.query.pages[pageKey];
 				if (page.imageinfo) {
 					page.imageinfo.forEach((imgInfo: any) => {
 						foundUrl = imgInfo.url;
@@ -35,29 +40,27 @@ export function getWikiImageUrl(fileName: string, id: any): Promise<IFoundResult
 				}
 			});
 
-			return Promise.resolve({ id: id, url: foundUrl });
+			let result: IFoundResult = {
+				id: id,
+				url: foundUrl
+			};
+			return Promise.resolve(result);
 		}).then((found: IFoundResult) => {
-			if (found.url) {
-				//console.info('Caching ' + fileName + ' with url ' + found.url);
-				return STTApi.wikiImages.put({
-					fileName: fileName,
-					url: found.url,
-					lastQueried: Date.now()
-				}).then(() => {
+			return STTApi.wikiImages.put({
+				fileName: fileName,
+				url: found.url,
+				lastQueried: Date.now()
+			}).then(() => {
+				if (found.url) {
+					//console.info('Caching ' + fileName + ' with url ' + found.url);
 					return Promise.resolve(found);
-				});
-			} else {
-				// the Wiki doesn't have this image yet, or it was named in a non-standard way
-
-				//console.info('Caching the fact that ' + fileName + ' is not available in the wiki yet');
-				return STTApi.wikiImages.put({
-					fileName: fileName,
-					url: undefined,
-					lastQueried: Date.now()
-				}).then(() => {
+				}
+				else {
+					// the Wiki doesn't have this image yet, or it was named in a non-standard way
+					//console.info('Caching the fact that ' + fileName + ' is not available in the wiki yet');
 					return Promise.reject('The Wiki doesn\'t have an image yet for ' + fileName);
-				});
-			}
+				}
+			});
 		});
 	});
 }

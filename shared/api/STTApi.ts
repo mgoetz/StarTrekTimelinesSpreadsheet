@@ -17,7 +17,7 @@
 */
 import { NetworkInterface } from "./NetworkInterface";
 import { NetworkFetch } from "./NetworkFetch.ts";
-import { DexieCache, QuestsTable, ImmortalsTable, WikiImageTable } from "./Cache.ts";
+import { DexieCache, QuestsTable, ImmortalsTable, ConfigTable, WikiImageTable } from "./Cache.ts";
 import Dexie from "dexie";
 import CONFIG from "./CONFIG.ts";
 
@@ -67,6 +67,10 @@ class STTApi {
 		return this._cache.wikiImages;
 	}
 
+	get config(): Dexie.Table<ConfigTable, string> {
+		return this._cache.config;
+	}
+
 	get accessToken(): string | undefined {
 		return this._accessToken;
 	}
@@ -111,6 +115,10 @@ class STTApi {
 		return this._platformConfig.config.trait_names[trait] ? this._platformConfig.config.trait_names[trait] : trait;
 	}
 
+	getShipTraitName(trait: string): string {
+		return this._platformConfig.config.ship_trait_names[trait] ? this._platformConfig.config.ship_trait_names[trait] : trait;
+	}
+
 	getCrewAvatarById(id: number): any {
 		return this._crewAvatars.find((avatar: any) => avatar.id === id);
 	}
@@ -119,7 +127,7 @@ class STTApi {
 		return this._crewAvatars.find((avatar: any) => avatar.symbol === symbol);
 	}
 
-	login(username: string, password: string): Promise<any> {
+	login(username: string, password: string, autoLogin: boolean): Promise<any> {
 		return this._net.post(CONFIG.URL_PLATFORM + "oauth2/token", {
 			"username": username,
 			"password": password,
@@ -129,20 +137,55 @@ class STTApi {
 			if (data.error_description) {
 				return Promise.reject(data.error_description);
 			} else if (data.access_token) {
-				this._accessToken = data.access_token;
-				console.info("Logged in with access token " + data.access_token);
-				return Promise.resolve();
+				return this._loginWithAccessToken(data.access_token, autoLogin);
 			} else {
 				return Promise.reject("Invalid data for login!");
 			}
 		});
 	}
 
-	loginWithCachedAccessToken(accessToken: string): void {
-		this._accessToken = accessToken;
+	loginWithCachedAccessToken(): Promise<boolean> {
+		return this._cache.config.where('key').equals('autoLogin').first((entry: ConfigTable) => {
+			if (entry && entry.value === true) {
+				return this._cache.config.where('key').equals('accessToken').first((entry: ConfigTable) => {
+					if (entry && entry.value) {
+						this._accessToken = entry.value;
+						return Promise.resolve(true);
+					}
+					else {
+						return Promise.resolve(false);
+					}
+				});
+			}
+			else {
+				return Promise.resolve(false);
+			}
+		});
 	}
 
-	loginWithFacebook(facebookAccessToken: string, facebookUserId: string): Promise<any> {
+	private _loginWithAccessToken(access_token: string, autoLogin: boolean): Promise<void> {
+		this._accessToken = access_token;
+		console.info("Logged in with access token " + access_token);
+
+		if (autoLogin) {
+			return this._cache.config.put({
+				key: 'autoLogin',
+				value: autoLogin
+			}).then(() => {
+				return this._cache.config.put({
+					key: 'accessToken',
+					value: access_token
+				}).then(() => {
+					return Promise.resolve();
+				});
+			});
+		}
+		else {
+			return Promise.resolve();
+		}
+	}
+
+	loginWithFacebook(facebookAccessToken: string, facebookUserId: string, autoLogin: boolean): Promise<any> {
 		return this._net.post(CONFIG.URL_PLATFORM + "oauth2/token", {
 			"third_party.third_party": "facebook",
 			"third_party.access_token": facebookAccessToken,
@@ -153,9 +196,7 @@ class STTApi {
 			if (data.error_description) {
 				return Promise.reject(data.error_description);
 			} else if (data.access_token) {
-				this._accessToken = data.access_token;
-				console.info("Logged in with access token " + data.access_token);
-				return Promise.resolve();
+				return this._loginWithAccessToken(data.access_token, autoLogin);
 			} else {
 				return Promise.reject("Invalid data for login!");
 			}

@@ -4,8 +4,10 @@ import { Image, ImageFit } from 'office-ui-fabric-react/lib/Image';
 import { Rating, RatingSize } from 'office-ui-fabric-react/lib/Rating';
 import { Link } from 'office-ui-fabric-react/lib/Link';
 import { Icon } from 'office-ui-fabric-react/lib/Icon';
+import { IconButton, IButtonProps } from 'office-ui-fabric-react/lib/Button';
 
 import { SkillCell } from './SkillCell.js';
+import { ActiveCrewDialog } from './ActiveCrewDialog.js';
 
 import { sortItems, columnClick } from '../utils/listUtils.js';
 
@@ -133,6 +135,21 @@ export class CrewList extends React.Component {
 				}
 			},
 			{
+				key: 'active_id',
+				name: 'Buy-back',
+				minWidth: 16,
+				maxWidth: 16,
+				iconName: 'Balloons',
+				isIconOnly: true,
+				fieldName: 'active_id',
+				onRender: (item) => {
+					if (item.active_id)
+						return (<IconButton iconProps={{iconName:'Balloons'}} title='Active engagement' onClick={() => this._showActiveDialog(item.active_id, item.name)} />);
+					else
+						return (<p />);
+				}
+			},
+			{
 				key: 'command_skill',
 				name: 'Command',
 				minWidth: 70,
@@ -240,6 +257,7 @@ export class CrewList extends React.Component {
 		}
 
 		this._onColumnClick = this._onColumnClick.bind(this);
+		this._showActiveDialog = this._showActiveDialog.bind(this);
 	}
 
 	render() {
@@ -256,6 +274,7 @@ export class CrewList extends React.Component {
 					layoutMode={DetailsListLayoutMode.justified}
 					onColumnHeaderClick={this._onColumnClick}
 				/>
+				<ActiveCrewDialog ref='activeCrewDialog' />
 			</div>
 		);
 	}
@@ -311,5 +330,9 @@ export class CrewList extends React.Component {
 			this.setState({ groups: null });
 		else
 			this.setState({ groups: groupBy(this.state.items, this.state.groupedColumn) });
+	}
+
+	_showActiveDialog(active_id, name) {
+		this.refs.activeCrewDialog.show(active_id, name);
 	}
 }

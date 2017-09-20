@@ -35,6 +35,12 @@ export class LoginDialog extends React.Component {
 		this._connectFacebook = this._connectFacebook.bind(this);
 	}
 
+	componentWillReceiveProps(nextProps) {
+		if (nextProps.shownByDefault !== this.props.shownByDefault) {
+			this.setState({hideDialog: !nextProps.shownByDefault});
+		}
+	}
+
 	render() {
 		return (
 			<div>
@@ -134,15 +140,15 @@ export class LoginDialog extends React.Component {
 
 		let promiseLogin;
 		if (this.state.facebookAccessToken) {
-			promiseLogin = STTApi.loginWithFacebook(this.state.facebookAccessToken, this.state.facebookUserId);
+			promiseLogin = STTApi.loginWithFacebook(this.state.facebookAccessToken, this.state.facebookUserId, this.state.autoLogin);
 		}
 		else {
-			promiseLogin = STTApi.login(this.state.username, this.state.password);
+			promiseLogin = STTApi.login(this.state.username, this.state.password, this.state.autoLogin);
 		}
 
 		promiseLogin.then(() => {
 			this.setState({ showSpinner: false, hideDialog: true });
-			this.props.onAccessToken(this.state.autoLogin);
+			this.props.onAccessToken();
 		})
 		.catch((error) => {
 			this.setState({ showSpinner: false, hideDialog: false, errorMessage: error });

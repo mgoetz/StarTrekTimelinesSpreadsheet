@@ -52,7 +52,16 @@ function loadConflictInfo(quest: any): Promise<void> {
 	});
 }
 
-export function loadMissionData(accepted_missions: any, dispute_histories: any): Promise<any> {
+export interface IMissionData {
+	id: number;
+	episode_title: string;
+	description: string;
+	stars_earned: number;
+	total_stars: number;
+	quests: any[];
+}
+
+export function loadMissionData(accepted_missions: any, dispute_histories: any): Promise<IMissionData[]> {
 	var mission_ids = accepted_missions.map((mission: any) => mission.id);
 
 	// Add all the episodes' missions (if not cadet)
@@ -63,12 +72,12 @@ export function loadMissionData(accepted_missions: any, dispute_histories: any):
 	}
 
 	return STTApi.executeGetRequest("mission/info", { ids: mission_ids }).then((data: any) => {
-		let missions: any[] = [];
+		let missions: IMissionData[] = [];
 		let questPromises: Promise<void>[] = [];
 
 		data.character.accepted_missions.forEach((mission: any) => {
 			if (mission.episode_title != null) {
-				let missionData = {
+				let missionData: IMissionData = {
 					id: mission.id,
 					episode_title: mission.episode_title,
 					description: mission.description,
@@ -122,7 +131,7 @@ export function loadMissionData(accepted_missions: any, dispute_histories: any):
 			if (dispute_histories) {
 				// Pretend the episodes (disputes) are missions too, to get them to show up
 				dispute_histories.forEach((dispute: any) => {
-					var missionData = {
+					let missionData: IMissionData = {
 						id: dispute.mission_ids[0],
 						episode_title: 'Episode ' + dispute.episode + ' : ' + dispute.name,
 						description: 'Episode ' + dispute.episode,

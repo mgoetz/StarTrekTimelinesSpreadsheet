@@ -4,6 +4,7 @@ export class DexieCache extends Dexie {
     private _questsTable: Dexie.Table<QuestsTable, number>;
     private _immortalsTable: Dexie.Table<ImmortalsTable, string>;
     private _wikiImageTable: Dexie.Table<WikiImageTable, string>;
+    private _config: Dexie.Table<ConfigTable, string>;
 
     get quests(): Dexie.Table<QuestsTable, number> {
 		return this._questsTable;
@@ -15,6 +16,10 @@ export class DexieCache extends Dexie {
     
     get wikiImages(): Dexie.Table<WikiImageTable, string> {
 		return this._wikiImageTable;
+    }
+    
+    get config(): Dexie.Table<ConfigTable, string> {
+		return this._config;
 	}
 
     constructor (databaseName: string) {
@@ -22,7 +27,8 @@ export class DexieCache extends Dexie {
         this.version(1).stores({
             _questsTable: 'id,description,challenges,mastery_levels,cadet,crew_requirement',
             _immortalsTable: 'symbol,crew',
-            _wikiImageTable: 'fileName,url,lastQueried'
+            _wikiImageTable: 'fileName,url,lastQueried',
+            _config: 'key,value'
         });
     }
 }
@@ -45,4 +51,9 @@ export interface WikiImageTable {
     fileName: string,
     url: string | undefined,
     lastQueried: number
+}
+
+export interface ConfigTable {
+    key: string,
+    value: any
 }

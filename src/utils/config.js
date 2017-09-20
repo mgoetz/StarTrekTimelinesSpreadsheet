@@ -1,9 +1,3 @@
-import { UserConfigLoader } from './UserConfigLoader.ts';
-
-export var UserConfig = new UserConfigLoader();
-
-// CONSTANTS below
-
 export const rarityRes = {
 	'0': { name: 'Basic', color: 'Grey' },
 	'1': { name: 'Common', color: '#ddd' },

@@ -5,6 +5,7 @@ function rosterFromCrew(rosterEntry: any, crew: any): void {
 	rosterEntry.rarity = crew.rarity;
 	rosterEntry.buyback = crew.in_buy_back_state;
 	rosterEntry.crew_id = crew.id;
+	rosterEntry.active_id = crew.active_id;
 
 	for (var skill in crew.skills) {
 		rosterEntry[skill].core = crew.skills[skill].core;
