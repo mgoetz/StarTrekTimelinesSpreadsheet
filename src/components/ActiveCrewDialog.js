@@ -121,6 +121,10 @@ export class Voyage extends React.Component {
                     </tr>
                 </tbody>
             </table>
+            <h4>Pending rewards</h4>
+            {this.state.voyage.pending_rewards.loot.map((loot, index) => {
+                return (<span key={index} style={{ color: loot.rarity && CONFIG.rarityRes[loot.rarity].color }}>{loot.quantity} {(loot.rarity == null) ? '' : CONFIG.rarityRes[loot.rarity].name} {loot.full_name}</span>);
+            }).reduce((prev, curr) => [prev, ', ', curr])}
         </div>);
     }
 }
