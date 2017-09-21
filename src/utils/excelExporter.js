@@ -1,6 +1,7 @@
 const Excel = require('electron').remote.require('exceljs');
+import STTApi from '../../shared/api/STTApi.ts';
 
-export function exportExcel(roster, itemList, shipList, fileName) {
+export function exportExcel(itemList, fileName) {
 	var workbook = new Excel.Workbook();
 	var worksheet = workbook.addWorksheet('Crew stats');
 
@@ -38,7 +39,7 @@ export function exportExcel(roster, itemList, shipList, fileName) {
 
 	worksheet.autoFilter = 'A1:AA1';
 
-	roster.forEach(function (crew) {
+	STTApi.roster.forEach(function (crew) {
 		worksheet.addRow({
 			'id': crew.id,
 			'name': crew.name,
@@ -117,7 +118,7 @@ export function exportExcel(roster, itemList, shipList, fileName) {
 
 	worksheetShips.autoFilter = 'A1:J1';
 
-	shipList.forEach(function (ship) {
+	STTApi.ships.forEach(function (ship) {
 		worksheetShips.addRow({
 			'id': ship.archetype_id,
 			'name': ship.name,

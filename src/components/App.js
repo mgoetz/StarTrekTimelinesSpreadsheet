@@ -32,8 +32,6 @@ import { exportExcel } from '../utils/excelExporter.js';
 import { exportCsv } from '../utils/csvExporter.js';
 import { shareCrew } from '../utils/pastebin.js';
 
-var compareSemver = require('compare-semver');
-
 import { LoginDialog } from './LoginDialog.js';
 import { ShipList } from './ShipList.js';
 import { ItemList } from './ItemList.js';
@@ -49,11 +47,10 @@ import { CaptainCard } from './CaptainCard.js';
 import { FeedbackPanel } from './FeedbackPanel.js';
 
 import STTApi from '../../shared/api/STTApi.ts';
-import { matchCrew } from '../../shared/api/CrewTools.ts';
-import { matchShips } from '../../shared/api/ShipTools.ts';
 import { getWikiImageUrl } from '../../shared/api/WikiImageTools.ts';
+import { loginSequence } from '../../shared/api/LoginSequence.ts';
 
-const path = require('path');
+const compareSemver = require('compare-semver');
 const electron = require('electron');
 const app = electron.app || electron.remote.app;
 const shell = electron.shell;
@@ -73,12 +70,7 @@ class App extends React.Component {
 			secondLine: '',
 			captainAvatarUrl: '',
 			captainAvatarBodyUrl: '',
-			crewList: [],
-			filteredCrewList: [],
-			shipList: [],
 			itemList: [],
-			missionHelperParams: {},
-			cadetMissionHelperParams: {},
 			spinnerLabel: 'Loading...'
 		};
 
@@ -192,28 +184,28 @@ class App extends React.Component {
 								onChange={ (newValue) => this.refs.crewList.filter(newValue) }
 								onSearch={ (newValue) => this.refs.crewList.filter(newValue) }
         					/>
-							<CrewList data={this.state.filteredCrewList} grouped={false} ref='crewList' />
+							<CrewList data={STTApi.roster} grouped={false} ref='crewList' />
 						</PivotItem>
 						<PivotItem linkText='Items' itemIcon='Boards'>
 							<ItemList data={this.state.itemList} />
 						</PivotItem>
 						<PivotItem linkText='Equipment' itemIcon='CheckList'>
-							<EquipmentDetails crewList={this.state.crewList} />
+							<EquipmentDetails />
 						</PivotItem>
 						<PivotItem linkText='Ships' itemIcon='Airplane'>
-							<ShipList data={this.state.shipList} />
+							<ShipList />
 						</PivotItem>
 						<PivotItem linkText='Missions' itemIcon='Ribbon'>
-							<MissionHelper params={this.state.missionHelperParams} />
+							<MissionHelper cadet={false} />
 						</PivotItem>
 						<PivotItem linkText='Cadet' itemIcon='Trophy'>
-							<MissionHelper params={this.state.cadetMissionHelperParams} />
+							<MissionHelper cadet={true} />
 						</PivotItem>
 						<PivotItem linkText='Recommendations' itemIcon='Lightbulb'>
-							<CrewRecommendations crew={this.state.crewList} cadetMissions={this.state.cadetMissionHelperParams} missions={this.state.missionHelperParams} />
+							<CrewRecommendations />
 						</PivotItem>
 						<PivotItem linkText='Gauntlet' itemIcon='DeveloperTools'>
-							<GauntletHelper crew={this.state.crewList} />
+							<GauntletHelper />
 						</PivotItem>
 						<PivotItem linkText='Fleet' itemIcon='WindDirection'>
 							<FleetDetails />
@@ -251,7 +243,7 @@ class App extends React.Component {
 							if (fileName === undefined)
 								return;
 
-							exportExcel(this.state.crewList, this.state.itemList, this.state.shipList, fileName).then((filePath) => {
+							exportExcel(this.state.itemList, fileName).then((filePath) => {
 								shell.openItem(filePath);
 							});
 						}.bind(this));
@@ -276,7 +268,7 @@ class App extends React.Component {
 							if (fileName === undefined)
 								return;
 
-							exportCsv(this.state.crewList, fileName).then((filePath) => {
+							exportCsv(fileName).then((filePath) => {
 								shell.openItem(filePath);
 							});
 						}.bind(this));
@@ -326,7 +318,7 @@ class App extends React.Component {
 	}
 
 	_onShare(options) {
-		shareCrew(this.state.crewList, options, this.state.missionHelperParams, this.state.cadetMissionHelperParams).then((url) => {
+		shareCrew(options).then((url) => {
 			shell.openItem(url);
 		});
 	}
@@ -334,66 +326,7 @@ class App extends React.Component {
 	_onAccessToken() {
 		this.setState({ showSpinner: true });
 
-		var mainResources = [
-			{
-				loader: STTApi.loadCrewArchetypes.bind(STTApi),
-				description: 'crew information'
-			},
-			{
-				loader: STTApi.loadServerConfig.bind(STTApi),
-				description: 'server configuration'
-			},
-			{
-				loader: STTApi.loadPlatformConfig.bind(STTApi),
-				description: 'platform configuration'
-			},
-			{
-				loader: STTApi.loadShipSchematics.bind(STTApi),
-				description: 'ship information'
-			},
-			{
-				loader: STTApi.loadPlayerData.bind(STTApi),
-				description: 'player data'
-			}
-		];
-
-		var fleetResources = [
-			{
-				loader: STTApi.loadFleetMemberInfo.bind(STTApi),
-				description: 'fleet members'
-			},
-			{
-				loader: STTApi.loadFleetData.bind(STTApi),
-				description: 'fleet data'
-			},
-			{
-				loader: STTApi.loadStarbaseData.bind(STTApi),
-				description: 'starbase data'
-			}
-		];
-
-		mainResources.reduce((prev, cur) => {
-			return prev.then(() => {
-				this.setState({ spinnerLabel: 'Loading ' + cur.description + '...' });
-				return cur.loader();
-			});
-		}, Promise.resolve())
-		.then(() => {
-			if (STTApi.playerData.fleet && STTApi.playerData.fleet.id != 0) {
-				return fleetResources.reduce((prev, cur) => {
-					return prev.then(() => {
-						this.setState({ spinnerLabel: 'Loading ' + cur.description + '...' });
-						return cur.loader(STTApi.playerData.fleet.id);
-					});
-				}, Promise.resolve());
-			}
-			else {
-				return Promise.resolve();
-			}
-		})
-		.then(() => {
-			this.setState({ spinnerLabel: 'Finishing up...' });
-		})
+		loginSequence( (progressLabel) => this.setState({ spinnerLabel: progressLabel}) )
 		.then(this._onDataFinished)
 		.catch(this._onDataError);
 	}
@@ -409,13 +342,7 @@ class App extends React.Component {
 			captainName: STTApi.playerData.character.display_name,
 			secondLine: 'Level ' + STTApi.playerData.character.level,
 			itemList: STTApi.playerData.character.items,
-			missionHelperParams: {
-				accepted_missions: STTApi.playerData.character.accepted_missions,
-				dispute_histories: STTApi.playerData.character.dispute_histories
-			},
-			cadetMissionHelperParams: {
-				accepted_missions: STTApi.playerData.character.cadet_schedule.missions
-			}
+			dataLoaded: true
 		});
 
 		STTApi.getGithubReleases().then((data) => {
@@ -435,40 +362,6 @@ class App extends React.Component {
 				this.setState({ captainAvatarBodyUrl: url });
 			}).catch((error) => {});
 		}
-
-		matchCrew(STTApi.playerData.character).then((roster) => {
-			roster.forEach(function (crew) {
-				crew.iconUrl = '';
-				crew.iconBodyUrl = '';
-			});
-
-			this.setState({ dataLoaded: true, crewList: roster, filteredCrewList: roster });
-
-			let iconPromises = [];
-			roster.forEach((crew) => {
-				iconPromises.push(getWikiImageUrl(crew.name.split(' ').join('_') + '_Head.png', crew.id).then(({id, url}) => {
-					this.state.crewList.forEach(function (crew) {
-						if (crew.id === id)
-							crew.iconUrl = url;
-					});
-
-					return Promise.resolve();
-				}).catch((error) => { /*console.warn(error);*/ }));
-				iconPromises.push(getWikiImageUrl(crew.name.split(' ').join('_') + '.png', crew.id).then(({id, url}) => {
-					this.state.crewList.forEach(function (crew) {
-						if (crew.id === id)
-							crew.iconBodyUrl = url;
-					});
-
-					return Promise.resolve();
-				}).catch((error) => { /*console.warn(error);*/ }));
-			});
-			Promise.all(iconPromises).then(() => this.forceUpdate());
-		});
-
-		matchShips(STTApi.playerData.character.ships).then((ships) => {
-			this.setState({ shipList: ships });
-		});
 	}
 }
 

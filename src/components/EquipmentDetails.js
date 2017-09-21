@@ -157,7 +157,7 @@ export class EquipmentDetails extends React.Component {
 		super(props);
 
 		// Search for crew without all 4 equipment slots filled
-		var filteredCrew = this.props.crewList.filter(function (crew) {
+		var filteredCrew = STTApi.roster.filter(function (crew) {
 			return crew.equipment_slots.some(equipment => !equipment.have);
 		});
 

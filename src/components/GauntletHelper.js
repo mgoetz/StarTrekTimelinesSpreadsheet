@@ -116,7 +116,7 @@ export class GauntletHelper extends React.Component {
 	_gauntletDataRecieved(data) {
 		if (data.gauntlet) {
 			if (data.gauntlet.state == 'NONE') {
-				var result = gauntletCrewSelection(data.gauntlet, this.props.crew);
+				var result = gauntletCrewSelection(data.gauntlet, STTApi.roster);
 
 				this.setState({
 					gauntlet: data.gauntlet,
@@ -124,7 +124,7 @@ export class GauntletHelper extends React.Component {
 					startsIn: Math.floor(data.gauntlet.seconds_to_join / 60),
 					featuredSkill: data.gauntlet.contest_data.featured_skill,
 					traits: data.gauntlet.contest_data.traits.map(function (trait) { return STTApi.getTraitName(trait); }.bind(this)),
-					recommendations: result.recommendations.map(function (id) { return this.props.crew.find((crew) => (crew.id == id)); }.bind(this)),
+					recommendations: result.recommendations.map(function (id) { return STTApi.roster.find((crew) => (crew.id == id)); }.bind(this)),
 					bestInSkill: result.best
 				});
 			}

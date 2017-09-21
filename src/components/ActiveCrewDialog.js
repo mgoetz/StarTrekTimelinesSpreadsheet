@@ -18,7 +18,7 @@ export class ShuttleAdventure extends React.Component {
                 this.state = {
                     name: shuttle.shuttles[0].name,
                     description: shuttle.shuttles[0].description,
-                    completes_in_seconds: shuttle.completes_in_seconds,
+                    completes_in_seconds: shuttle.shuttles[0].expires_in,
                     faction_id: shuttle.faction_id,
                     challenge_rating: shuttle.challenge_rating,
                     faction_iconUrl: '',
@@ -91,7 +91,12 @@ export class Voyage extends React.Component {
     render() {
         return (<div>
             <h3>Voyage on the {STTApi.getShipTraitName(this.state.voyage.ship_trait)} ship {this.state.ship_name}</h3>
-            <p>Voyage has been ongoing for {Math.floor(this.state.voyage_duration / 60)} minutes (new dillema in {Math.floor((this.state.seconds_between_dilemmas - this.state.seconds_since_last_dilemma) / 60)} minutes).</p>
+            {(this.state.voyage.state == "recalled") &&
+                <p>Voyage has lasted for {Math.floor(this.state.voyage_duration / 60)} minutes and it's currently returning.</p>
+            }
+            {(this.state.voyage.state != "recalled") &&
+                <p>Voyage has been ongoing for {Math.floor(this.state.voyage_duration / 60)} minutes (new dillema in {Math.floor((this.state.seconds_between_dilemmas - this.state.seconds_since_last_dilemma) / 60)} minutes).</p>
+            }
             <p>Antimatter remaining: {this.state.voyage.hp} / {this.state.voyage.max_hp}.</p>
             <table>
                 <tbody>

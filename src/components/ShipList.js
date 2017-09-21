@@ -4,14 +4,14 @@ import { Rating, RatingSize } from 'office-ui-fabric-react/lib/Rating';
 import { Image, ImageFit } from 'office-ui-fabric-react/lib/Image';
 
 import { sortItems, columnClick } from '../utils/listUtils.js';
-import { getWikiImageUrl } from '../../shared/api/WikiImageTools.ts';
+import STTApi from '../../shared/api/STTApi.ts';
 
 export class ShipList extends React.Component {
 	constructor(props) {
 		super(props);
 
 		this.state = {
-			items: sortItems(this.props.data, 'name'),
+			items: sortItems(STTApi.ships, 'name'),
 			columns: [
 				{
 					key: 'icon',
@@ -126,21 +126,6 @@ export class ShipList extends React.Component {
 				}
 			]
 		};
-
-		let iconPromises = [];
-		this.state.items.forEach((ship) => {
-			var fileName = ship.name.split(' ').join('_').split('.').join('') + '.png';
-			iconPromises.push(getWikiImageUrl(fileName, ship.name).then(({id, url}) => {
-				this.state.items.forEach(function (item) {
-					if (item.name === id) {
-						item.iconUrl = url;
-					}
-				});
-
-				return Promise.resolve();
-			}).catch((error) => {}));
-		});
-		Promise.all(iconPromises).then(() => this.forceUpdate());
 
 		this._onColumnClick = this._onColumnClick.bind(this);
 	}

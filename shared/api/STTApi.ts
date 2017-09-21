@@ -32,6 +32,9 @@ class STTApi {
 	private _starbaseData: any;
 	private _fleetData: any;
 	private _fleetMemberInfo: any;
+	private _roster: any;
+	private _ships: any;
+	private _missions: any;
 	private _cache: DexieCache;
 
 	constructor() {
@@ -44,11 +47,37 @@ class STTApi {
 		this._starbaseData = null;
 		this._fleetData = null;
 		this._fleetMemberInfo = null;
+		this._roster = null;
+		this._ships = null;
+		this._missions = null;
 
 		this._net = new NetworkFetch();
 
 		// TODO: Dexie uses IndexedDB, so doesn't work in plain node.js without polyfill - should the caching be an interface?
 		this._cache = new DexieCache("sttcache");
+	}
+
+	get roster(): any {
+		return this._roster;
+	}
+
+	get ships(): any {
+		return this._ships;
+	}
+
+	get missions(): any {
+		return this._missions;
+	}
+
+	// TODO: these setters should only be accessible form LoginSequence - perhaps make that a member of STTApi and pass in constructor
+	set roster(value: any) {
+		this._roster = value;
+	}
+	set ships(value: any) {
+		this._ships = value;
+	}
+	set missions(value: any) {
+		this._missions = value;
 	}
 
 	get networkHelper(): NetworkInterface {
