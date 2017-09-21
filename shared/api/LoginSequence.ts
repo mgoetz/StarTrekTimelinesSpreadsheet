@@ -1,9 +1,10 @@
 import STTApi from "./STTApi.ts";
-
+import CONFIG from "./CONFIG.ts";
 import { matchCrew } from './CrewTools.ts';
 import { matchShips } from './ShipTools.ts';
 import { getWikiImageUrl, IFoundResult } from './WikiImageTools.ts';
 import { loadMissionData } from './MissionTools.ts';
+import { calculateMissionCrewSuccess, calculateMinimalComplement } from './MissionCrewSuccess.ts';
 
 export function loginSequence(onProgress: (description: string) => void): Promise<any> {
 	var mainResources = [
@@ -66,6 +67,24 @@ export function loginSequence(onProgress: (description: string) => void): Promis
     .then(() => {
         onProgress('Analyzing crew...');
 
+        let avatarAssets: any[] = [];
+        let urlAsset = STTApi.serverConfig.config.asset_server + 'bundles/webgl/default/' + CONFIG.CLIENT_VERSION + '/' + STTApi.serverConfig.config.asset_bundle_version + '/';
+        STTApi.crewAvatars.forEach((avatar: any) => {
+            var avatarEntry:any = {
+                full_body: urlAsset + 'images' + avatar.full_body.file.replace(new RegExp('/', 'g'), '_') + '.sd',
+                icon: urlAsset + 'images' + avatar.icon.file.replace(new RegExp('/', 'g'), '_') + '.sd',
+                portrait: urlAsset + 'images' + avatar.portrait.file.replace(new RegExp('/', 'g'), '_') + '.sd',
+                id: avatar.id,
+                name: avatar.name,
+                short_name: avatar.short_name,
+                symbol: avatar.symbol
+            }
+
+            avatarAssets.push(avatarEntry);
+        });
+
+        require('electron').remote.require('fs').writeFileSync('avatarAssets.json', JSON.stringify(avatarAssets));
+
         return matchCrew(STTApi.playerData.character).then((roster: any) => {
             STTApi.roster = roster;
 			roster.forEach((crew: any) => {
@@ -118,10 +137,15 @@ export function loginSequence(onProgress: (description: string) => void): Promis
         });
     })
     .then(() => {
-        onProgress('Loading missions and quests...');
+        //onProgress('Loading missions and quests...');
+        onProgress('Finishing up...');
 
         return loadMissionData(STTApi.playerData.character.cadet_schedule.missions.concat(STTApi.playerData.character.accepted_missions), STTApi.playerData.character.dispute_histories).then((missions) => {
             STTApi.missions = missions;
+
+            //onProgress('Calculating mission success stats for crew...');
+            STTApi.missionSuccess = calculateMissionCrewSuccess();
+            STTApi.minimalComplement = calculateMinimalComplement();
 
             return Promise.resolve();
         });

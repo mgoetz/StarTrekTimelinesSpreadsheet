@@ -18,6 +18,7 @@
 import { NetworkInterface } from "./NetworkInterface";
 import { NetworkFetch } from "./NetworkFetch.ts";
 import { DexieCache, QuestsTable, ImmortalsTable, ConfigTable, WikiImageTable } from "./Cache.ts";
+import { IChallengeSuccess, MinimalComplement } from './MissionCrewSuccess.ts';
 import Dexie from "dexie";
 import CONFIG from "./CONFIG.ts";
 
@@ -35,6 +36,8 @@ class STTApi {
 	private _roster: any;
 	private _ships: any;
 	private _missions: any;
+	private _missionSuccess: IChallengeSuccess[];
+	private _minimalComplement: MinimalComplement;
 	private _cache: DexieCache;
 
 	constructor() {
@@ -50,6 +53,7 @@ class STTApi {
 		this._roster = null;
 		this._ships = null;
 		this._missions = null;
+		this._missionSuccess = [];
 
 		this._net = new NetworkFetch();
 
@@ -69,6 +73,14 @@ class STTApi {
 		return this._missions;
 	}
 
+	get missionSuccess(): any {
+		return this._missionSuccess;
+	}
+
+	get minimalComplement(): MinimalComplement {
+		return this._minimalComplement;
+	}
+
 	// TODO: these setters should only be accessible form LoginSequence - perhaps make that a member of STTApi and pass in constructor
 	set roster(value: any) {
 		this._roster = value;
@@ -78,6 +90,12 @@ class STTApi {
 	}
 	set missions(value: any) {
 		this._missions = value;
+	}
+	set missionSuccess(value: any) {
+		this._missionSuccess = value;
+	}
+	set minimalComplement(value: MinimalComplement) {
+		this._minimalComplement = value;
 	}
 
 	get networkHelper(): NetworkInterface {
@@ -138,6 +156,10 @@ class STTApi {
 
 	get starbaseRooms(): any {
 		return this._starbaseData[0].character.starbase_rooms;
+	}
+
+	get serverConfig(): any {
+		return this._serverConfig;
 	}
 
 	getTraitName(trait: string): string {
@@ -253,7 +275,12 @@ class STTApi {
 	}
 
 	loadServerConfig(): Promise<any> {
-		return this.executeGetRequest("config").then((data: any) => {
+		return this.executeGetRequest("config", {
+			platform:'WebGLPlayer',
+			device_type:'Desktop',
+			client_version:CONFIG.CLIENT_VERSION,
+			platform_folder:'webgl'
+		}).then((data: any) => {
 			this._serverConfig = data;
 			console.info("Loaded server config");
 			return Promise.resolve();

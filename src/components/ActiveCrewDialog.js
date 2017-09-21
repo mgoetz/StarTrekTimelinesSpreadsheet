@@ -73,6 +73,11 @@ export class Voyage extends React.Component {
 
         STTApi.playerData.character.voyage.forEach((voyage) => {
             if (voyage.id == props.activeId) {
+                // replace the crew with the one from roster (already has loaded icons and stuff)
+                voyage.crew_slots.forEach((voyageCrew) => {
+                    voyageCrew.crew = STTApi.roster.find((rosterCrew) => rosterCrew.id == voyageCrew.crew.archetype_id);
+                });
+
                 this.state = {
                     ship_name: voyage.ship_name,
                     ship_id: voyage.ship_id,
@@ -98,15 +103,18 @@ export class Voyage extends React.Component {
                 <p>Voyage has been ongoing for {Math.floor(this.state.voyage_duration / 60)} minutes (new dillema in {Math.floor((this.state.seconds_between_dilemmas - this.state.seconds_since_last_dilemma) / 60)} minutes).</p>
             }
             <p>Antimatter remaining: {this.state.voyage.hp} / {this.state.voyage.max_hp}.</p>
-            <table>
+            <table style={{ borderSpacing: '0' }}>
                 <tbody>
                     <tr>
                         <td>
                             <section>
                                 <h4>Full crew complement and skill aggregates</h4>
                                 <ul>
-                                    {this.state.voyage.crew_slots.map((slot) => {
-                                        return (<li key={slot.symbol}>{slot.name}: {slot.crew.name}</li>);
+                                    {this.state.crew_slots.map((slot) => {
+                                        return (<li key={slot.symbol}><span className='quest-mastery'>
+                                            {slot.name} &nbsp; <Image src={slot.crew.iconUrl} width={20} height={20} imageFit={ImageFit.contain} /> &nbsp; {slot.crew.name}
+                                            </span>
+                                        </li>);
                                     })}
                                 </ul>
                             </section>
@@ -116,8 +124,7 @@ export class Voyage extends React.Component {
                                 {Object.values(this.state.voyage.skill_aggregates).map((skill) => {
                                     return (<li key={skill.skill}>
                                         <span className='quest-mastery'>
-                                            <Image src={CONFIG.skillRes[skill.skill].url} height={18} />
-                                            {CONFIG.skillRes[skill.skill].name}: {skill.core} ({skill.range_min}-{skill.range_max})
+                                            <Image src={CONFIG.skillRes[skill.skill].url} height={18} /> &nbsp; {skill.core} ({skill.range_min}-{skill.range_max})
                                         </span>
                                     </li>);
                                 })}
