@@ -4,7 +4,7 @@ import { matchCrew } from './CrewTools.ts';
 import { matchShips } from './ShipTools.ts';
 import { getWikiImageUrl, IFoundResult } from './WikiImageTools.ts';
 import { loadMissionData } from './MissionTools.ts';
-import { calculateMissionCrewSuccess, calculateMinimalComplement } from './MissionCrewSuccess.ts';
+import { calculateMissionCrewSuccess, calculateMinimalComplementAsync } from './MissionCrewSuccess.ts';
 
 export function loginSequence(onProgress: (description: string) => void): Promise<any> {
 	var mainResources = [
@@ -119,15 +119,13 @@ export function loginSequence(onProgress: (description: string) => void): Promis
         });
     })
     .then(() => {
-        //onProgress('Loading missions and quests...');
-        onProgress('Finishing up...');
-
+        onProgress('Loading missions and quests...');
         return loadMissionData(STTApi.playerData.character.cadet_schedule.missions.concat(STTApi.playerData.character.accepted_missions), STTApi.playerData.character.dispute_histories).then((missions) => {
             STTApi.missions = missions;
 
-            //onProgress('Calculating mission success stats for crew...');
+            onProgress('Calculating mission success stats for crew...');
             STTApi.missionSuccess = calculateMissionCrewSuccess();
-            STTApi.minimalComplement = calculateMinimalComplement();
+            calculateMinimalComplementAsync();
 
             return Promise.resolve();
         });

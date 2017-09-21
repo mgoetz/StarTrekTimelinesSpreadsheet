@@ -78,23 +78,37 @@ export class MinimalComplement extends React.Component {
 	constructor(props) {
 		super(props);
 
-		this.state = {
-			removableCrew: STTApi.roster.filter(function (crew) { return STTApi.minimalComplement.unneededCrew.includes(crew.id) && (crew.frozen == 0); }),
-			unfreezeCrew: STTApi.roster.filter(function (crew) { return STTApi.minimalComplement.neededCrew.includes(crew.id) && (crew.frozen > 0); })
-		};
+		if (!STTApi.minimalComplement) {
+			// The thread (worker) didn't finish loading yet
+			this.state = {
+				dataLoaded: false
+			};
+		}
+		else {
+			this.state = {
+				dataLoaded: true,
+				removableCrew: STTApi.roster.filter(function (crew) { return STTApi.minimalComplement.unneededCrew.includes(crew.id) && (crew.frozen == 0); }),
+				unfreezeCrew: STTApi.roster.filter(function (crew) { return STTApi.minimalComplement.neededCrew.includes(crew.id) && (crew.frozen > 0); })
+			};
+		}
 	}
 
 	render() {
-		return (<CollapsibleSection title={this.props.title}>
-			<div>
-				<p><b>Note:</b> These recommendations do not take into account the needs for gauntlets, shuttle adventures, voyages or any ship battle missions. They also don't account for quest paths, only considering the needs of individual nodes. Manually review each one before making decisions.</p>
+		if (this.state.dataLoaded) {
+			return (<CollapsibleSection title={this.props.title}>
+				<div>
+					<p><b>Note:</b> These recommendations do not take into account the needs for gauntlets, shuttle adventures, voyages or any ship battle missions. They also don't account for quest paths, only considering the needs of individual nodes. Manually review each one before making decisions.</p>
 
-				<h3>Crew which could be frozen or airlocked</h3>
-				<CrewList data={this.state.removableCrew} grouped={false} overrideClassName='embedded-crew-grid' />
-				<h3>Crew which needs to be unfrozen</h3>
-				<CrewList data={this.state.unfreezeCrew} grouped={false} overrideClassName='embedded-crew-grid' />
-			</div>
-		</CollapsibleSection>);
+					<h3>Crew which could be frozen or airlocked</h3>
+					<CrewList data={this.state.removableCrew} grouped={false} overrideClassName='embedded-crew-grid' />
+					<h3>Crew which needs to be unfrozen</h3>
+					<CrewList data={this.state.unfreezeCrew} grouped={false} overrideClassName='embedded-crew-grid' />
+				</div>
+			</CollapsibleSection>);
+		}
+		else {
+			return <p>Minimal crew calculation not done yet. Reload this tab in a bit.</p>
+		}
 	}
 }
 
