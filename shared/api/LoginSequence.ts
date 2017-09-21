@@ -67,24 +67,6 @@ export function loginSequence(onProgress: (description: string) => void): Promis
     .then(() => {
         onProgress('Analyzing crew...');
 
-        let avatarAssets: any[] = [];
-        let urlAsset = STTApi.serverConfig.config.asset_server + 'bundles/webgl/default/' + CONFIG.CLIENT_VERSION + '/' + STTApi.serverConfig.config.asset_bundle_version + '/';
-        STTApi.crewAvatars.forEach((avatar: any) => {
-            var avatarEntry:any = {
-                full_body: urlAsset + 'images' + avatar.full_body.file.replace(new RegExp('/', 'g'), '_') + '.sd',
-                icon: urlAsset + 'images' + avatar.icon.file.replace(new RegExp('/', 'g'), '_') + '.sd',
-                portrait: urlAsset + 'images' + avatar.portrait.file.replace(new RegExp('/', 'g'), '_') + '.sd',
-                id: avatar.id,
-                name: avatar.name,
-                short_name: avatar.short_name,
-                symbol: avatar.symbol
-            }
-
-            avatarAssets.push(avatarEntry);
-        });
-
-        require('electron').remote.require('fs').writeFileSync('avatarAssets.json', JSON.stringify(avatarAssets));
-
         return matchCrew(STTApi.playerData.character).then((roster: any) => {
             STTApi.roster = roster;
 			roster.forEach((crew: any) => {
