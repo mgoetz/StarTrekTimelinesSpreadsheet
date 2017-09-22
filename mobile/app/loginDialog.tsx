@@ -9,7 +9,7 @@ import { Spinner, SpinnerSize } from 'office-ui-fabric-react/lib/Spinner';
 import { MessageBar, MessageBarType } from 'office-ui-fabric-react/lib/MessageBar';
 
 export interface ILoginDialogProps {
-    onAccessToken: (autoLogin: boolean) => void;
+    onAccessToken: () => void;
 }
 
 export interface ILoginDialogState {
@@ -73,10 +73,10 @@ export class LoginDialog extends React.Component<ILoginDialogProps, ILoginDialog
     _closeDialog() {
         this.setState({ showSpinner: true, errorMessage: null });
 
-        STTApi.login(this.state.username, this.state.password).then(() => {
+        STTApi.login(this.state.username, this.state.password, this.state.autoLogin).then(() => {
             this.setState({ showSpinner: false });
 
-            this.props.onAccessToken(this.state.autoLogin);
+            this.props.onAccessToken();
         })
         .catch((error: string) => {
             this.setState({ showSpinner: false, errorMessage: error });
