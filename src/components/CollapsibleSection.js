@@ -6,13 +6,14 @@ export class CollapsibleSection extends React.Component {
 		super(props);
 
 		this.state = {
-			isCollapsed: true
+			isCollapsed: true,
+			background: props.background ? props.background : 'none'
 		};
 	}
 
 	render() {
 		return (<div>
-			<h2><button type='button' style={{ cursor: 'default', background: 'none', border: 'none' }} onClick={() => this.setState({ isCollapsed: !this.state.isCollapsed })}>
+			<h2><button type='button' style={{ cursor: 'default', background: this.state.background, border: 'none' }} onClick={() => this.setState({ isCollapsed: !this.state.isCollapsed })}>
 				<Icon iconName={this.state.isCollapsed ? 'ChevronDown' : 'ChevronUp'} />
 			</button> {this.props.title}
 			</h2>

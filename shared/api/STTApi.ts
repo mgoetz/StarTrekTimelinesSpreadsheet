@@ -19,6 +19,7 @@ import { NetworkInterface } from "./NetworkInterface";
 import { NetworkFetch } from "./NetworkFetch.ts";
 import { DexieCache, QuestsTable, ImmortalsTable, ConfigTable, WikiImageTable } from "./Cache.ts";
 import { IChallengeSuccess, MinimalComplement } from './MissionCrewSuccess.ts';
+import { mergeDeep } from './ObjectMerge.ts';
 import Dexie from "dexie";
 import CONFIG from "./CONFIG.ts";
 
@@ -319,11 +320,26 @@ class STTApi {
 		});
 	}
 
+	resyncPlayerCurrencyData(): Promise<any> {
+		// this code reloads minimal stuff to update the player information and merge things back in
+		// "player/resync_inventory" is more heavy-handed and has the potential to overwrite some stuff we added on like images, but can also bring in any new items, crew or ships
+		return this.executeGetRequest("player/resync_currency").then((data: any) => {
+			if (data.id) {
+				this._playerData.player = mergeDeep(this._playerData.player, data.player);
+				console.info("Resynced player currency data");
+				return Promise.resolve();
+			} else {
+				return Promise.reject("Invalid data for player!");
+			}
+		});
+	}
+
 	loadShipSchematics(): Promise<any> {
 		return this.executeGetRequest("ship_schematic").then((data: any) => {
 			if (data.schematics) {
 				this._shipSchematics = data.schematics;
 				console.info("Loaded " + data.schematics.length + " ship schematics");
+
 				return Promise.resolve();
 			} else {
 				return Promise.reject("Invalid data for ship schematics!");
@@ -374,6 +390,29 @@ class STTApi {
 				return Promise.resolve();
 			} else {
 				return Promise.reject("Invalid data for starbase!");
+			}
+		});
+	}
+
+	loadVoyage(voyageId: number, newOnly: boolean = true): Promise<any> {
+		return this.executePostRequest("voyage/refresh", { voyage_status_id: voyageId, new_only: newOnly }).then((data: any) => {
+			if (data) {
+				let voyageNarrative: any[] = [];
+
+				data.forEach((action: any) => {
+					if (action.character) {
+						// TODO: if DB adds support for more than one voyage at a time this hack won't work
+						this._playerData.player.character.voyage[0] = mergeDeep(this._playerData.player.character.voyage[0], action.character.voyage[0]);
+					}
+					else if (action.voyage_narrative) {
+						voyageNarrative = action.voyage_narrative;
+					}
+				});
+
+				//console.info("Loaded voyage info");
+				return Promise.resolve(voyageNarrative);
+			} else {
+				return Promise.reject("Invalid data for voyage!");
 			}
 		});
 	}

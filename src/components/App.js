@@ -25,7 +25,6 @@ import { Spinner, SpinnerSize } from 'office-ui-fabric-react/lib/Spinner';
 import { Pivot, PivotItem, PivotLinkFormat, PivotLinkSize } from 'office-ui-fabric-react/lib/Pivot';
 import { Image, ImageFit } from 'office-ui-fabric-react/lib/Image';
 import { Callout } from 'office-ui-fabric-react/lib/Callout';
-import { IconButton, IButtonProps } from 'office-ui-fabric-react/lib/Button';
 import { SearchBox } from 'office-ui-fabric-react/lib/SearchBox';
 
 import { exportExcel } from '../utils/excelExporter.js';
@@ -45,6 +44,7 @@ import { ShareDialog } from './ShareDialog.js';
 import { EquipmentDetails } from './EquipmentDetails.js';
 import { CaptainCard } from './CaptainCard.js';
 import { FeedbackPanel } from './FeedbackPanel.js';
+import { ShakingButton } from './ShakingButton.js';
 
 import STTApi from '../../shared/api/STTApi.ts';
 import { getWikiImageUrl } from '../../shared/api/WikiImageTools.ts';
@@ -75,7 +75,7 @@ class App extends React.Component {
 		};
 
 		this._captainButtonElement = null;
-		this._feedbackButton = null;
+		
 
 		this._onAccessToken = this._onAccessToken.bind(this);
 		this._getCommandItems = this._getCommandItems.bind(this);
@@ -84,7 +84,7 @@ class App extends React.Component {
 		this._onCaptainCalloutDismiss = this._onCaptainCalloutDismiss.bind(this);
 		this._onDataFinished = this._onDataFinished.bind(this);
 		this._onDataError = this._onDataError.bind(this);
-		this._tick = this._tick.bind(this);
+		this._playerResync = this._playerResync.bind(this);
 
 		STTApi.loginWithCachedAccessToken().then((success) => {
 			if (success) {
@@ -109,30 +109,17 @@ class App extends React.Component {
 	}
 
 	componentDidMount() {
-		this.interval = setInterval(this._tick, 4000);
+		this.intervalPlayerResync = setInterval(this._playerResync, 5*60*1000);
 	}
 
 	componentWillUnmount() {
-		clearInterval(this.interval);
+		clearInterval(this.intervalPlayerResync);
 	}
 
-	_tick() {
+	_playerResync() {
+		// Every 5 minutes, refresh the player currency data (the number of merits, chronitons, etc.)
 		if (this.state.dataLoaded) {
-			var distance = 6;
-			var keyframes = [
-				{ transform: 'translate3d(0, 0, 0)', offset: 0 },
-				{ transform: 'translate3d(-' + distance + 'px, 0, 0)', offset: 0.1 },
-				{ transform: 'translate3d(' + distance + 'px, 0, 0)', offset: 0.2 },
-				{ transform: 'translate3d(-' + distance + 'px, 0, 0)', offset: 0.3 },
-				{ transform: 'translate3d(' + distance + 'px, 0, 0)', offset: 0.4 },
-				{ transform: 'translate3d(-' + distance + 'px, 0, 0)', offset: 0.5 },
-				{ transform: 'translate3d(' + distance + 'px, 0, 0)', offset: 0.6 },
-				{ transform: 'translate3d(-' + distance + 'px, 0, 0)', offset: 0.7 },
-				{ transform: 'translate3d(' + distance + 'px, 0, 0)', offset: 0.8 },
-				{ transform: 'translate3d(-' + distance + 'px, 0, 0)', offset: 0.9 },
-				{ transform: 'translate3d(0, 0, 0)', offset: 1 }];
-			var timing = { duration: 900, iterations: 1 };
-			this._feedbackButton.animate(keyframes, timing);
+			STTApi.resyncPlayerCurrencyData();
 		}
 	}
 
@@ -164,8 +151,8 @@ class App extends React.Component {
 						{this.state.secondLine}
 					</div>
 					<div className='lcars-box' />
-					<div className='lcars-content' ref={(feedbackButton) => this._feedbackButton = feedbackButton}>
-						<IconButton iconProps={{ iconName: 'Emoji2' }} title='Feedback' onClick={() => this.refs.feedbackPanel.show() } />
+					<div className='lcars-content'>
+						<ShakingButton iconName='Emoji2' title='Feedback' interval={10000} onClick={() => this.refs.feedbackPanel.show() } />
 					</div>
 					<div className='lcars-corner-right' />
 				</div>

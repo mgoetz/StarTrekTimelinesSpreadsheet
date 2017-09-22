@@ -118,6 +118,21 @@ export class ShipList extends React.Component {
 					fieldName: 'evasion'
 				},
 				{
+					key: 'antimatter',
+					name: 'Antimatter',
+					minWidth: 40,
+					maxWidth: 50,
+					isResizable: true,
+					fieldName: 'antimatter'
+				},
+				{
+					key: 'traitNames',
+					name: 'Traits',
+					minWidth: 80,
+					isResizable: true,
+					fieldName: 'traitNames',
+				},
+				{
 					key: 'flavor',
 					name: 'Description',
 					minWidth: 100,

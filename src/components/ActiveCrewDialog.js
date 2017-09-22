@@ -3,8 +3,13 @@ import React, { Component } from 'react';
 import { Dialog, DialogType, DialogFooter } from 'office-ui-fabric-react/lib/Dialog';
 import { PrimaryButton, DefaultButton } from 'office-ui-fabric-react/lib/Button';
 import { Image, ImageFit } from 'office-ui-fabric-react/lib/Image';
+import { Icon } from 'office-ui-fabric-react/lib/Icon';
+import { Spinner, SpinnerSize } from 'office-ui-fabric-react/lib/Spinner';
+
+import { CollapsibleSection } from './CollapsibleSection.js';
 
 import STTApi from '../../shared/api/STTApi.ts';
+import { mergeDeep } from '../../shared/api/ObjectMerge.ts';
 import { getWikiImageUrl } from '../../shared/api/WikiImageTools.ts';
 
 const CONFIG = require('../utils/config.js');
@@ -67,41 +72,95 @@ export class ShuttleAdventure extends React.Component {
     }
 }
 
+export class VoyageLogEntry extends React.Component {
+	constructor(props) {
+        super(props);
+        
+        this.props.log.forEach(entry=> {
+            // TODO: some log entries have 2 crew 
+            if (entry.crew) {
+                let rc = STTApi.roster.find((rosterCrew) => rosterCrew.symbol == entry.crew[0]);
+                if (rc) entry.crewIconUrl = rc.iconUrl;
+            }
+        });
+	}
+
+	render() {
+		return (<ul>
+            {this.props.log.map((entry, index) =>
+                <li key={index}>
+                    <span className='quest-mastery'>
+                        {entry.skill_check && (
+                            <span className='quest-mastery'>
+                                <Image src={CONFIG.skillRes[entry.skill_check.skill].url} height={18} />
+                                {(entry.skill_check.passed == true)?<Icon iconName='Like' /> : <Icon iconName='Dislike' />} &nbsp;
+                            </span>
+                        )}
+                        {entry.crewIconUrl && (
+                            <Image src={entry.crewIconUrl} width={32} height={32} imageFit={ImageFit.contain} />
+                        )}
+                        <span dangerouslySetInnerHTML={{__html: entry.text}} />
+                    </span>
+                </li>
+            )}
+		</ul>);
+	}
+}
+
 export class Voyage extends React.Component {
     constructor(props) {
         super(props);
 
+        this.state = {
+            showSpinner: true
+        }
+
         STTApi.playerData.character.voyage.forEach((voyage) => {
             if (voyage.id == props.activeId) {
-                // replace the crew with the one from roster (already has loaded icons and stuff)
-                voyage.crew_slots.forEach((voyageCrew) => {
-                    voyageCrew.crew = STTApi.roster.find((rosterCrew) => rosterCrew.id == voyageCrew.crew.archetype_id);
-                });
+                STTApi.loadVoyage(voyage.id, false).then((voyageNarrative) => {
 
-                this.state = {
-                    ship_name: voyage.ship_name,
-                    ship_id: voyage.ship_id,
-                    created_at: voyage.created_at,
-                    voyage_duration: voyage.voyage_duration,
-                    seconds_since_last_dilemma: voyage.seconds_since_last_dilemma,
-                    seconds_between_dilemmas: voyage.seconds_between_dilemmas,
-                    skill_aggregates: voyage.skill_aggregates,
-                    crew_slots: voyage.crew_slots,
-                    voyage: voyage
-                };
+                    // Group by index
+                    voyageNarrative = voyageNarrative.reduce(function (r, a) {
+                        r[a.index] = r[a.index] || [];
+                        r[a.index].push(a);
+                        return r;
+                    }, Object.create(null));
+
+                    this.setState({
+                        showSpinner: false,
+                        ship_name: voyage.ship_name,
+                        ship_id: voyage.ship_id,
+                        created_at: voyage.created_at,
+                        voyage_duration: voyage.voyage_duration,
+                        seconds_since_last_dilemma: voyage.seconds_since_last_dilemma,
+                        seconds_between_dilemmas: voyage.seconds_between_dilemmas,
+                        skill_aggregates: voyage.skill_aggregates,
+                        crew_slots: voyage.crew_slots,
+                        voyage: voyage,
+                        voyageNarrative: voyageNarrative
+                    });
+                });
             }
         });
     }
 
+    renderVoyageState() {
+        if (this.state.voyage.state == "recalled") {
+            return <p>Voyage has lasted for {Math.floor(this.state.voyage_duration / 60)} minutes and it's currently returning.</p>;
+        } else if (this.state.voyage.state == "failed") {
+            return <p>Voyage has run out of antimatter after {Math.floor(this.state.voyage_duration / 60)} minutes and it's waiting to be abandoned or replenished.</p>;
+        } else {
+            return <p>Voyage has been ongoing for {Math.floor(this.state.voyage_duration / 60)} minutes (new dilemma in {Math.floor((this.state.seconds_between_dilemmas - this.state.seconds_since_last_dilemma) / 60)} minutes).</p>;
+        }
+    }
+
     render() {
-        return (<div>
+        if (this.state.showSpinner)
+            return <Spinner size={SpinnerSize.large} label='Loading voyage details...' />;
+
+        return (<div style={{ userSelect: 'initial' }}>
             <h3>Voyage on the {STTApi.getShipTraitName(this.state.voyage.ship_trait)} ship {this.state.ship_name}</h3>
-            {(this.state.voyage.state == "recalled") &&
-                <p>Voyage has lasted for {Math.floor(this.state.voyage_duration / 60)} minutes and it's currently returning.</p>
-            }
-            {(this.state.voyage.state != "recalled") &&
-                <p>Voyage has been ongoing for {Math.floor(this.state.voyage_duration / 60)} minutes (new dillema in {Math.floor((this.state.seconds_between_dilemmas - this.state.seconds_since_last_dilemma) / 60)} minutes).</p>
-            }
+            {this.renderVoyageState()}
             <p>Antimatter remaining: {this.state.voyage.hp} / {this.state.voyage.max_hp}.</p>
             <table style={{ borderSpacing: '0' }}>
                 <tbody>
@@ -112,7 +171,7 @@ export class Voyage extends React.Component {
                                 <ul>
                                     {this.state.crew_slots.map((slot) => {
                                         return (<li key={slot.symbol}><span className='quest-mastery'>
-                                            {slot.name} &nbsp; <Image src={slot.crew.iconUrl} width={20} height={20} imageFit={ImageFit.contain} /> &nbsp; {slot.crew.name}
+                                            {slot.name} &nbsp; <Image src={ STTApi.roster.find((rosterCrew) => rosterCrew.id == slot.crew.archetype_id).iconUrl} width={20} height={20} imageFit={ImageFit.contain} /> &nbsp; {slot.crew.name}
                                             </span>
                                         </li>);
                                     })}
@@ -133,10 +192,16 @@ export class Voyage extends React.Component {
                     </tr>
                 </tbody>
             </table>
-            <h4>Pending rewards</h4>
-            {this.state.voyage.pending_rewards.loot.map((loot, index) => {
-                return (<span key={index} style={{ color: loot.rarity && CONFIG.rarityRes[loot.rarity].color }}>{loot.quantity} {(loot.rarity == null) ? '' : CONFIG.rarityRes[loot.rarity].name} {loot.full_name}</span>);
-            }).reduce((prev, curr) => [prev, ', ', curr])}
+            <CollapsibleSection title={'Pending rewards (' + this.state.voyage.pending_rewards.loot.length + ')'} background='#0078d7'>
+                {this.state.voyage.pending_rewards.loot.map((loot, index) => {
+                    return (<span key={index} style={{ color: loot.rarity && CONFIG.rarityRes[loot.rarity].color }}>{loot.quantity} {(loot.rarity == null) ? '' : CONFIG.rarityRes[loot.rarity].name} {loot.full_name}</span>);
+                }).reduce((prev, curr) => [prev, ', ', curr])}
+            </CollapsibleSection>
+            <CollapsibleSection title={'Complete Captain\'s Log (' + Object.keys(this.state.voyageNarrative).length + ')'} background='#0078d7'>
+                {Object.keys(this.state.voyageNarrative).map((key) => {
+                    return <VoyageLogEntry key={key} log={this.state.voyageNarrative[key]}/>;
+                })}
+            </CollapsibleSection>
         </div>);
     }
 }
