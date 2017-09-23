@@ -3,15 +3,22 @@
     <head>
         <meta charset="UTF-8" />
         <title>STT Mobile Companion</title>
-        <meta http-equiv="Content-Security-Policy" content="default-src *; style-src * 'self' 'unsafe-inline'; font-src * 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline' 'unsafe-eval'">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta http-equiv="Content-Security-Policy" content="default-src *; style-src * 'self' 'unsafe-inline'; font-src 'self' https: data:; script-src 'self' 'unsafe-inline' 'unsafe-eval'">
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/semantic-ui@2.2.13/dist/semantic.min.css">
         <style>
             body {
-                margin: 5px;
+                padding: 5px;
             }
 
             .skillImage {
                 height: 18px !important;
+            }
+
+            .skillImageMenu {
+                height: 18px !important;
+                margin-right: 1px;
+                margin-top: -2px;
             }
         </style>
     </head>

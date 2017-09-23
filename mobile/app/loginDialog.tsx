@@ -2,12 +2,6 @@ import * as React from "react";
 import * as ReactDOM from "react-dom";
 import STTApi from '../../shared/api/STTApi';
 
-import { PrimaryButton, DefaultButton } from 'office-ui-fabric-react/lib/Button';
-import { TextField } from 'office-ui-fabric-react/lib/TextField';
-import { Checkbox, ICheckboxStyles } from 'office-ui-fabric-react/lib/Checkbox';
-import { Spinner, SpinnerSize } from 'office-ui-fabric-react/lib/Spinner';
-import { MessageBar, MessageBarType } from 'office-ui-fabric-react/lib/MessageBar';
-
 export interface ILoginDialogProps {
     onAccessToken: () => void;
 }
@@ -35,37 +29,46 @@ export class LoginDialog extends React.Component<ILoginDialogProps, ILoginDialog
     }
 
     render() {
-        return <div>
+        return <div className="ui middle aligned center aligned" style={{ maxWidth: '450px' }}>
             {this.state.errorMessage && (
-                <MessageBar messageBarType={MessageBarType.error} isMultiline={false}>
-                    <span>{this.state.errorMessage}</span>
-                </MessageBar>
+                <div className="ui error message">{this.state.errorMessage}</div>
             )}
 
-            <TextField
-                label='Username (e-mail)'
-                value={this.state.username}
-                onChanged={(value) => { this.setState({ username: value }) }}
-            />
+            <h2 className="ui teal header">
+                <div className="content">Log-in with your account</div>
+            </h2>
+            <div className="ui large form">
+                <div className="ui stacked segment">
+                    <div className="field">
+                        <div className="ui left icon input">
+                            <i className="user icon"></i>
+                            <input type="text" name="email" placeholder="Username (e-mail)" value={this.state.username} onChange={(event: any) => this.setState({ username: event.target.value })} />
+                        </div>
+                    </div>
+                    <div className="field">
+                        <div className="ui left icon input">
+                            <i className="lock icon"></i>
+                            <input type="password" name="password" placeholder="Password" value={this.state.password} onChange={(event: any) => this.setState({ password: event.target.value })} />
+                        </div>
+                    </div>
+                    <div className="field">
+                        <div className="ui checkbox">
+                            <input type="checkbox" name="save" checked={this.state.autoLogin} onChange={(event: any) => this.setState({ autoLogin: event.target.checked })} />
+                            <label>Stay logged in</label>
+                        </div>
+                    </div>
+                    <div className="ui fluid large teal submit button" onClick={this._closeDialog}>Login</div>
+                </div>
+            </div>
 
-            <TextField
-                label='Password'
-                value={this.state.password}
-                type='password'
-                onChanged={(value) => { this.setState({ password: value }) }}
-            />
+            <div className="ui message">
+                New to us? <a href="#">Sign Up</a>
+            </div>
 
-            <Checkbox
-                label='Stay logged in'
-                checked={this.state.autoLogin}
-                onChange={(ev, checked) => {
-                    this.setState({ autoLogin: checked });
-                }}
-            />
-
-            <PrimaryButton onClick={this._closeDialog} text='Login' disabled={this.state.showSpinner} />
             {this.state.showSpinner && (
-                <Spinner size={SpinnerSize.small} label='Logging in...' />
+                <div className="ui active inverted dimmer">
+                    <div className="ui small text loader">Logging in...</div>
+                </div>
             )}
         </div>;
     }

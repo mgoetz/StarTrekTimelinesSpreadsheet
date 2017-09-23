@@ -11,10 +11,10 @@
     "license": "GPL-3.0",
     "main": "index.js",
     "dependencies": {
+        "cordova-android": "^6.2.3",
         "cordova-browser": "latest",
         "cordova-plugin-whitelist": "latest",
         "dexie": "latest",
-        "office-ui-fabric-react": "latest",
         "react": "latest",
         "react-dom": "latest"
     },
@@ -37,6 +37,7 @@
             "cordova-plugin-whitelist": {}
         },
         "platforms": [
+            "android",
             "browser"
         ]
     }

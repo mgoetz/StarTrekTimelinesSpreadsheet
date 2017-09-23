@@ -1,9 +1,10 @@
 {
   "compilerOptions": {
     "module": "commonjs",
-    "target": "es2015",
+    "target": "es5",
     "jsx": "react",
     "noImplicitAny": true,
-    "sourceMap": true
+    "sourceMap": true,
+    "lib": ["es5", "es2015", "dom", "webworker"]
   }
 }

@@ -34,6 +34,13 @@ function rosterFromCrew(rosterEntry: any, crew: any): void {
 
 	rosterEntry.traits = crew.traits.concat(crew.traits_hidden).map((trait: any) => { return STTApi.getTraitName(trait); }).join();
 	rosterEntry.rawTraits = crew.traits.concat(crew.traits_hidden);
+
+	// Replace "nonhuman" with "alien" to make the search easier
+	let nh = rosterEntry.rawTraits.indexOf('nonhuman');
+	if (nh > -1) {
+		rosterEntry.rawTraits.splice(nh,1);
+		rosterEntry.rawTraits.push('alien');
+	}
 }
 
 export function matchCrew(character: any): Promise<any> {
