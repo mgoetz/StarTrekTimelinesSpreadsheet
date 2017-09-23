@@ -285,7 +285,7 @@ export function gauntletCrewSelection(currentGauntlet: any, roster: any): any {
 
 	skillList.forEach((skill: any) => {
 		gauntletCrew.sort((a: any, b: any) => {
-			return b[skill] - a[skill];
+			return b.skills[skill] - a.skills[skill];
 		});
 		result.best[skill] = gauntletCrew[0].name;
 
