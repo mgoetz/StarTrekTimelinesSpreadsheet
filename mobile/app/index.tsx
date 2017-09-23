@@ -99,7 +99,7 @@ class App extends React.Component<any, IAppState> {
     }
 
     _filterCrewItem(crew: any, searchString: string) {
-        return searchString.split(' ').every((text: string) => {
+        return searchString.toLowerCase().split(' ').every((text: string) => {
             // search the name first
             if (crew.name.toLowerCase().indexOf(text) > -1) {
                 return true;
@@ -248,8 +248,8 @@ class App extends React.Component<any, IAppState> {
                                     </a>
                                 </div>
                             </div>
-                            <a className="item" onClick={() => this.setState({currentTab: Tab.Recommendations})} >Recommendations <i className="wizard icon"></i></a>
-                            <a className="item" onClick={() => this.setState({currentTab: Tab.Feedback})} >Help <i className="help icon"></i></a>
+                            <a className="item" onClick={() => this.setState({currentTab: Tab.Recommendations})} ><i className="wizard icon"></i></a>
+                            <a className="item" onClick={() => this.setState({currentTab: Tab.Feedback})} ><i className="help icon"></i></a>
                         </div>
                     </div>
 

@@ -2,6 +2,30 @@
 
 Testing
 
+## Features
+
+### Crew management
+
+![Screenshot tool](/docs/Screenshot_main.png "Tool screenshot")
+
+The default tab lets you manage your crew. You can search using keywords matching names and / or traits.
+
+![Screenshot tool](/docs/Screenshot_sort.png "Tool screenshot")
+
+You can also sort ascending / descending on various fields.
+
+### Recommendations
+
+![Screenshot tool](/docs/Screenshot_recommendations.png "Tool screenshot")
+
+The recommendations can help you choose which crew is safe to airlock or freeze and which crew is still needed to complete missions or cadet challenges. It also calls out duplicates you might have to help you get rid of newly aquired crew that you already maxed out.
+
+### Stats
+
+![Screenshot tool](/docs/Screenshot_stats.png "Tool screenshot")
+
+You can also quickly glance at your stats from the tool.
+
 ## Installation Steps
 
 ### Visual Studio Code

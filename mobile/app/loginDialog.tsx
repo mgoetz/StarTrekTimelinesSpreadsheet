@@ -62,7 +62,7 @@ export class LoginDialog extends React.Component<ILoginDialogProps, ILoginDialog
             </div>
 
             <div className="ui message">
-                New to us? <a href="#">Sign Up</a>
+                New to Star Trek Timelines? <a href="https://www.disruptorbeam.com/games/star-trek-timelines/">Check it out</a>
             </div>
 
             {this.state.showSpinner && (

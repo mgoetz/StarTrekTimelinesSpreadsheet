@@ -23,6 +23,22 @@ export class CrewCard extends React.Component<any, any> {
             rating.push(<i key={i + 5} className='grey star icon' />);
         }
 
+        let status = "Available";
+        if (crew.active_id) {
+            if (STTApi.playerData.character.shuttle_adventures.find((shuttle:any) => shuttle.shuttles[0].id == crew.active_id)) {
+                status = "On a shuttle adventure";
+            }
+            else {
+                status = "On a voyage";
+            }
+        }
+        else if (crew.frozen) {
+            status = "Frozen";
+        }
+        else if (crew.buyback) {
+            status = "Airlocked (in buy-back state)";
+        }
+
         return (<div className="card">
             <div className="content">
                 <img className="left floated ui tiny image" src={crew.iconUrl} />
@@ -39,39 +55,65 @@ export class CrewCard extends React.Component<any, any> {
                     <i className={crew.equipment_slots[1].have ? "green square icon" : "square icon"} />
                     <i className={crew.equipment_slots[2].have ? "green square icon" : "square icon"} />
                     <i className={crew.equipment_slots[3].have ? "green square icon" : "square icon"} />
+                    <br/>
+                    {status}
                 </div>
                 <div className="description">{crew.rawTraits.map((trait: any) => <div className="ui horizontal mini label" style={{ marginBottom: '.25em' }} key={trait}>{STTApi.getTraitName(trait)}</div>)}</div>
             </div>
             <div className="extra content">
                 <div className="ui three column grid">
                     {(crew.command_skill.core > 0) &&
-                        <div className="column">
-                            <img className="ui image skillImage" src={skillRes["command_skill"].url} />&nbsp;<b>{crew.command_skill.core}</b>&nbsp; +({crew.command_skill.min} - {crew.command_skill.max})
+                        <div className="column" style={{ padding: '0.2em', paddingBottom: '1rem' }}>
+                            <div className="ui tiny label">
+                            <img className="ui image skillImage" src={skillRes["command_skill"].url} />
+                                {crew.command_skill.core}
+                                <div className="detail" style={{ marginLeft: '0px' }} >+({crew.command_skill.min} - {crew.command_skill.max})</div>
+                            </div>
                         </div>
                     }
                     {(crew.science_skill.core > 0) &&
-                        <div className="column">
-                            <img className="ui image skillImage" src={skillRes["science_skill"].url} />&nbsp;<b>{crew.science_skill.core}</b>&nbsp; +({crew.science_skill.min} - {crew.science_skill.max})
+                        <div className="column" style={{ padding: '0.2em', paddingBottom: '1rem' }}>
+                            <div className="ui tiny label">
+                            <img className="ui image skillImage" src={skillRes["science_skill"].url} />
+                                {crew.science_skill.core}
+                                <div className="detail" style={{ marginLeft: '0px' }} >+({crew.science_skill.min} - {crew.science_skill.max})</div>
+                            </div>
                         </div>
                     }
                     {(crew.security_skill.core > 0) &&
-                        <div className="column">
-                            <img className="ui image skillImage" src={skillRes["security_skill"].url} />&nbsp;<b>{crew.security_skill.core}</b>&nbsp; +({crew.security_skill.min} - {crew.security_skill.max})
+                        <div className="column" style={{ padding: '0.2em', paddingBottom: '1rem' }}>
+                            <div className="ui tiny label">
+                                <img className="ui image skillImage" src={skillRes["security_skill"].url} />
+                                {crew.security_skill.core}
+                                <div className="detail" style={{ marginLeft: '0px' }} >+({crew.security_skill.min} - {crew.security_skill.max})</div>
+                            </div>
                         </div>
                     }
                     {(crew.engineering_skill.core > 0) &&
-                        <div className="column">
-                            <img className="ui image skillImage" src={skillRes["engineering_skill"].url} />&nbsp;<b>{crew.engineering_skill.core}</b>&nbsp; +({crew.engineering_skill.min} - {crew.engineering_skill.max})
+                        <div className="column" style={{ padding: '0.2em', paddingBottom: '1rem' }}>
+                            <div className="ui tiny label">
+                                <img className="ui image skillImage" src={skillRes["engineering_skill"].url} />
+                                {crew.engineering_skill.core}
+                                <div className="detail" style={{ marginLeft: '0px' }} >+({crew.engineering_skill.min} - {crew.engineering_skill.max})</div>
+                            </div>
                         </div>
                     }
                     {(crew.diplomacy_skill.core > 0) &&
-                        <div className="column">
-                            <img className="ui image skillImage" src={skillRes["diplomacy_skill"].url} />&nbsp;<b>{crew.diplomacy_skill.core}</b>&nbsp; +({crew.diplomacy_skill.min} - {crew.diplomacy_skill.max})
+                        <div className="column" style={{ padding: '0.2em', paddingBottom: '1rem' }}>
+                            <div className="ui tiny label">
+                                <img className="ui image skillImage" src={skillRes["diplomacy_skill"].url} />
+                                {crew.diplomacy_skill.core}
+                                <div className="detail" style={{ marginLeft: '0px' }} >+({crew.diplomacy_skill.min} - {crew.diplomacy_skill.max})</div>
+                            </div>
                         </div>
                     }
                     {(crew.medicine_skill.core > 0) &&
-                        <div className="column">
-                            <img className="ui image skillImage" src={skillRes["medicine_skill"].url} />&nbsp;<b>{crew.medicine_skill.core}</b>&nbsp; +({crew.medicine_skill.min} - {crew.medicine_skill.max})
+                        <div className="column" style={{ padding: '0.2em', paddingBottom: '1rem' }}>
+                            <div className="ui tiny label">
+                                <img className="ui image skillImage" src={skillRes["medicine_skill"].url} />
+                                {crew.medicine_skill.core}
+                                <div className="detail" style={{ marginLeft: '0px' }} >+({crew.medicine_skill.min} - {crew.medicine_skill.max})</div>
+                            </div>
                         </div>
                     }
                 </div>
