@@ -7,6 +7,8 @@ A tool to help with crew management in Star Trek Timelines
 It should be understood that *Star Trek Timelines* content and materials are trademarks and copyrights of [Disruptor Beam, Inc.](https://www.disruptorbeam.com/tos/) or its licensors. All rights reserved. This tool is neither endorsed by nor affiliated with Disruptor Beam, Inc..
 All images (crew portraits, items) displayed in the tool are references to [stt.wiki](https://stt.wiki/wiki/Main_Page).
 
+[If you're looking for the mobile (Android) version of the tool see details here](/mobile/README.md)
+
 ## Install and run the tool
 
 I recommend you install the development environment and play with the source code yourself; make improvements and submit PRs to help your fellow players. See [contribution guidelines](/docs/CONTRIBUTING.md).
@@ -100,6 +102,18 @@ _Recommendation: Update the "postpackage" script call in package.json to specify
 
 If you want to test the production build (In case you think Babili might be breaking something) after running `npm run build` you can then call `npm run prod`. This will cause electron to load off of the `dist/` build instead of looking for the webpack-dev-server instance. Electron will launch automatically after compilation.
 
+## Privacy and security
+There is no server associated with this tool, all state stays on your device. Here's a comprehensive list of URLs that the tool accesses (all these URLs are accessed over a secure (HTTPS) connection):
+- https://thorium.disruptorbeam.com/ : this is the login URL for DisruptorBeam; your username / password or Facebook access token is sent to this URL in order to get an access_token. This URL is only accessed during login.
+- https://stt.disruptorbeam.com/ : this is the main Star Trek Timelines API endpoint URL, owned by DisruptorBeam.
+- https://api.github.com/repos/IAmPicard/StarTrekTimelinesSpreadsheet/releases : this URL contains the list of tool releases. It's accessed during application boot (and from the About tab) to check for new versions. No data is sent along with the request (it's just a GET).
+- https://logic.azure.com : this URL is accessed when (and only if) you submit user feedback. The only data included with the request are the fields in the feedback dialog itself. No other data is sent.
+- https://ptpb.pw : this URL is accessed when (and only if) you use the Share dialog to share your crew stats online.
+- https://www.facebook.com/v2.8/dialog/oauth : this URL is only accessed if you use the Facebook login option. It's used to obtain a facebook access token which is later sent to DB's server to get an access_token.
+
+The tool never stores your username or password and it only sends it to DisruptorBeam's official servers for login purposes. If you check the "Stay logged in" checkbox in the login dialog, the tool will store an access_token on your local device in the IndexedDB database.
+
+I encourage you to only use a version of the tool from a trusted source (such as the [Releases](https://github.com/IAmPicard/StarTrekTimelinesSpreadsheet/releases) page on GitHub). If a "well intentioned" person online offers to send you a modified version with "extra features" ask for the source code and manually compare against what's here in the repo to ensure no malicious functionality was added.
 
 ## Command line version of the tool
 **NOTE: The command-line version of the tool is deprecated, all new development happens in the GUI version!**
