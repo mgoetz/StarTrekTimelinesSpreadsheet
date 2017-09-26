@@ -19,5 +19,6 @@
     </platform>
     <engine name="android" spec="^6.2.3" />
     <engine name="browser" spec="latest" />
+    <engine name="windows" spec="^5.0.0" />
     <plugin name="cordova-plugin-whitelist" spec="latest" />
 </widget>

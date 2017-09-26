@@ -14,9 +14,11 @@
         "cordova-android": "^6.2.3",
         "cordova-browser": "latest",
         "cordova-plugin-whitelist": "latest",
+        "cordova-windows": "^5.0.0",
         "dexie": "latest",
         "react": "latest",
-        "react-dom": "latest"
+        "react-dom": "latest",
+        "url-search-params-polyfill": "^2.0.1"
     },
     "devDependencies": {
         "@types/prop-types": "latest",
@@ -38,7 +40,8 @@
         },
         "platforms": [
             "android",
-            "browser"
+            "browser",
+            "windows"
         ]
     }
 }

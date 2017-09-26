@@ -1,5 +1,6 @@
 // an implemention of NetworkInterface using the native browser fetch functionality
 import { NetworkInterface } from "./NetworkInterface";
+import 'url-search-params-polyfill';
 
 export class NetworkFetch implements NetworkInterface {
 	post(uri: string, form: any, bearerToken: string | undefined = undefined, getjson: boolean = true): Promise<any> {
@@ -44,18 +45,18 @@ export class NetworkFetch implements NetworkInterface {
 	}
 
 	get(uri: string, qs: any): Promise<any> {
-		let url: URL = new URL(uri);
+		let searchParams: URLSearchParams = new URLSearchParams();
 		for (const prop of Object.keys(qs)) {
 			if (Array.isArray(qs[prop])) {
 				qs[prop].forEach((entry: any): void => {
-					url.searchParams.append(prop + '[]', entry);
+					searchParams.append(prop + '[]', entry);
 				});
 			}
 			else {
-				url.searchParams.set(prop, qs[prop]);
+				searchParams.set(prop, qs[prop]);
 			}
 		}
 
-		return window.fetch(url.toString()).then((response: Response) => response.json());
+		return window.fetch(uri + "?" + searchParams.toString()).then((response: Response) => response.json());
 	}
 }
