@@ -90,6 +90,7 @@ export class VoyageLog extends React.Component<any, IVoyageLogState> {
         };
 
         this._recall = this._recall.bind(this);
+        this._revive = this._revive.bind(this);
         this._chooseDilemma = this._chooseDilemma.bind(this);
         this.reloadState = this.reloadState.bind(this);
         this.animateAntimatter = this.animateAntimatter.bind(this);
@@ -150,6 +151,12 @@ export class VoyageLog extends React.Component<any, IVoyageLogState> {
 
     _recall() {
         STTApi.recallVoyage(STTApi.playerData.character.voyage[0].id).then(() => {
+            this.reloadState();
+        });
+    }
+
+    _revive() {
+        STTApi.reviveVoyage(STTApi.playerData.character.voyage[0].id).then(() => {
             this.reloadState();
         });
     }
@@ -219,9 +226,14 @@ export class VoyageLog extends React.Component<any, IVoyageLogState> {
                     </div>
                     <br />
                     {(this.state.voyage.state != "recalled") && (this.state.voyage.state != "failed") && (
-                        <button className="ui right labeled icon button" onClick={() => this._recall}>
+                        <button className="ui right labeled icon button" onClick={() => this._recall()}>
                             <i className="right history icon"></i>
                             Recall now
+                    </button>)}
+                    {(this.state.voyage.state == "failed") && (
+                        <button className="ui right labeled icon button" onClick={() => this._revive()}>
+                            <i className="right history icon"></i>
+                            Revive for {this.state.voyage.revive_cost.amount} dilithium
                     </button>)}
                 </div>
 
