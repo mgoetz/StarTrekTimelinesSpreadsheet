@@ -417,6 +417,17 @@ class STTApi {
 		});
 	}
 
+	recallVoyage(voyageId: number): Promise<void> {
+		return this.executePostRequest("voyage/recall", { voyage_status_id: voyageId }).then((data: any) => {
+			if (data) {
+				//console.info("Recalled voyage");
+				return Promise.resolve();
+			} else {
+				return Promise.reject("Invalid data for voyage!");
+			}
+		});
+	}
+
 	submitUserFeedback(feedback: any): Promise<any> {
 		return this._net.postjson(CONFIG.URL_USERFEEDBACK, feedback);
 	}

@@ -20,17 +20,16 @@
         "url-search-params-polyfill": "latest"
     },
     "devDependencies": {
+        "@types/cordova": "latest",
         "@types/prop-types": "latest",
         "@types/react": "latest",
         "@types/react-dom": "latest",
         "source-map-loader": "latest",
         "ts-loader": "latest",
         "typescript": "latest",
-        "typings": "latest",
         "webpack": "latest"
     },
     "scripts": {
-        "postinstall": "node_modules/.bin/typings install",
         "bundle": "node_modules/.bin/webpack"
     },
     "cordova": {
@@ -38,7 +37,8 @@
             "cordova-plugin-whitelist": {}
         },
         "platforms": [
-            "browser"
+            "browser",
+            "windows"
         ]
     }
 }

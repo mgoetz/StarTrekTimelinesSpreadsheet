@@ -26,34 +26,42 @@ interface IVoyageLogEntryProps {
 }
 
 class VoyageLogEntry extends React.Component<any, IVoyageLogEntryProps> {
+    when: string;
+
     constructor(props: IVoyageLogEntryProps) {
         super(props);
+
+        let minutes = (Date.now() / 1000 - this.props.entry.event_time) / 60;
+        if (minutes > 2) {
+            this.when = minutes.toFixed(0) + ' minutes ago';
+        }
+        else {
+            this.when = 'just now';
+        }
     }
 
     render() {
         return (<div className='event'>
-                {this.props.entry.crewIconUrl && (
-                    <div className='label'>
-                        <img src={this.props.entry.crewIconUrl} />
-                    </div>
-                )}
+            {this.props.entry.crewIconUrl && (
+                <div className='label'>
+                    <img src={this.props.entry.crewIconUrl} />
+                </div>
+            )}
 
-                <div className='content'>
-                    <div className='summary'>
-                        {this.props.entry.skill_check && (
-                            <span>
-                                <img className="ui image skillImage" src={skillRes[this.props.entry.skill_check.skill].url} />
-                                {(this.props.entry.skill_check.passed == true) ? <i className='check circle icon' /> : <i className='minus circle icon' />}
-                            </span>
-                        )}
+            <div className='content'>
+                <div className='summary'>
+                    {this.props.entry.skill_check && (
+                        <span>
+                            <img className="ui image skillImage" src={skillRes[this.props.entry.skill_check.skill].url} />
+                            {(this.props.entry.skill_check.passed == true) ? <i className='check circle icon' /> : <i className='minus circle icon' />}
+                        </span>
+                    )}
 
-                        <span dangerouslySetInnerHTML={{ __html: this.props.entry.text }} />
-                        <div className="date">
-                            {((Date.now()/1000 - this.props.entry.event_time) / 60).toFixed(0)} minutes ago
-                        </div>
-                    </div>
+                    <span dangerouslySetInnerHTML={{ __html: this.props.entry.text }} />
+                    <div className="date">{this.when}</div>
                 </div>
             </div>
+        </div>
         );
     }
 }
@@ -79,6 +87,7 @@ export class VoyageLog extends React.Component<any, IVoyageLogState> {
             antimatter: 0
         };
 
+        this._recall = this._recall.bind(this);
         this.reloadState = this.reloadState.bind(this);
         this.animateAntimatter = this.animateAntimatter.bind(this);
 
@@ -86,21 +95,12 @@ export class VoyageLog extends React.Component<any, IVoyageLogState> {
     }
 
     animateAntimatter() {
-        var distance = 6;
-        var keyframes = [
-            { transform: 'translate3d(0, 0, 0)' },
-            { transform: 'translate3d(-' + distance + 'px, 0, 0)' },
-            { transform: 'translate3d(' + distance + 'px, 0, 0)' },
-            { transform: 'translate3d(-' + distance + 'px, 0, 0)' },
-            { transform: 'translate3d(' + distance + 'px, 0, 0)' },
-            { transform: 'translate3d(-' + distance + 'px, 0, 0)' },
-            { transform: 'translate3d(' + distance + 'px, 0, 0)' },
-            { transform: 'translate3d(-' + distance + 'px, 0, 0)' },
-            { transform: 'translate3d(' + distance + 'px, 0, 0)' },
-            { transform: 'translate3d(-' + distance + 'px, 0, 0)' },
-            { transform: 'translate3d(0, 0, 0)' }];
-        var timing = { duration: 900, iterations: 1 };
-        this._antimatterstatistic.animate(keyframes, timing);
+        this._antimatterstatistic.className = 'value';
+
+        // Magic sauce :) This triggers a reflow which tricks the browser into replaying the animation
+        void this._antimatterstatistic.offsetWidth;
+
+        this._antimatterstatistic.className = 'value shakeAnimation';
     }
 
     reloadState() {
@@ -118,6 +118,14 @@ export class VoyageLog extends React.Component<any, IVoyageLogState> {
 
                 voyageNarrative = voyageNarrative.reverse();
 
+                if (STTApi.playerData.character.voyage[0].ship_name == null) {
+                    STTApi.playerData.character.voyage[0].ship_name = STTApi.playerData.character.ships.find((ship: any) => ship.id == STTApi.playerData.character.voyage[0].ship_id).name;
+                }
+
+                if ((this.state.antimatter >= 100) && (STTApi.playerData.character.voyage[0].hp < 100)) {
+                    (window as any).showLocalNotification("WARNING: You only have " + STTApi.playerData.character.voyage[0].hp + " antimatter left. Consider recalling your voyage!");
+                }
+
                 this.setState({
                     dataLoaded: true,
                     voyage: STTApi.playerData.character.voyage[0],
@@ -130,8 +138,14 @@ export class VoyageLog extends React.Component<any, IVoyageLogState> {
         }
     }
 
+    _recall() {
+        STTApi.recallVoyage(STTApi.playerData.character.voyage[0].id).then(() => {
+            this.reloadState();
+        });
+    }
+
     componentDidMount() {
-        this.timerID = setInterval( this.reloadState, 20000);
+        this.timerID = setInterval(this.reloadState, 20000);
     }
 
     componentWillUnmount() {
@@ -140,7 +154,7 @@ export class VoyageLog extends React.Component<any, IVoyageLogState> {
 
     renderVoyageState(): JSX.Element {
         if (this.state.voyage.state == "recalled") {
-            return <p>Voyage has lasted for {Math.floor(this.state.voyage.voyage_duration / 60)} minutes and it's currently returning.</p>;
+            return <p>Voyage is returning and will be complete in {Math.floor(this.state.voyage.recall_time_left / 60)} minutes.</p>;
         } else if (this.state.voyage.state == "failed") {
             return <p>Voyage has run out of antimatter after {Math.floor(this.state.voyage.voyage_duration / 60)} minutes and it's waiting to be abandoned or replenished.</p>;
         } else {
@@ -155,7 +169,7 @@ export class VoyageLog extends React.Component<any, IVoyageLogState> {
                 {this.renderVoyageState()}
 
                 <div className="ui center aligned inverted segment">
-                    <div className="ui teal inverted statistic">
+                    <div className={this.state.voyage.hp > 100 ? "ui teal inverted statistic" : "ui red inverted statistic"}>
                         <div className="value" ref={(antimatterstatistic) => this._antimatterstatistic = antimatterstatistic}>
                             {this.state.voyage.hp}
                         </div>
@@ -163,6 +177,12 @@ export class VoyageLog extends React.Component<any, IVoyageLogState> {
                             Antimatter
                         </div>
                     </div>
+                    <br/>
+                    {(this.state.voyage.state != "recalled") && (this.state.voyage.state != "failed") && (
+                    <button className="ui right labeled icon button" onClick={() => this._recall}>
+                        <i className="right history icon"></i>
+                        Recall now
+                    </button>)}
                 </div>
 
                 <h3>Pending rewards</h3>

@@ -1,6 +1,6 @@
 <?xml version='1.0' encoding='utf-8'?>
 <widget id="com.tools.voyagemonitor" version="0.0.2" xmlns="http://www.w3.org/ns/widgets" xmlns:cdv="http://cordova.apache.org/ns/1.0">
-    <name>Voyage Monitor</name>
+    <name>STT Voyage Monitor v0.0.2</name>
     <description>Companion for Star Trek Timelines for monitoring voyage status</description>
     <author email="" href="https://github.com/IAmPicard/StarTrekTimelinesSpreadsheet">IAmPicard</author>
     <content src="index.html" />
@@ -11,5 +11,6 @@
     <allow-intent href="https://*/*" />
     <allow-intent href="mailto:*" />
     <engine name="browser" spec="^5.0.0" />
+    <engine name="windows" spec="^5.0.0" />
     <plugin name="cordova-plugin-whitelist" spec="^1.3.2" />
 </widget>

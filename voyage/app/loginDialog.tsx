@@ -29,7 +29,7 @@ export class LoginDialog extends React.Component<ILoginDialogProps, ILoginDialog
     }
 
     render() {
-        return <div className="ui middle aligned center aligned" style={{ maxWidth: '450px' }}>
+        return <div className="ui middle aligned center aligned">
             {this.state.errorMessage && (
                 <div className="ui error message">{this.state.errorMessage}</div>
             )}
