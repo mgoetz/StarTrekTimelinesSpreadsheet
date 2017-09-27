@@ -6,8 +6,8 @@ import { getWikiImageUrl, IFoundResult } from './WikiImageTools.ts';
 import { loadMissionData } from './MissionTools.ts';
 import { calculateMissionCrewSuccess, calculateMinimalComplementAsync } from './MissionCrewSuccess.ts';
 
-export function loginSequence(onProgress: (description: string) => void): Promise<any> {
-	var mainResources = [
+export function loginSequence(onProgress: (description: string) => void, loadMissions: boolean = true): Promise<any> {
+    var mainResources = [
         {
             loader: STTApi.loadCrewArchetypes.bind(STTApi),
             description: 'crew information'
@@ -45,7 +45,7 @@ export function loginSequence(onProgress: (description: string) => void): Promis
         }
     ];
 
-    return mainResources.reduce((prev, cur) => {
+    let promise: Promise<any> = mainResources.reduce((prev, cur) => {
         return prev.then(() => {
             onProgress('Loading ' + cur.description + '...');
             return cur.loader();
@@ -69,33 +69,33 @@ export function loginSequence(onProgress: (description: string) => void): Promis
 
         return matchCrew(STTApi.playerData.character).then((roster: any) => {
             STTApi.roster = roster;
-			roster.forEach((crew: any) => {
-				crew.iconUrl = '';
-				crew.iconBodyUrl = '';
+            roster.forEach((crew: any) => {
+                crew.iconUrl = '';
+                crew.iconBodyUrl = '';
             });
 
             onProgress('Finding crew images...');
-			let iconPromises: Array<Promise<void>> = [];
-			roster.forEach((crew: any) => {
-				iconPromises.push(getWikiImageUrl(crew.name.split(' ').join('_') + '_Head.png', crew.id).then((found: IFoundResult) => {
-					STTApi.roster.forEach((crew: any) => {
-						if (crew.id === found.id)
-							crew.iconUrl = found.url;
-					});
+            let iconPromises: Array<Promise<void>> = [];
+            roster.forEach((crew: any) => {
+                iconPromises.push(getWikiImageUrl(crew.name.split(' ').join('_') + '_Head.png', crew.id).then((found: IFoundResult) => {
+                    STTApi.roster.forEach((crew: any) => {
+                        if (crew.id === found.id)
+                            crew.iconUrl = found.url;
+                    });
 
-					return Promise.resolve();
-				}).catch((error: any) => { /*console.warn(error);*/ }));
-				iconPromises.push(getWikiImageUrl(crew.name.split(' ').join('_') + '.png', crew.id).then((found: IFoundResult) => {
-					STTApi.roster.forEach((crew: any) => {
-						if (crew.id === found.id)
-							crew.iconBodyUrl = found.url;
-					});
+                    return Promise.resolve();
+                }).catch((error: any) => { /*console.warn(error);*/ }));
+                iconPromises.push(getWikiImageUrl(crew.name.split(' ').join('_') + '.png', crew.id).then((found: IFoundResult) => {
+                    STTApi.roster.forEach((crew: any) => {
+                        if (crew.id === found.id)
+                            crew.iconBodyUrl = found.url;
+                    });
 
-					return Promise.resolve();
-				}).catch((error: any) => { /*console.warn(error);*/ }));
-			});
-			return Promise.all(iconPromises);
-		}).then(() => {
+                    return Promise.resolve();
+                }).catch((error: any) => { /*console.warn(error);*/ }));
+            });
+            return Promise.all(iconPromises);
+        }).then(() => {
             onProgress('Loading ships...');
 
             return matchShips(STTApi.playerData.character.ships).then((ships: any) => {
@@ -110,24 +110,30 @@ export function loginSequence(onProgress: (description: string) => void): Promis
                             if (ship.name === found.id)
                                 ship.iconUrl = found.url;
                         });
-    
+
                         return Promise.resolve();
                     }).catch((error: any) => { /*console.warn(error);*/ }));
                 });
                 return Promise.all(iconPromises);
             });
         });
-    })
-    .then(() => {
-        onProgress('Loading missions and quests...');
-        return loadMissionData(STTApi.playerData.character.cadet_schedule.missions.concat(STTApi.playerData.character.accepted_missions), STTApi.playerData.character.dispute_histories).then((missions) => {
-            STTApi.missions = missions;
-
-            onProgress('Calculating mission success stats for crew...');
-            STTApi.missionSuccess = calculateMissionCrewSuccess();
-            calculateMinimalComplementAsync();
-
-            return Promise.resolve();
-        });
     });
+
+    if (loadMissions) {
+        return promise.then(() => {
+            onProgress('Loading missions and quests...');
+            return loadMissionData(STTApi.playerData.character.cadet_schedule.missions.concat(STTApi.playerData.character.accepted_missions), STTApi.playerData.character.dispute_histories).then((missions) => {
+                STTApi.missions = missions;
+
+                onProgress('Calculating mission success stats for crew...');
+                STTApi.missionSuccess = calculateMissionCrewSuccess();
+                calculateMinimalComplementAsync();
+
+                return Promise.resolve();
+            });
+        });
+    }
+    else {
+        return promise;
+    }
 }
