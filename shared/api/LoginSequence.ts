@@ -104,7 +104,7 @@ export function loginSequence(onProgress: (description: string) => void, loadMis
                 onProgress('Finding ship images...');
                 let iconPromises: Array<Promise<void>> = [];
                 ships.forEach((ship: any) => {
-                    var fileName = ship.name.split(' ').join('_').split('.').join('') + '.png';
+                    var fileName = ship.name.split(' ').join('_').split('.').join('').split('\'').join('') + '.png';
                     iconPromises.push(getWikiImageUrl(fileName, ship.name).then((found: IFoundResult) => {
                         STTApi.ships.forEach((ship: any) => {
                             if (ship.name === found.id)

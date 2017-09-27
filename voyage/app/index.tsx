@@ -163,7 +163,16 @@ class App extends React.Component<any, IAppState> {
     }
 
     _renderCrewPage() {
-        return (<div><h4>Full crew complement</h4>
+        let actualShip: any = STTApi.ships.find((ship: any) => ship.id == STTApi.playerData.character.voyage[0].ship_id);
+        if (STTApi.playerData.character.voyage[0].ship_name == null) {
+            STTApi.playerData.character.voyage[0].ship_name = actualShip.name;
+        }
+
+        return (<div>
+            <h4>Voyage on the {STTApi.getShipTraitName(STTApi.playerData.character.voyage[0].ship_trait)} ship {STTApi.playerData.character.voyage[0].ship_name}</h4>
+            <img className="ui medium image" src={actualShip.iconUrl} />
+
+            <h4>Full crew complement</h4>
             <div className="ui list">
                 {STTApi.playerData.character.voyage[0].crew_slots.map((slot: any) => {
                     return (<div className="item" key={slot.symbol}>

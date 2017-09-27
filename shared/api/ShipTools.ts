@@ -6,9 +6,11 @@ export function matchShips(ships: any): Promise<any> {
 		let owned = ships.find((ship: any) => ship.name == schematic.ship.name);
 		if (owned) {
 			schematic.ship.level = owned.level;
+			schematic.ship.id = owned.id;
 		}
 		else {
 			schematic.ship.level = 0;
+			schematic.ship.id = 0;
 		}
 
 		if (schematic.ship.traits) {

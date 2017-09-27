@@ -122,7 +122,7 @@ export class VoyageLog extends React.Component<any, IVoyageLogState> {
                 voyageNarrative = voyageNarrative.reverse();
 
                 if (STTApi.playerData.character.voyage[0].ship_name == null) {
-                    STTApi.playerData.character.voyage[0].ship_name = STTApi.playerData.character.ships.find((ship: any) => ship.id == STTApi.playerData.character.voyage[0].ship_id).name;
+                    STTApi.playerData.character.voyage[0].ship_name = STTApi.ships.find((ship: any) => ship.id == STTApi.playerData.character.voyage[0].ship_id).name;
                 }
 
                 if ((this.state.antimatter >= 100) && (STTApi.playerData.character.voyage[0].hp < 100)) {
@@ -157,6 +157,9 @@ export class VoyageLog extends React.Component<any, IVoyageLogState> {
     _chooseDilemma(voyageId: number, dilemmaId: number, index: number) {
         STTApi.resolveDilemma(voyageId, dilemmaId, index).then(() => {
             this.reloadState();
+
+            // Remove the dilemma that was just resolved
+            STTApi.playerData.character.voyage[0].dilemma = null;
         });
     }
 
@@ -180,7 +183,7 @@ export class VoyageLog extends React.Component<any, IVoyageLogState> {
 
     renderDilemma(): JSX.Element[] {
         if (this.state.voyage.dilemma && this.state.voyage.dilemma.id) {
-            return [<h3 key={0} className="ui top attached header">{this.state.voyage.dilemma.title}</h3>,
+            return [<h3 key={0} className="ui top attached header"><span dangerouslySetInnerHTML={{__html: this.state.voyage.dilemma.title}} /></h3>,
             <div key={1} className="ui center aligned inverted attached segment">
                 <div>{this.state.voyage.dilemma.intro}</div>
                 <div className="ui middle aligned selection list inverted">
@@ -188,7 +191,7 @@ export class VoyageLog extends React.Component<any, IVoyageLogState> {
                         return (<div className="item" key={index} onClick={() => this._chooseDilemma(this.state.voyage.id, this.state.voyage.dilemma.id, index)}>
                             <img className="ui image skillImage" style={{ display: 'inline-block' }} src={skillRes[resolution.skill].url} />
                             <div className="content">
-                                <div className="header">{resolution.option}</div>
+                                <div className="header"><span dangerouslySetInnerHTML={{__html: resolution.option}} /></div>
                             </div>
                         </div>);
                     })}
