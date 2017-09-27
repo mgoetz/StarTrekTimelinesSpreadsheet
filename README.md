@@ -9,6 +9,8 @@ All images (crew portraits, items) displayed in the tool are references to [stt.
 
 [If you're looking for the mobile (Android) version of the tool see details here](/mobile/README.md)
 
+[If you're looking for the voyage monitor (Windows) mini tool see details here](/voyage/README.md)
+
 ## Install and run the tool
 
 I recommend you install the development environment and play with the source code yourself; make improvements and submit PRs to help your fellow players. See [contribution guidelines](/docs/CONTRIBUTING.md).
