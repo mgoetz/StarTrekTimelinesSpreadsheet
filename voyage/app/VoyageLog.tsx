@@ -71,6 +71,7 @@ interface IVoyageLogState {
     voyage: any;
     voyageNarrative: any;
     antimatter: number;
+    lastDilemmaNotification: number;
 }
 
 export class VoyageLog extends React.Component<any, IVoyageLogState> {
@@ -84,10 +85,12 @@ export class VoyageLog extends React.Component<any, IVoyageLogState> {
             dataLoaded: false,
             voyage: undefined,
             voyageNarrative: undefined,
-            antimatter: 0
+            antimatter: 0,
+            lastDilemmaNotification: 0
         };
 
         this._recall = this._recall.bind(this);
+        this._chooseDilemma = this._chooseDilemma.bind(this);
         this.reloadState = this.reloadState.bind(this);
         this.animateAntimatter = this.animateAntimatter.bind(this);
 
@@ -126,11 +129,18 @@ export class VoyageLog extends React.Component<any, IVoyageLogState> {
                     (window as any).showLocalNotification("WARNING: You only have " + STTApi.playerData.character.voyage[0].hp + " antimatter left. Consider recalling your voyage!");
                 }
 
+                if (STTApi.playerData.character.voyage[0].dilemma && STTApi.playerData.character.voyage[0].dilemma.id) {
+                    if (this.state.lastDilemmaNotification != STTApi.playerData.character.voyage[0].dilemma.id) {
+                        (window as any).showLocalNotification("WARNING: A new dilemma is available: " + STTApi.playerData.character.voyage[0].dilemma.title + ". Choose an action now!");
+                    }
+                }
+
                 this.setState({
                     dataLoaded: true,
                     voyage: STTApi.playerData.character.voyage[0],
                     antimatter: STTApi.playerData.character.voyage[0].hp,
-                    voyageNarrative: voyageNarrative
+                    voyageNarrative: voyageNarrative,
+                    lastDilemmaNotification: STTApi.playerData.character.voyage[0].dilemma ? STTApi.playerData.character.voyage[0].dilemma.id : 0
                 });
 
                 this.animateAntimatter();
@@ -140,6 +150,12 @@ export class VoyageLog extends React.Component<any, IVoyageLogState> {
 
     _recall() {
         STTApi.recallVoyage(STTApi.playerData.character.voyage[0].id).then(() => {
+            this.reloadState();
+        });
+    }
+
+    _chooseDilemma(voyageId: number, dilemmaId: number, index: number) {
+        STTApi.resolveDilemma(voyageId, dilemmaId, index).then(() => {
             this.reloadState();
         });
     }
@@ -162,6 +178,27 @@ export class VoyageLog extends React.Component<any, IVoyageLogState> {
         }
     }
 
+    renderDilemma(): JSX.Element[] {
+        if (this.state.voyage.dilemma && this.state.voyage.dilemma.id) {
+            return [<h3 key={0} className="ui top attached header">{this.state.voyage.dilemma.title}</h3>,
+            <div key={1} className="ui center aligned inverted attached segment">
+                <div>{this.state.voyage.dilemma.intro}</div>
+                <div className="ui middle aligned selection list inverted">
+                    {this.state.voyage.dilemma.resolutions.map((resolution: any, index: number) => {
+                        return (<div className="item" key={index} onClick={() => this._chooseDilemma(this.state.voyage.id, this.state.voyage.dilemma.id, index)}>
+                            <img className="ui image skillImage" style={{ display: 'inline-block' }} src={skillRes[resolution.skill].url} />
+                            <div className="content">
+                                <div className="header">{resolution.option}</div>
+                            </div>
+                        </div>);
+                    })}
+                </div>
+            </div>];
+        } else {
+            return [<span />];
+        }
+    }
+
     render() {
         if (this.state.dataLoaded) {
             return (<div style={{ userSelect: 'initial' }}>
@@ -177,13 +214,15 @@ export class VoyageLog extends React.Component<any, IVoyageLogState> {
                             Antimatter
                         </div>
                     </div>
-                    <br/>
+                    <br />
                     {(this.state.voyage.state != "recalled") && (this.state.voyage.state != "failed") && (
-                    <button className="ui right labeled icon button" onClick={() => this._recall}>
-                        <i className="right history icon"></i>
-                        Recall now
+                        <button className="ui right labeled icon button" onClick={() => this._recall}>
+                            <i className="right history icon"></i>
+                            Recall now
                     </button>)}
                 </div>
+
+                {this.renderDilemma()}
 
                 <h3>Pending rewards</h3>
                 <div className="ui inverted segment">

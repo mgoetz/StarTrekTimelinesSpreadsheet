@@ -428,6 +428,17 @@ class STTApi {
 		});
 	}
 
+	resolveDilemma(voyageId: number, dilemmaId: number, index: number): Promise<void> {
+		return this.executePostRequest("voyage/resolve_dilemma", { voyage_status_id: voyageId, dilemma_id: dilemmaId, resolution_index: index }).then((data: any) => {
+			if (data) {
+				//console.info("Resolved dilemma");
+				return Promise.resolve();
+			} else {
+				return Promise.reject("Invalid data for voyage!");
+			}
+		});
+	}
+
 	submitUserFeedback(feedback: any): Promise<any> {
 		return this._net.postjson(CONFIG.URL_USERFEEDBACK, feedback);
 	}
