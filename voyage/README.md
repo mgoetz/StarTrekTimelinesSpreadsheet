@@ -2,6 +2,8 @@
 
 **NOTE** This tool is in a very early (pre-release) state. Same disclaimers apply as for the [desktop version](/README.md)!
 
+Latest release (if you don't want to build it yourself) is available [here](https://github.com/IAmPicard/StarTrekTimelinesSpreadsheet/releases/tag/v0.0.2-voyage).
+
 ## Features
 
 ### Monitor the captain's log and current voyage status
@@ -18,7 +20,7 @@ When a dilemma is available, a notification will be displayed and you can choose
 
 ![Screenshot Crew](docs/Voyage_Crew.png "Crew screenshot")
 
-The second tab simply displays the list of crew assigned to the voyage with their respective rols and a skill aggregate table.
+The second tab simply displays the list of crew assigned to the voyage with their respective roles and a skill aggregate table.
 
 ## Installation Steps
 
