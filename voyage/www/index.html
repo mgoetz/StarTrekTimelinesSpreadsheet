@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <title>STT Mobile Companion</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta http-equiv="Content-Security-Policy" content="default-src *; style-src * 'self' 'unsafe-inline'; font-src 'self' https: data:; script-src 'self' 'unsafe-inline' 'unsafe-eval'">
+    <meta http-equiv="Content-Security-Policy" content="default-src * blob:; style-src * 'self' 'unsafe-inline'; font-src 'self' https: data:; script-src 'self' 'unsafe-inline' 'unsafe-eval'">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/semantic-ui@2.2.13/dist/semantic.min.css">
     <style>
         body {
@@ -73,6 +73,40 @@
             var toast = new notifications.ToastNotification(toastXml);
 
             notificationManager.createToastNotifier().show(toast);
+        }
+
+        // This is Windows-specific code for showing a file save dialog
+        // TODO: cordova plugin? Doesn't look like there is one that is cross platform
+        function showLogSavePicker(voyageNarrative) {
+            if (!Windows || !Windows.Storage) {
+                return;
+            }
+
+            var savePicker = new Windows.Storage.Pickers.FileSavePicker();
+            savePicker.suggestedStartLocation = Windows.Storage.Pickers.PickerLocationId.documentsLibrary;
+            savePicker.defaultFileExtension = ".txt";
+            savePicker.suggestedFileName = "voyage_log";
+            savePicker.fileTypeChoices.insert("Plain text", [".txt"]);
+            savePicker.fileTypeChoices.insert("JSON", [".json"]);
+            savePicker.pickSaveFileAsync().then((file) => {
+                if (file) {
+                    console.log(file.fileType);
+                    Windows.Storage.CachedFileManager.deferUpdates(file);
+
+                    let fileContent = null;
+                    if (file.fileType == '.json') {
+                        fileContent = JSON.stringify(voyageNarrative);
+                    }
+                    else if (file.fileType == '.txt') {
+                        fileContent = voyageNarrative.map((entry) => { return "[" + new Date(entry.event_time * 1000).toString() + "]: " + entry.text}).join("\r\n");
+                    }
+
+                    Windows.Storage.FileIO.writeTextAsync(file, fileContent).done(function () {
+                        Windows.Storage.CachedFileManager.completeUpdatesAsync(file);
+                        Windows.System.Launcher.launchFileAsync(file);
+                    });
+                }
+            });
         }
     </script>
 </body>

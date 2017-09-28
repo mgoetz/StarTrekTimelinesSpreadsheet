@@ -10,11 +10,19 @@ Latest release (if you don't want to build it yourself) is available [here](http
 
 ![Screenshot main](docs/Voyage_Main.png "main screenshot")
 
-This is the main tab. It updates whenever a new event happens (every 20 seconds). The program also displays a notification when antimatter drops below 100. You can choose to recall the voyage at any time from this page.
+This is the main tab. It updates whenever a new event happens (every 20 seconds).
+
+![Screenshot notification](docs/Voyage_Notification.png "notification screenshot")
+
+The program also displays a notification when antimatter drops below 100. You can choose to recall the voyage at any time from this tab.
 
 ![Screenshot Dilemma](docs/Voyage_Dilemma.png "Dilemma screenshot")
 
 When a dilemma is available, a notification will be displayed and you can choose a resolution from within the tool itself.
+
+![Screenshot Return](docs/Voyage_Return.png "Return screenshot")
+
+When the voyage is on its way back (recalled) you can export the log of your voyage (either as plain text or in JSON format).
 
 ### Crew
 

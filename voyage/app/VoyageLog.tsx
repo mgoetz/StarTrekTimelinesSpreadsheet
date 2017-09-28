@@ -91,6 +91,7 @@ export class VoyageLog extends React.Component<any, IVoyageLogState> {
 
         this._recall = this._recall.bind(this);
         this._revive = this._revive.bind(this);
+        this._saveLog = this._saveLog.bind(this);
         this._chooseDilemma = this._chooseDilemma.bind(this);
         this.reloadState = this.reloadState.bind(this);
         this.animateAntimatter = this.animateAntimatter.bind(this);
@@ -99,12 +100,14 @@ export class VoyageLog extends React.Component<any, IVoyageLogState> {
     }
 
     animateAntimatter() {
-        this._antimatterstatistic.className = 'value';
+        if (this._antimatterstatistic) {
+            this._antimatterstatistic.className = 'value';
 
-        // Magic sauce :) This triggers a reflow which tricks the browser into replaying the animation
-        void this._antimatterstatistic.offsetWidth;
+            // Magic sauce :) This triggers a reflow which tricks the browser into replaying the animation
+            void this._antimatterstatistic.offsetWidth;
 
-        this._antimatterstatistic.className = 'value shakeAnimation';
+            this._antimatterstatistic.className = 'value shakeAnimation';
+        }
     }
 
     reloadState() {
@@ -126,7 +129,9 @@ export class VoyageLog extends React.Component<any, IVoyageLogState> {
                     STTApi.playerData.character.voyage[0].ship_name = STTApi.ships.find((ship: any) => ship.id == STTApi.playerData.character.voyage[0].ship_id).name;
                 }
 
-                if ((this.state.antimatter >= 100) && (STTApi.playerData.character.voyage[0].hp < 100)) {
+                if ((STTApi.playerData.character.voyage[0].hp < 100) &&
+                    ((this.state.antimatter >= 100) || !this.state.antimatter) &&
+                    (STTApi.playerData.character.voyage[0].state != "recalled")) {
                     (window as any).showLocalNotification("WARNING: You only have " + STTApi.playerData.character.voyage[0].hp + " antimatter left. Consider recalling your voyage!");
                 }
 
@@ -170,6 +175,10 @@ export class VoyageLog extends React.Component<any, IVoyageLogState> {
         });
     }
 
+    _saveLog() {
+        (window as any).showLogSavePicker(this.state.voyageNarrative);
+    }
+
     componentDidMount() {
         this.timerID = setInterval(this.reloadState, 20000);
     }
@@ -190,7 +199,7 @@ export class VoyageLog extends React.Component<any, IVoyageLogState> {
 
     renderDilemma(): JSX.Element[] {
         if (this.state.voyage.dilemma && this.state.voyage.dilemma.id) {
-            return [<h3 key={0} className="ui top attached header"><span dangerouslySetInnerHTML={{__html: this.state.voyage.dilemma.title}} /></h3>,
+            return [<h3 key={0} className="ui top attached header"><span dangerouslySetInnerHTML={{ __html: this.state.voyage.dilemma.title }} /></h3>,
             <div key={1} className="ui center aligned inverted attached segment">
                 <div>{this.state.voyage.dilemma.intro}</div>
                 <div className="ui middle aligned selection list inverted">
@@ -198,7 +207,7 @@ export class VoyageLog extends React.Component<any, IVoyageLogState> {
                         return (<div className="item" key={index} onClick={() => this._chooseDilemma(this.state.voyage.id, this.state.voyage.dilemma.id, index)}>
                             <img className="ui image skillImage" style={{ display: 'inline-block' }} src={skillRes[resolution.skill].url} />
                             <div className="content">
-                                <div className="header"><span dangerouslySetInnerHTML={{__html: resolution.option}} /></div>
+                                <div className="header"><span dangerouslySetInnerHTML={{ __html: resolution.option }} /></div>
                             </div>
                         </div>);
                     })}
@@ -206,6 +215,27 @@ export class VoyageLog extends React.Component<any, IVoyageLogState> {
             </div>];
         } else {
             return [<span />];
+        }
+    }
+
+    renderExtraButtons() {
+        if (this.state.voyage.state == "failed") {
+            return (<button className="ui right labeled icon button" onClick={() => this._revive()}>
+                <i className="right money icon"></i>
+                Revive for {this.state.voyage.revive_cost.amount} dilithium
+                </button>);
+        }
+        else if (this.state.voyage.state == "recalled") {
+            return (<button className="ui right labeled icon button" onClick={() => this._saveLog()}>
+                <i className="right download icon"></i>
+                Save this log...
+                </button>);
+        }
+        else {
+            return (<button className="ui right labeled icon button" onClick={() => this._recall()}>
+                <i className="right history icon"></i>
+                Recall now
+                </button>);
         }
     }
 
@@ -225,16 +255,7 @@ export class VoyageLog extends React.Component<any, IVoyageLogState> {
                         </div>
                     </div>
                     <br />
-                    {(this.state.voyage.state != "recalled") && (this.state.voyage.state != "failed") && (
-                        <button className="ui right labeled icon button" onClick={() => this._recall()}>
-                            <i className="right history icon"></i>
-                            Recall now
-                    </button>)}
-                    {(this.state.voyage.state == "failed") && (
-                        <button className="ui right labeled icon button" onClick={() => this._revive()}>
-                            <i className="right history icon"></i>
-                            Revive for {this.state.voyage.revive_cost.amount} dilithium
-                    </button>)}
+                    {this.renderExtraButtons()}
                 </div>
 
                 {this.renderDilemma()}
