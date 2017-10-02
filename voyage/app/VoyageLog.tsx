@@ -201,7 +201,7 @@ export class VoyageLog extends React.Component<any, IVoyageLogState> {
         if (this.state.voyage.dilemma && this.state.voyage.dilemma.id) {
             return [<h3 key={0} className="ui top attached header"><span dangerouslySetInnerHTML={{ __html: this.state.voyage.dilemma.title }} /></h3>,
             <div key={1} className="ui center aligned inverted attached segment">
-                <div>{this.state.voyage.dilemma.intro}</div>
+                <div><span dangerouslySetInnerHTML={{ __html: this.state.voyage.dilemma.intro }} /></div>
                 <div className="ui middle aligned selection list inverted">
                     {this.state.voyage.dilemma.resolutions.map((resolution: any, index: number) => {
                         return (<div className="item" key={index} onClick={() => this._chooseDilemma(this.state.voyage.id, this.state.voyage.dilemma.id, index)}>
