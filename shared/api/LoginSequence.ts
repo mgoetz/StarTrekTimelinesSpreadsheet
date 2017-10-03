@@ -94,6 +94,19 @@ export function loginSequence(onProgress: (description: string) => void, loadMis
                     return Promise.resolve();
                 }).catch((error: any) => { /*console.warn(error);*/ }));
             });
+
+            // Also load the avatars for crew not in the roster
+            STTApi.crewAvatars.forEach((crew: any) => {
+                iconPromises.push(getWikiImageUrl(crew.name.split(' ').join('_') + '_Head.png', crew.id).then((found: IFoundResult) => {
+                    STTApi.crewAvatars.forEach((crew: any) => {
+                        if (crew.id === found.id)
+                            crew.iconUrl = found.url;
+                    });
+
+                    return Promise.resolve();
+                }).catch((error: any) => { /*console.warn(error);*/ }));
+            });
+
             return Promise.all(iconPromises);
         }).then(() => {
             onProgress('Loading ships...');

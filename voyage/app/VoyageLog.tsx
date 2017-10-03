@@ -218,6 +218,42 @@ export class VoyageLog extends React.Component<any, IVoyageLogState> {
         }
     }
 
+    renderRewards() {
+        return (
+            <div className="ui inverted segments">
+                <div className="ui inverted segment">
+                    <div className="ui list">
+                    {this.state.voyage.pending_rewards.loot.filter((loot: any) => loot.type == 1).map((loot: any, index: number) => {
+                        let rating: JSX.Element[] = [];
+                        for (let i = 0; i < loot.rarity; i++) {
+                            rating.push(<i key={i} className='yellow star icon' />);
+                        }
+
+                        return (<div className="item" key={index}>
+                            <img className="ui avatar image" src={STTApi.crewAvatars.find((crew: any) => crew.id == loot.id).iconUrl} />
+                            <div className="content">
+                                <div className="header" style={{ color: loot.rarity && rarityRes[loot.rarity].color }}>{loot.full_name}</div>
+                                <div className="description" style={{ color: 'red' }} >{rating} { STTApi.roster.find((crew: any) => crew.symbol == loot.symbol) ? 'DUPLICATE' : '' }</div>
+                            </div>
+                        </div>);
+                    })}
+                    </div>
+                </div>
+
+                <div className="ui inverted segment">
+                    {this.state.voyage.pending_rewards.loot.filter((loot: any) => loot.type == 2).map((loot: any, index: number) => {
+                        return (<span key={index} style={{ color: loot.rarity && rarityRes[loot.rarity].color }}>{loot.quantity} {(loot.rarity == null) ? '' : rarityRes[loot.rarity].name} {loot.full_name}</span>);
+                    }).reduce((prev: any, curr: any) => [prev, ', ', curr])}
+                </div>
+
+                <div className="ui inverted segment">
+                    {this.state.voyage.pending_rewards.loot.filter((loot: any) => loot.type == 3).map((loot: any, index: number) => {
+                        return (<span key={index} style={{ color: loot.rarity && rarityRes[loot.rarity].color }}>{loot.quantity} {(loot.rarity == null) ? '' : rarityRes[loot.rarity].name} {loot.full_name}</span>);
+                    }).reduce((prev: any, curr: any) => [prev, ', ', curr])}
+                </div>
+            </div>);
+    }
+
     renderExtraButtons() {
         if (this.state.voyage.state == "failed") {
             return (<button className="ui right labeled icon button" onClick={() => this._revive()}>
@@ -261,11 +297,7 @@ export class VoyageLog extends React.Component<any, IVoyageLogState> {
                 {this.renderDilemma()}
 
                 <h3>Pending rewards</h3>
-                <div className="ui inverted segment">
-                    {this.state.voyage.pending_rewards.loot.map((loot: any, index: number) => {
-                        return (<span key={index} style={{ color: loot.rarity && rarityRes[loot.rarity].color }}>{loot.quantity} {(loot.rarity == null) ? '' : rarityRes[loot.rarity].name} {loot.full_name}</span>);
-                    }).reduce((prev: any, curr: any) => [prev, ', ', curr])}
-                </div>
+                {this.renderRewards()}
 
                 <h3>Complete Captain's Log</h3>
                 <div className="ui feed">

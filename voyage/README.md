@@ -8,7 +8,7 @@ Latest release (if you don't want to build it yourself) is available [here](http
 
 ### Monitor the captain's log and current voyage status
 
-![Screenshot main](docs/Voyage_Main.png "main screenshot")
+![Screenshot main](docs/Voyage_Main2.png "main screenshot")
 
 This is the main tab. It updates whenever a new event happens (every 20 seconds).
 
