@@ -74,7 +74,7 @@ export class LoginDialog extends React.Component<ILoginDialogProps, ILoginDialog
     }
 
     _closeDialog() {
-        this.setState({ showSpinner: true, errorMessage: null });
+        this.setState({ showSpinner: true, errorMessage: undefined });
 
         STTApi.login(this.state.username, this.state.password, this.state.autoLogin).then(() => {
             this.setState({ showSpinner: false });

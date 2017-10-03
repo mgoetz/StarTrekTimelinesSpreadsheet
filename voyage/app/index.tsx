@@ -20,7 +20,7 @@ interface IAppState {
     loggedIn: boolean;
     captainName: string;
     spinnerLabel: string;
-    captainAvatarUrl: string;
+    captainAvatarUrl: string | undefined;
     filter: string;
     currentTab: Tab;
 }
