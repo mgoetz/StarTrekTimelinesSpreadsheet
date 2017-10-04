@@ -9,7 +9,7 @@ All images (crew portraits, items) displayed in the tool are references to [stt.
 
 [If you're looking for the mobile (Android) version of the tool see details here](/mobile/README.md)
 
-[If you're looking for the voyage monitor (Windows) mini tool see details here](/voyage/README.md)
+[If you're looking for the voyage monitor (Windows) mini tool see details here](https://github.com/IAmPicard/STTVoyage)
 
 ## Install and run the tool
 
