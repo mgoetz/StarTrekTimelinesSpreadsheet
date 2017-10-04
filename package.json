@@ -49,7 +49,7 @@
     "exceljs": "latest",
     "fb": "^2.0.0",
     "json2csv": "latest",
-    "office-ui-fabric-react": "latest",
+    "office-ui-fabric-react": "^4.0.0",
     "pubnub": "latest",
     "url-search-params-polyfill": "^2.0.1",
     "uuid": "latest",
