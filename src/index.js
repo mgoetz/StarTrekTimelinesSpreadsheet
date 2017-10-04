@@ -7,5 +7,10 @@ let root = document.createElement('div');
 root.id = "root";
 document.body.appendChild( root );
 
+window.onerror = (message, filename, lineno) =>
+{
+    console.warn(`ERROR in ${filename} (${lineno}): ${message}`);
+}
+
 // Now we can render our application into it
 render( <App />, document.getElementById('root') );
