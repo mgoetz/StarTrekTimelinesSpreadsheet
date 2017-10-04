@@ -7,9 +7,7 @@ A tool to help with crew management in Star Trek Timelines
 It should be understood that *Star Trek Timelines* content and materials are trademarks and copyrights of [Disruptor Beam, Inc.](https://www.disruptorbeam.com/tos/) or its licensors. All rights reserved. This tool is neither endorsed by nor affiliated with Disruptor Beam, Inc..
 All images (crew portraits, items) displayed in the tool are references to [stt.wiki](https://stt.wiki/wiki/Main_Page).
 
-[If you're looking for the mobile (Android) version of the tool see details here](https://github.com/IAmPicard/STTCrewMobile)
-
-[If you're looking for the voyage monitor (Windows) mini tool see details here](https://github.com/IAmPicard/STTVoyage)
+[More tools and information here](https://iampicard.github.io/)
 
 ## Install and run the tool
 
