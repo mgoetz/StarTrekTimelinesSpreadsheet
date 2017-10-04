@@ -8,7 +8,7 @@ import { MessageBar, MessageBarType } from 'office-ui-fabric-react/lib/MessageBa
 import { Pivot, PivotItem } from 'office-ui-fabric-react/lib/Pivot';
 import { Image, ImageFit } from 'office-ui-fabric-react/lib/Image';
 
-import STTApi from '../../shared/api/STTApi.ts';
+import STTApi from 'sttapi';
 
 import {ipcRenderer} from 'electron';
 

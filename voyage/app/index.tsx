@@ -4,9 +4,8 @@ import * as ReactDOM from "react-dom";
 import { LoginDialog } from "./loginDialog";
 import { VoyageLog } from "./VoyageLog";
 
-import STTApi from '../../shared/api/STTApi';
-import { loginSequence } from '../../shared/api/LoginSequence';
-import { getWikiImageUrl } from '../../shared/api/WikiImageTools';
+import STTApi from 'sttapi';
+import { loginSequence, getWikiImageUrl } from 'sttapi';
 
 enum Tab {
     VoyageLog,
@@ -202,7 +201,7 @@ class App extends React.Component<any, IAppState> {
 
     _renderFeedbackPage() {
         return <div>
-            <h1>Star Trek Timelines Voyage Monitor v0.0.2</h1>
+            <h1>Star Trek Timelines Voyage Monitor v0.0.4</h1>
             <p>A tool to help with voyages in Star Trek Timelines</p>
 
             <p><b>DISCLAIMER</b> This tool is provided "as is", without warranty of any kind. Use at your own risk! It should be understood that <i>Star Trek Timelines</i> content and materials are trademarks and copyrights of <a href='https://www.disruptorbeam.com/tos/' target='_blank'>Disruptor Beam, Inc.</a> or its licensors. All rights reserved. This tool is neither endorsed by nor affiliated with Disruptor Beam, Inc.</p>

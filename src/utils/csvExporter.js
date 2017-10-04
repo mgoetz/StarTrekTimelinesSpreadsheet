@@ -1,6 +1,6 @@
 const json2csv = require('json2csv');
 const fs = require('fs');
-import STTApi from '../../shared/api/STTApi.ts';
+import STTApi from 'sttapi';
 
 // In plain browsers, to avoid using fs, we could do something like this: https://stackoverflow.com/a/18197511
 export function exportCsv(fileName) {

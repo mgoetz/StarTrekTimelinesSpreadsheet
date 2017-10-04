@@ -5,9 +5,8 @@ import { LoginDialog } from "./loginDialog";
 import { MinimalComplement } from "./MinimalComplement";
 import { CrewCard } from "./CrewCard";
 
-import STTApi from '../../shared/api/STTApi';
-import { loginSequence } from '../../shared/api/LoginSequence';
-import { getWikiImageUrl } from '../../shared/api/WikiImageTools';
+import STTApi from 'sttapi';
+import { loginSequence, getWikiImageUrl } from 'sttapi';
 
 enum Tab {
     Crew = 1,

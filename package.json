@@ -52,6 +52,7 @@
     "office-ui-fabric-react": "latest",
     "pubnub": "latest",
     "url-search-params-polyfill": "^2.0.1",
-    "uuid": "latest"
+    "uuid": "latest",
+    "sttapi": "file:./STTApi"
   }
 }

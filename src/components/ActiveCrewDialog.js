@@ -8,9 +8,8 @@ import { Spinner, SpinnerSize } from 'office-ui-fabric-react/lib/Spinner';
 
 import { CollapsibleSection } from './CollapsibleSection.js';
 
-import STTApi from '../../shared/api/STTApi.ts';
-import { mergeDeep } from '../../shared/api/ObjectMerge.ts';
-import { getWikiImageUrl } from '../../shared/api/WikiImageTools.ts';
+import STTApi from 'sttapi';
+import { mergeDeep, getWikiImageUrl } from 'sttapi';
 
 const CONFIG = require('../utils/config.js');
 

@@ -3,7 +3,7 @@ import * as ReactDOM from "react-dom";
 
 import { CrewCard } from "./CrewCard";
 
-import STTApi from '../../shared/api/STTApi';
+import STTApi from 'sttapi';
 
 interface IMinimalComplementState {
     dataLoaded: boolean;

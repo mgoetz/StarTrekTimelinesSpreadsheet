@@ -18,7 +18,8 @@
         "dexie": "latest",
         "react": "latest",
         "react-dom": "latest",
-        "url-search-params-polyfill": "^2.0.1"
+        "url-search-params-polyfill": "^2.0.1",
+        "sttapi": "file:../STTApi"
     },
     "devDependencies": {
         "@types/prop-types": "latest",

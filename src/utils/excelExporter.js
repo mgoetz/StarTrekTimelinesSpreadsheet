@@ -1,5 +1,5 @@
 const Excel = require('electron').remote.require('exceljs');
-import STTApi from '../../shared/api/STTApi.ts';
+import STTApi from 'sttapi';
 
 export function exportExcel(itemList, fileName) {
 	var workbook = new Excel.Workbook();

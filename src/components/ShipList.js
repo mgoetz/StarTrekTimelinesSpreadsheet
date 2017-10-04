@@ -4,7 +4,7 @@ import { Rating, RatingSize } from 'office-ui-fabric-react/lib/Rating';
 import { Image, ImageFit } from 'office-ui-fabric-react/lib/Image';
 
 import { sortItems, columnClick } from '../utils/listUtils.js';
-import STTApi from '../../shared/api/STTApi.ts';
+import STTApi from 'sttapi';
 
 export class ShipList extends React.Component {
 	constructor(props) {

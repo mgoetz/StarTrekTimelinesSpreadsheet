@@ -7,7 +7,7 @@ import { Image, ImageFit } from 'office-ui-fabric-react/lib/Image';
 import { CrewList } from './CrewList.js';
 import { CollapsibleSection } from './CollapsibleSection.js';
 
-import STTApi from '../../shared/api/STTApi.ts';
+import STTApi from 'sttapi';
 
 const CONFIG = require('../utils/config.js');
 

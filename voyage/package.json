@@ -17,7 +17,8 @@
         "dexie": "latest",
         "react": "latest",
         "react-dom": "latest",
-        "url-search-params-polyfill": "latest"
+        "url-search-params-polyfill": "latest",
+        "sttapi": "file:../STTApi"
     },
     "devDependencies": {
         "@types/cordova": "latest",

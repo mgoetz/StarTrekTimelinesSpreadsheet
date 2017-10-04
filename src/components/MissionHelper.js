@@ -10,7 +10,7 @@ import { DefaultButton } from 'office-ui-fabric-react/lib/Button';
 import { Callout } from 'office-ui-fabric-react/lib/Callout';
 import { Spinner, SpinnerSize } from 'office-ui-fabric-react/lib/Spinner';
 
-import STTApi from '../../shared/api/STTApi.ts';
+import STTApi from 'sttapi';
 
 const CONFIG = require('../utils/config.js');
 

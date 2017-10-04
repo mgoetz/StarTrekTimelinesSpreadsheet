@@ -5,7 +5,7 @@ import { Rating, RatingSize } from 'office-ui-fabric-react/lib/Rating';
 import { Link } from 'office-ui-fabric-react/lib/Link';
 
 import { sortItems, columnClick } from '../utils/listUtils.js';
-import { getWikiImageUrl } from '../../shared/api/WikiImageTools.ts';
+import { getWikiImageUrl } from 'sttapi';
 
 const CONFIG = require('../utils/config.js');
 

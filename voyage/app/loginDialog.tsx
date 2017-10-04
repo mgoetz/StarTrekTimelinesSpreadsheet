@@ -1,6 +1,6 @@
 import * as React from "react";
 import * as ReactDOM from "react-dom";
-import STTApi from '../../shared/api/STTApi';
+import STTApi from 'sttapi';
 
 export interface ILoginDialogProps {
     onAccessToken: () => void;

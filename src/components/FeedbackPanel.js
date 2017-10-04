@@ -4,7 +4,7 @@ import { TextField } from 'office-ui-fabric-react/lib/TextField';
 import { Spinner, SpinnerSize } from 'office-ui-fabric-react/lib/Spinner';
 import { PrimaryButton } from 'office-ui-fabric-react/lib/Button';
 
-import STTApi from '../../shared/api/STTApi.ts';
+import STTApi from 'sttapi';
 
 export class FeedbackPanel extends React.Component {
 	constructor(props) {

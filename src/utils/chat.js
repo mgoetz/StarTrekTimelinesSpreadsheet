@@ -3,7 +3,7 @@ const uuidv4 = require('uuid/v4');
 
 const CONFIG = require('./config.js');
 
-import STTApi from '../../shared/api/STTApi.ts';
+import STTApi from 'sttapi';
 
 function loadSubscriberDetails() {
 	return STTApi.executeGetRequest("notification/subscriber_details");

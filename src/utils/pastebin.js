@@ -1,6 +1,6 @@
 const fs = require('electron').remote.require('fs');
 
-import STTApi from '../../shared/api/STTApi.ts';
+import STTApi from 'sttapi';
 
 const CONFIG = require('./config.js');
 

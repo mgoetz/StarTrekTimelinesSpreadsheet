@@ -7,9 +7,8 @@ import { Icon } from 'office-ui-fabric-react/lib/Icon';
 
 import { CrewList } from './CrewList.js';
 
-import STTApi from '../../shared/api/STTApi.ts';
-import { getWikiImageUrl } from '../../shared/api/WikiImageTools.ts';
-import { loadGauntlet, gauntletCrewSelection, gauntletRoundOdds, payToGetNewOpponents, playContest } from '../../shared/api/GauntletTools.ts';
+import STTApi from 'sttapi';
+import { getWikiImageUrl, loadGauntlet, gauntletCrewSelection, gauntletRoundOdds, payToGetNewOpponents, playContest } from 'sttapi';
 
 const CONFIG = require('../utils/config.js');
 

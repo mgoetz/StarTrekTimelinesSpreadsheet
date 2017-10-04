@@ -1,7 +1,7 @@
 import * as React from "react";
 import * as ReactDOM from "react-dom";
 
-import STTApi from '../../shared/api/STTApi';
+import STTApi from 'sttapi';
 
 const skillRes: { [index: string]: { name: string, url: string } } = {
     'command_skill': { name: 'Command', url: 'https://stt.wiki/w/images/thumb/6/6d/CMD.png/18px-CMD.png' },

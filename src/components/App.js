@@ -46,9 +46,8 @@ import { CaptainCard } from './CaptainCard.js';
 import { FeedbackPanel } from './FeedbackPanel.js';
 import { ShakingButton } from './ShakingButton.js';
 
-import STTApi from '../../shared/api/STTApi.ts';
-import { getWikiImageUrl } from '../../shared/api/WikiImageTools.ts';
-import { loginSequence } from '../../shared/api/LoginSequence.ts';
+import STTApi from 'sttapi';
+import { loginSequence, getWikiImageUrl } from 'sttapi';
 
 const compareSemver = require('compare-semver');
 const electron = require('electron');
