@@ -13,21 +13,10 @@ export class ItemList extends React.Component {
 	constructor(props) {
 		super(props);
 
-		var items = this.props.data.map(function (item) {
-			return {
-				id: item.id,
-				name: item.name,
-				rarity: item.rarity,
-				quantity: item.quantity,
-				iconUrl: CONFIG.defaultItemIconUrl,
-				type: item.icon.file.replace("/items", "").split("/")[1],
-				symbol: item.icon.file.replace("/items", "").split("/")[2],
-				flavor: item.flavor
-			}
-		});
-
 		this.state = {
-			items: sortItems(items, 'name'),
+			items: sortItems(this.props.data, 'name'),
+			sortColumn: 'name',
+			sortedDescending: false,
 			columns: [
 				{
 					key: 'icon',
@@ -59,7 +48,7 @@ export class ItemList extends React.Component {
 					onRender: (item) => {
 						return (
 							<Rating
-								min={0}
+								min={1}
 								max={item.rarity}
 								rating={item.rarity}
 							/>
@@ -81,7 +70,7 @@ export class ItemList extends React.Component {
 					minWidth: 70,
 					maxWidth: 120,
 					isResizable: true,
-					fieldName: 'type'
+					fieldName: 'typeName'
 				},
 				{
 					key: 'symbol',
@@ -103,28 +92,11 @@ export class ItemList extends React.Component {
 		};
 
 		this._onColumnClick = this._onColumnClick.bind(this);
-
-		let iconPromises = [];
-		items.forEach((item) => {
-			var fileName = item.name + CONFIG.rarityRes[item.rarity].name + '.png';
-			fileName = fileName.split(' ').join('');
-			fileName = fileName.split('\'').join('');
-
-			iconPromises.push(getWikiImageUrl(fileName, item.id).then(({id, url}) => {
-				this.state.items.forEach(function (item) {
-					if (item.id === id)
-						item.iconUrl = url;
-				});
-
-				return Promise.resolve();
-			}).catch((error) => {}));
-		});
-		Promise.all(iconPromises).then(() => this.forceUpdate());
 	}
 
 	render() {
 		return (
-			<div className='tab-panel' data-is-scrollable='true'>
+			<div className='item-panel' data-is-scrollable='true'>
 				<DetailsList
 					items={this.state.items}
 					columns={this.state.columns}
@@ -135,6 +107,35 @@ export class ItemList extends React.Component {
 				/>
 			</div>
 		);
+	}
+
+	_filterItem(item, searchString) {
+		return searchString.split(' ').every(text => {
+			// search the name first
+			if (item.name.toLowerCase().indexOf(text) > -1) {
+				return true;
+			}
+
+			// now search the traits
+			if (item.symbol && (item.symbol.toLowerCase().indexOf(text) > -1)) {
+				return true;
+			}
+
+			// now search the raw traits
+			if (item.flavor && (item.flavor.toLowerCase().indexOf(text) > -1)) {
+				return true;
+			}
+
+			return false;
+		});
+	}
+
+	filter(newValue) {
+		this.setState({
+			items: sortItems((newValue ?
+				this.props.data.filter(i => this._filterItem(i, newValue)) :
+				this.props.data), this.state.sortColumn, this.state.sortedDescending)
+		});
 	}
 
 	_onColumnClick(ev, column) {

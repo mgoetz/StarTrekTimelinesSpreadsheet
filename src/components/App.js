@@ -69,7 +69,6 @@ class App extends React.Component {
 			secondLine: '',
 			captainAvatarUrl: '',
 			captainAvatarBodyUrl: '',
-			itemList: [],
 			spinnerLabel: 'Loading...'
 		};
 
@@ -173,7 +172,11 @@ class App extends React.Component {
 							<CrewList data={STTApi.roster} grouped={false} ref='crewList' />
 						</PivotItem>
 						<PivotItem linkText='Items' itemIcon='Boards'>
-							<ItemList data={this.state.itemList} />
+							<SearchBox labelText='Search by name description...'
+								onChange={ (newValue) => this.refs.itemList.filter(newValue) }
+								onSearch={ (newValue) => this.refs.itemList.filter(newValue) }
+        					/>
+							<ItemList data={STTApi.playerData.character.items} ref='itemList' />
 						</PivotItem>
 						<PivotItem linkText='Equipment' itemIcon='CheckList'>
 							<EquipmentDetails />
@@ -229,7 +232,7 @@ class App extends React.Component {
 							if (fileName === undefined)
 								return;
 
-							exportExcel(this.state.itemList, fileName).then((filePath) => {
+							exportExcel(STTApi.playerData.character.items, fileName).then((filePath) => {
 								shell.openItem(filePath);
 							});
 						}.bind(this));
@@ -327,7 +330,6 @@ class App extends React.Component {
 			showSpinner: false,
 			captainName: STTApi.playerData.character.display_name,
 			secondLine: 'Level ' + STTApi.playerData.character.level,
-			itemList: STTApi.playerData.character.items,
 			dataLoaded: true
 		});
 
