@@ -1,6 +1,5 @@
 import React, { Component } from 'react';
 import { Spinner, SpinnerSize } from 'office-ui-fabric-react/lib/Spinner';
-import { Toggle } from 'office-ui-fabric-react/lib/Toggle';
 import { Icon } from 'office-ui-fabric-react/lib/Icon';
 import { Image, ImageFit } from 'office-ui-fabric-react/lib/Image';
 
@@ -128,22 +127,6 @@ export class CrewRecommendations extends React.Component {
 				<GuaranteedSuccess title='Missions without guaranteed success' cadet={false} />
 				<CrewDuplicates title='Crew duplicates' />
 				<MinimalComplement title='Minimal crew complement needed for cadet challenges' />
-
-				<Toggle
-					onText='Show detailed list of crew success stats for all cadet challenges and missions'
-					offText='Hide detailed list of crew success stats for all cadet challenges and missions'
-					checked={this.state.showDetails}
-					onChanged={checked => this.setState({ showDetails: checked })} />
-
-				{this.state.showDetails && STTApi.missionSuccess.map(function (recommendation) {
-					return (<div key={recommendation.mission.episode_title + ' - ' + recommendation.quest.name + ' - ' + recommendation.challenge.name}>
-						<h3>{recommendation.mission.episode_title + ' - ' + recommendation.quest.name + ' - ' + recommendation.challenge.name}</h3>
-						{(recommendation.crew.length == 0) ? (<span style={{ color: 'red' }}>You have no crew which can complete this challenge!</span>) :
-							recommendation.crew.map(function (crew) {
-								return (<span key={crew.crew.name}>{crew.crew.name} ({crew.success.toFixed(2)}%)</span>);
-							}).reduce((prev, curr) => [prev, ', ', curr])}
-					</div>);
-				})}
 			</div>
 		);
 	}
