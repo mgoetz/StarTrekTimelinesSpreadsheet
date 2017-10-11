@@ -39,13 +39,7 @@ This tab lists out all the ships you currently have, along with their stats.
 
 ![Screenshot Missions](/docs/Screenshot-Missions.png "Missions screenshot")
 
-This tab give an overview of all accepted missions, along with individual requirements and player stats for each quest and challenge.
-
-### Cadet challenges
-
-![Screenshot Cadet](/docs/Screenshot-Cadet.png "Cadet screenshot")
-
-Similar to the Missions tab, but for cadet challenges.
+This tab give an overview of all accepted missions and cadet challenged, along with individual requirements and player stats for each quest and challenge, as well as crew success rates for each challenge (node).
 
 ### Crew recommendations
 
