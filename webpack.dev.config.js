@@ -31,8 +31,15 @@ module.exports = {
 				include: defaultInclude
 			},
 			{
-				test: /\.(jpe?g|png|gif)$/,
-				use: [{ loader: 'file-loader?name=img/[name]__[hash:base64:5].[ext]' }],
+				test: /\.(png|jpg|gif)$/,
+				use: [
+				  {
+					loader: 'url-loader',
+					options: {
+					  limit: 8192
+					}
+				  }
+				],
 				include: defaultInclude
 			},
 			{

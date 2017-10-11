@@ -25,7 +25,7 @@
     "babel-preset-es2015-node": "latest",
     "babel-preset-react": "latest",
     "css-loader": "latest",
-    "electron":"1.7.8",
+    "electron": "1.7.8",
     "electron-builder": "latest",
     "electron-packager": "latest",
     "extract-text-webpack-plugin": "latest",
@@ -35,13 +35,14 @@
     "react-dom": "latest",
     "style-loader": "latest",
     "ts-loader": "latest",
-    "worker-loader": "latest",
     "tslint": "latest",
     "tslint-config-standard": "latest",
     "tslint-loader": "latest",
     "typescript": "latest",
+    "url-loader": "^0.6.2",
     "webpack": "latest",
-    "webpack-dev-server": "latest"
+    "webpack-dev-server": "latest",
+    "worker-loader": "latest"
   },
   "dependencies": {
     "compare-semver": "latest",
@@ -51,8 +52,9 @@
     "json2csv": "latest",
     "office-ui-fabric-react": "^4.0.0",
     "pubnub": "latest",
+    "sttapi": "file:./STTApi",
     "url-search-params-polyfill": "latest",
     "uuid": "latest",
-    "sttapi": "file:./STTApi"
+    "vis": "^4.20.1"
   }
 }

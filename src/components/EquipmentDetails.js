@@ -3,6 +3,9 @@ import { Image, ImageFit } from 'office-ui-fabric-react/lib/Image';
 import { Rating, RatingSize } from 'office-ui-fabric-react/lib/Rating';
 import { ChoiceGroup, IChoiceGroupOption } from 'office-ui-fabric-react/lib/ChoiceGroup';
 import { Spinner, SpinnerSize } from 'office-ui-fabric-react/lib/Spinner';
+import uuid from 'uuid';
+import vis from 'vis';
+import '!style-loader!css-loader!vis/dist/vis.css';
 
 import { CollapsibleSection } from './CollapsibleSection.js';
 
@@ -38,9 +41,19 @@ export class ItemDetails extends React.Component {
 		this.state = {
 			equipment: null
 		};
+		this.updateGraph = this.updateGraph.bind(this);
+		this.visContent = null;
 	}
 
-	loadRecipeTree(equipment, multi) {
+	componentDidMount() {
+	  this.updateGraph();
+	}
+
+	componentDidUpdate() {
+	  this.updateGraph();
+	}
+
+	loadRecipeTree(equipment, eqid, multi) {
 		if (!equipment)
 			return [];
 
@@ -49,11 +62,27 @@ export class ItemDetails extends React.Component {
 
 		var result = [];
 		equipment.recipe.demands.forEach((item) => {
+			let ceqid = uuid.v4();
 			let childEquipment = STTApi.itemArchetypeCache.archetypes.find(equipment => equipment.id == item.archetype_id);
 			if (!childEquipment) {
 				console.error('Could not find equipment information for id ' + item.archetype_id + ' in the cache!');
 			}
-			result = result.concat(this.loadRecipeTree(childEquipment, item.count * multi));
+			result = result.concat(this.loadRecipeTree(childEquipment, ceqid, item.count * multi));
+
+			let have = STTApi.playerData.character.items.find(item => item.archetype_id == childEquipment.id);
+			let label = (item.count * multi) + 'x ' + childEquipment.name;
+			let color = 'red';
+			if (have) {
+				if (have.quantity >= item.count * multi) {
+					color = 'green';
+				}
+				else {
+					color = 'yellow';
+				}
+			}
+
+			this.visNodes.push({id: ceqid, label: label, image: childEquipment.iconUrl, shape: 'image', font: {color : color }});
+			this.visEdges.push({from: eqid, to: ceqid});
 		});
 
 		return result;
@@ -62,28 +91,25 @@ export class ItemDetails extends React.Component {
 	changeEquipment(slot) {
 		let equipment = STTApi.itemArchetypeCache.archetypes.find(equipment => equipment.id == this.props.crew.equipment_slots[slot].archetype);
 
-		let recipeTree = this.loadRecipeTree(equipment, 1);
-
-		var result = [];
-		recipeTree.reduce(function (res, value) {
-			if (!res[value.equipment.id]) {
-				res[value.equipment.id] = {
-					count: 0,
-					equipment: value.equipment
-				};
-				result.push(res[value.equipment.id]);
-			}
-			res[value.equipment.id].count += value.count;
-			return res;
-		}, {});
-
-		recipeTree = result;
+		let eqid = uuid.v4();
+		this.visNodes = [{id: eqid, label: equipment.name, image: equipment.iconUrl, shape: 'image'}];
+		this.visEdges = [];
+		this.loadRecipeTree(equipment, eqid, 1);
 
 		this.setState({
-			equipment: equipment,
-			recipeTree: recipeTree
+			equipment: equipment
 		});
 	}
+
+	updateGraph() {
+		if (!this.refs.visGraph)
+			return;
+
+		if (this.visContent)
+			this.visContent.destroy();
+
+		this.visContent = new vis.Network(this.refs.visGraph, { nodes: this.visNodes, edges: this.visEdges}, { height: 240 });
+	  }
 
 	render() {
 		if (this.state.equipment) {
@@ -98,9 +124,7 @@ export class ItemDetails extends React.Component {
 				</div>}
 
 				{this.state.equipment.recipe &&
-					<div className='recipe-container'><span className='recipe-item-span'>Recipe:</span>{this.state.recipeTree.map(function (item) {
-						return <span key={item.equipment.id} className='recipe-item-span'><span style={{ color: CONFIG.rarityRes[item.equipment.rarity].color }} >{item.count} x {CONFIG.rarityRes[item.equipment.rarity].name} {item.equipment.name}</span><Image className='recipe-item-image' shouldFadeIn={false} src={item.equipment.iconUrl} width={20} height={20} imageFit={ImageFit.contain} /> </span>;
-						})}
+					<div ref='visGraph' style={{ width: '100%' }}>
 				</div>}
 			</div>);
 		}
