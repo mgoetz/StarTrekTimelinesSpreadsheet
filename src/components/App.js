@@ -37,6 +37,7 @@ import { ItemList } from './ItemList.js';
 import { CrewList } from './CrewList.js';
 import { GauntletHelper } from './GauntletHelper.js';
 import { MissionHelper } from './MissionHelper.js';
+import { MissionExplorer } from './MissionExplorer.js';
 import { CrewRecommendations } from './CrewRecommendations.js';
 import { AboutAndHelp } from './AboutAndHelp.js';
 import { FleetDetails } from './FleetDetails.js';
@@ -185,7 +186,7 @@ class App extends React.Component {
 							<ShipList />
 						</PivotItem>
 						<PivotItem linkText='Missions' itemIcon='Ribbon'>
-							<MissionHelper cadet={false} />
+							<MissionExplorer cadet={false} />
 						</PivotItem>
 						<PivotItem linkText='Cadet' itemIcon='Trophy'>
 							<MissionHelper cadet={true} />
