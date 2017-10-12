@@ -76,6 +76,7 @@ export class MissionDetails extends React.Component {
             }
         });
 
+        // TODO: This should probably move down into STTApi
         // This algorithm assumes the graph is acyclic
         var nodeElem = {};
         var unfinishedNodes = [];
@@ -109,7 +110,7 @@ export class MissionDetails extends React.Component {
             return path.filter(node => unfinishedNodes.indexOf(node) > -1).length > 0;
         });
 
-        // NOTE: this algorithm doesn't consider crew selectcions where you intentionally fail a node (all nodes must have success > 0)
+        // NOTE: this algorithm doesn't consider crew selections where you intentionally fail a node (all nodes must have success > 0)
         var bestCrewPaths = [];
 
         // Calculate optimal crew selection for each path
@@ -138,6 +139,7 @@ export class MissionDetails extends React.Component {
 
             // Apply tired crew coefficient and sort crew selections by total success
             let totalSuccess = (crewSelection) => {
+                let min = crewSelection[0].success;
                 let total = crewSelection[0].success;
                 for (var i = 1; i < crewSelection.length; i++) {
                     if (crewSelection[i].crew.id == crewSelection[i - 1].crew.id) {
@@ -147,19 +149,29 @@ export class MissionDetails extends React.Component {
                             (crewSelection[i].crew[skill].max - crewSelection[i].crew[skill].min);
                         if (tiredSuccess > 100) tiredSuccess = 100;
 
+                        if (tiredSuccess < min) {
+                            min = tiredSuccess;
+                        }
+
                         total += tiredSuccess;
                     }
                     else {
+                        if (crewSelection[i].success < min) {
+                            min = crewSelection[i].success;
+                        }
                         total += crewSelection[i].success;
                     }
                 }
-                return total;
+                return {total, min};
             };
 
-            crewSelections.sort((a,b) => totalSuccess(b) - totalSuccess(a));
+            // Filter out the selections that now are no longer feasible after applying the tired crew coefficient
+            crewSelections = crewSelections.filter(crewSelection => totalSuccess(crewSelection).min > 0);
+
+            crewSelections.sort((a,b) => totalSuccess(b).total - totalSuccess(a).total);
 
             if (crewSelections.length > 0) {
-                bestCrewPaths.push({path, crew: crewSelections[0], success: totalSuccess(crewSelections[0])});
+                bestCrewPaths.push({path, crew: crewSelections[0], success: totalSuccess(crewSelections[0]).min});
             }
         });
 
@@ -305,7 +317,7 @@ export class MissionDetails extends React.Component {
 
                 crewSelectionLog.push(
                     <div key={indexcrewpath} style={{ display: 'flex', flexDirection: 'row', flexWrap: 'wrap' }}>
-                        <span>{(crewpath.success / crewpath.crew.length ).toFixed(2)}% success:</span>
+                        <span>{(crewpath.success).toFixed(2)}% guaranteed success:</span>
                         {crewSuccess}
                     </div>
                 );
