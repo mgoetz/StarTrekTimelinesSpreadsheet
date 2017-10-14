@@ -8,7 +8,7 @@ import { Icon } from 'office-ui-fabric-react/lib/Icon';
 import { CrewList } from './CrewList.js';
 
 import STTApi from 'sttapi';
-import { getWikiImageUrl, loadGauntlet, gauntletCrewSelection, gauntletRoundOdds, payToGetNewOpponents, playContest } from 'sttapi';
+import { loadGauntlet, gauntletCrewSelection, gauntletRoundOdds, payToGetNewOpponents, playContest } from 'sttapi';
 
 const CONFIG = require('../utils/config.js');
 
@@ -28,10 +28,10 @@ class GauntletCrew extends React.Component {
 				</tr>
 				<tr>
 					<td>
-					{this.props.crew.disabled ?
-						(<span>Disabled <Icon iconName='Dislike' /> ({this.props.crew.debuff/4} battles)</span>) :
-						(<span>Active <Icon iconName='Like' /> ({this.props.crew.debuff/4} battles)</span>)
-					}
+						{this.props.crew.disabled ?
+							(<span>Disabled <Icon iconName='Dislike' /> ({this.props.crew.debuff / 4} battles)</span>) :
+							(<span>Active <Icon iconName='Like' /> ({this.props.crew.debuff / 4} battles)</span>)
+						}
 					</td>
 				</tr>
 				<tr>
@@ -79,7 +79,7 @@ class GauntletMatch extends React.Component {
 					</td>
 					<td className='gauntlet-match-crew-slot'>
 						<b>{STTApi.getCrewAvatarBySymbol(this.props.match.opponent.archetype_symbol).name}</b><br />
-						<Image src={this.props.match.opponent.iconUrl} height={128} style={{ display: 'inline-block' }}  />
+						<Image src={this.props.match.opponent.iconUrl} height={128} style={{ display: 'inline-block' }} />
 						{this.props.match.opponent.name}
 					</td>
 				</tr>
@@ -138,36 +138,36 @@ export class GauntletHelper extends React.Component {
 
 				data.gauntlet.contest_data.selected_crew.forEach((crew) => {
 					iconPromises.push(
-					getWikiImageUrl(STTApi.getCrewAvatarBySymbol(crew.archetype_symbol).name.split(' ').join('_') + '.png', crew.crew_id).then(({id, url}) => {
-						this.state.gauntlet.contest_data.selected_crew.forEach((crew) => {
-							if (crew.crew_id === id) {
-								crew.iconUrl = url;
-							}
+						STTApi.imageProvider.getCrewImageUrl(STTApi.getCrewAvatarBySymbol(crew.archetype_symbol), true, crew.crew_id).then(({ id, url }) => {
+							this.state.gauntlet.contest_data.selected_crew.forEach((crew) => {
+								if (crew.crew_id === id) {
+									crew.iconUrl = url;
+								}
 							});
-						return Promise.resolve();
-					}).catch((error) => { /*console.warn(error);*/ }));
+							return Promise.resolve();
+						}).catch((error) => { /*console.warn(error);*/ }));
 				});
-				
+
 				result.matches.forEach((match) => {
 					iconPromises.push(
-					getWikiImageUrl(STTApi.getCrewAvatarBySymbol(match.crewOdd.archetype_symbol).name.split(' ').join('_') + '.png', match.crewOdd.crew_id).then(({id, url}) => {
-						this.state.roundOdds.matches.forEach((match) => {
-							if (match.crewOdd.crew_id === id) {
-								match.crewOdd.iconUrl = url;
-							}
-						});
-						return Promise.resolve();
-					}).catch((error) => { /*console.warn(error);*/ }));
+						STTApi.imageProvider.getCrewImageUrl(STTApi.getCrewAvatarBySymbol(match.crewOdd.archetype_symbol), true, match.crewOdd.crew_id).then(({ id, url }) => {
+							this.state.roundOdds.matches.forEach((match) => {
+								if (match.crewOdd.crew_id === id) {
+									match.crewOdd.iconUrl = url;
+								}
+							});
+							return Promise.resolve();
+						}).catch((error) => { /*console.warn(error);*/ }));
 
 					iconPromises.push(
-					getWikiImageUrl(STTApi.getCrewAvatarBySymbol(match.opponent.archetype_symbol).name.split(' ').join('_') + '.png', match.opponent.crew_id).then(({id, url}) => {
-						this.state.roundOdds.matches.forEach((match) => {
-							if (match.opponent.crew_id === id) {
-								match.opponent.iconUrl = url;
-							}
-						});
-						return Promise.resolve();
-					}).catch((error) => { /*console.warn(error);*/ }));
+						STTApi.imageProvider.getCrewImageUrl(STTApi.getCrewAvatarBySymbol(match.opponent.archetype_symbol), true, match.opponent.crew_id).then(({ id, url }) => {
+							this.state.roundOdds.matches.forEach((match) => {
+								if (match.opponent.crew_id === id) {
+									match.opponent.iconUrl = url;
+								}
+							});
+							return Promise.resolve();
+						}).catch((error) => { /*console.warn(error);*/ }));
 				});
 
 				Promise.all(iconPromises).then(() => this.forceUpdate());
@@ -218,7 +218,7 @@ export class GauntletHelper extends React.Component {
 					<Label>Crew refeshes in {Math.floor(this.state.gauntlet.seconds_to_next_crew_refresh / 60)} minutes and the gauntlet ends in {Math.floor(this.state.gauntlet.seconds_to_end / 60)} minutes</Label>
 					<Label>Your rank is {this.state.roundOdds.rank} and you have {this.state.roundOdds.consecutive_wins} consecutive wins</Label>
 					<span><h3>Your crew stats <DefaultButton onClick={this._reloadGauntletData} text='Reload data' iconProps={{ iconName: 'Refresh' }} /></h3></span>
-					<div style={{display: 'flex'}} >
+					<div style={{ display: 'flex' }} >
 						{this.state.gauntlet.contest_data.selected_crew.map(function (crew) {
 							return <GauntletCrew key={crew.crew_id} crew={crew} />;
 						})}
@@ -232,8 +232,8 @@ export class GauntletHelper extends React.Component {
 					{this.state.lastResult &&
 						(<table>
 							<tbody>
-							<tr>
-								<td rowSpan={2}>
+								<tr>
+									<td rowSpan={2}>
 										<b> {(this.state.lastResult.win == true) ? 'WIN' : 'LOSE'} </b>
 									</td>
 									<td>You got {this.state.lastResult.player_rolls.reduce(function (sum, value) { return sum + value; }, 0)}</td>

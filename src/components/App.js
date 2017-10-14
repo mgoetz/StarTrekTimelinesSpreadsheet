@@ -47,7 +47,7 @@ import { FeedbackPanel } from './FeedbackPanel.js';
 import { ShakingButton } from './ShakingButton.js';
 
 import STTApi from 'sttapi';
-import { loginSequence, getWikiImageUrl } from 'sttapi';
+import { loginSequence } from 'sttapi';
 
 const compareSemver = require('compare-semver');
 const electron = require('electron');
@@ -339,11 +339,11 @@ class App extends React.Component {
 		});
 
 		if (STTApi.playerData.character.crew_avatar) {
-			getWikiImageUrl(STTApi.playerData.character.crew_avatar.name.split(' ').join('_') + '_Head.png', 0).then(({id, url}) => {
+			STTApi.imageProvider.getCrewImageUrl(STTApi.playerData.character.crew_avatar, false, 0).then(({id, url}) => {
 				this.setState({ captainAvatarUrl: url });
 			}).catch((error) => {});
 
-			getWikiImageUrl(STTApi.playerData.character.crew_avatar.name.split(' ').join('_') + '.png', 0).then(({id, url}) => {
+			STTApi.imageProvider.getCrewImageUrl(STTApi.playerData.character.crew_avatar, true, 0).then(({id, url}) => {
 				this.setState({ captainAvatarBodyUrl: url });
 			}).catch((error) => {});
 		}

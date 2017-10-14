@@ -11,7 +11,7 @@ import { CollapsibleSection } from './CollapsibleSection.js';
 
 const CONFIG = require('../utils/config.js');
 import STTApi from 'sttapi';
-import { loadFullTree, getWikiImageUrl } from 'sttapi';
+import { loadFullTree } from 'sttapi';
 
 export class EquipmentSlot extends React.Component {
 	constructor(props) {
@@ -192,13 +192,8 @@ export class EquipmentDetails extends React.Component {
 		loadFullTree().then(() => {
 			let iconPromises = [];
 			STTApi.itemArchetypeCache.archetypes.forEach((equipment) => {
-				var fileName = equipment.name + CONFIG.rarityRes[equipment.rarity].name + '.png';
-				fileName = fileName.split(' ').join('');
-				fileName = fileName.split('\'').join('');
-
 				equipment.iconUrl = CONFIG.defaultItemIconUrl;
-	
-				iconPromises.push(getWikiImageUrl(fileName, equipment.id).then(({id, url}) => {
+				iconPromises.push(STTApi.imageProvider.getItemImageUrl(equipment, equipment.id).then(({id, url}) => {
 					STTApi.itemArchetypeCache.archetypes.forEach(function (item) {
 						if ((item.id === id) && url)
 							item.iconUrl = url;

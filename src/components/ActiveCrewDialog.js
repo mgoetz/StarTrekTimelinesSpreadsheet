@@ -9,7 +9,7 @@ import { Spinner, SpinnerSize } from 'office-ui-fabric-react/lib/Spinner';
 import { CollapsibleSection } from './CollapsibleSection.js';
 
 import STTApi from 'sttapi';
-import { mergeDeep, getWikiImageUrl } from 'sttapi';
+import { mergeDeep } from 'sttapi';
 
 const CONFIG = require('../utils/config.js');
 
@@ -35,7 +35,7 @@ export class ShuttleAdventure extends React.Component {
             if (faction.id == this.state.faction_id) {
                 this.state.faction = faction;
 
-                getWikiImageUrl('Icon' + faction.name.split(' ').join('') + '.png', 0).then(({ id, url }) => {
+                STTApi.imageProvider.getFactionImageUrl(faction, 0).then(({ id, url }) => {
                     this.setState({ faction_iconUrl: url });
                 }).catch((error) => { });
             }

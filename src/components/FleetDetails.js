@@ -12,7 +12,6 @@ import { loginPubNub } from '../utils/chat.js';
 import { sortItems, columnClick } from '../utils/listUtils.js';
 
 import STTApi from 'sttapi';
-import { getWikiImageUrl } from 'sttapi';
 
 export class MemberList extends React.Component {
 	constructor(props) {
@@ -183,7 +182,7 @@ export class FleetDetails extends React.Component {
 			let iconPromises = [];
 			this.state.members.forEach((member) => {
 				if (member.crew_avatar) {
-					iconPromises.push(getWikiImageUrl(member.crew_avatar.name.split(' ').join('_') + '_Head.png', member.dbid).then(({id, url}) => {
+					iconPromises.push(STTApi.imageProvider.getCrewImageUrl(member.crew_avatar, false, member.dbid).then(({id, url}) => {
 						this.state.members.forEach(function (member) {
 							if (member.dbid === id)
 								member.iconUrl = url;
