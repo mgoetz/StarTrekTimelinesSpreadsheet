@@ -53,8 +53,34 @@ const compareSemver = require('compare-semver');
 const electron = require('electron');
 const app = electron.app || electron.remote.app;
 const shell = electron.shell;
+const fs = require('fs');
 
 const CONFIG = require('../utils/config.js');
+
+class FileImageCache {
+	formatUrl(url) {
+		return app.getPath('userData') + '/imagecache/' + url.substr(1).replace(new RegExp('/', 'g'), '_') + '.png';
+	}
+
+	getImage(url) {
+		console.log(this.formatUrl(url));
+		if (fs.existsSync(this.formatUrl(url))) {
+			return 'file://' + this.formatUrl(url);
+		}
+		else {
+			return undefined;
+		}
+	}
+
+	saveImage(url, data) {
+		if (!fs.existsSync(app.getPath('userData') + '/imagecache')) {
+			fs.mkdirSync(app.getPath('userData') + '/imagecache');
+		}
+
+		fs.writeFileSync(this.formatUrl(url), data);
+		return 'file://' + this.formatUrl(url);
+	}
+}
 
 class App extends React.Component {
 	constructor(props) {
@@ -73,7 +99,7 @@ class App extends React.Component {
 		};
 
 		this._captainButtonElement = null;
-		
+
 
 		this._onAccessToken = this._onAccessToken.bind(this);
 		this._getCommandItems = this._getCommandItems.bind(this);
@@ -84,13 +110,15 @@ class App extends React.Component {
 		this._onDataError = this._onDataError.bind(this);
 		this._playerResync = this._playerResync.bind(this);
 
+		STTApi.setImageProvider(true, new FileImageCache())
+
 		STTApi.loginWithCachedAccessToken().then((success) => {
 			if (success) {
-				this.setState({ showSpinner: true, showLoginDialog: false});
+				this.setState({ showSpinner: true, showLoginDialog: false });
 				this._onAccessToken();
 			}
 			else {
-				this.setState({ showLoginDialog: true});
+				this.setState({ showLoginDialog: true });
 			}
 		});
 	}
@@ -107,7 +135,7 @@ class App extends React.Component {
 	}
 
 	componentDidMount() {
-		this.intervalPlayerResync = setInterval(this._playerResync, 5*60*1000);
+		this.intervalPlayerResync = setInterval(this._playerResync, 5 * 60 * 1000);
 	}
 
 	componentWillUnmount() {
@@ -150,7 +178,7 @@ class App extends React.Component {
 					</div>
 					<div className='lcars-box' />
 					<div className='lcars-content'>
-						<ShakingButton iconName='Emoji2' title='Feedback' interval={10000} onClick={() => this.refs.feedbackPanel.show() } />
+						<ShakingButton iconName='Emoji2' title='Feedback' interval={10000} onClick={() => this.refs.feedbackPanel.show()} />
 					</div>
 					<div className='lcars-corner-right' />
 				</div>
@@ -158,7 +186,7 @@ class App extends React.Component {
 				<FeedbackPanel ref='feedbackPanel' />
 
 				{this.state.showSpinner && (
-					<Spinner size={SpinnerSize.large} label={this.state.spinnerLabel} /> 
+					<Spinner size={SpinnerSize.large} label={this.state.spinnerLabel} />
 				)}
 
 				{this.state.dataLoaded && (
@@ -166,16 +194,16 @@ class App extends React.Component {
 						<PivotItem linkText='Crew' itemIcon='Teamwork'>
 							<CommandBar items={this._getCommandItems()} />
 							<SearchBox labelText='Search by name or trait...'
-								onChange={ (newValue) => this.refs.crewList.filter(newValue) }
-								onSearch={ (newValue) => this.refs.crewList.filter(newValue) }
-        					/>
+								onChange={(newValue) => this.refs.crewList.filter(newValue)}
+								onSearch={(newValue) => this.refs.crewList.filter(newValue)}
+							/>
 							<CrewList data={STTApi.roster} grouped={false} ref='crewList' />
 						</PivotItem>
 						<PivotItem linkText='Items' itemIcon='Boards'>
 							<SearchBox labelText='Search by name description...'
-								onChange={ (newValue) => this.refs.itemList.filter(newValue) }
-								onSearch={ (newValue) => this.refs.itemList.filter(newValue) }
-        					/>
+								onChange={(newValue) => this.refs.itemList.filter(newValue)}
+								onSearch={(newValue) => this.refs.itemList.filter(newValue)}
+							/>
 							<ItemList data={STTApi.playerData.character.items} ref='itemList' />
 						</PivotItem>
 						<PivotItem linkText='Equipment' itemIcon='CheckList'>
@@ -208,8 +236,7 @@ class App extends React.Component {
 		);
 	}
 
-	_getCommandItems()
-	{
+	_getCommandItems() {
 		return [
 			{
 				key: 'exportExcel',
@@ -220,7 +247,7 @@ class App extends React.Component {
 
 					dialog.showSaveDialog(
 						{
-							filters: [ { name: 'Excel sheet (*.xlsx)', extensions: ['xlsx'] } ],
+							filters: [{ name: 'Excel sheet (*.xlsx)', extensions: ['xlsx'] }],
 							title: 'Export Star Trek Timelines crew roster',
 							defaultPath: 'My Crew.xlsx',
 							buttonLabel: 'Export'
@@ -312,9 +339,9 @@ class App extends React.Component {
 	_onAccessToken() {
 		this.setState({ showSpinner: true });
 
-		loginSequence( (progressLabel) => this.setState({ spinnerLabel: progressLabel}) )
-		.then(this._onDataFinished)
-		.catch(this._onDataError);
+		loginSequence((progressLabel) => this.setState({ spinnerLabel: progressLabel }))
+			.then(this._onDataFinished)
+			.catch(this._onDataError);
 	}
 
 	_onDataError(reason) {
@@ -339,13 +366,13 @@ class App extends React.Component {
 		});
 
 		if (STTApi.playerData.character.crew_avatar) {
-			STTApi.imageProvider.getCrewImageUrl(STTApi.playerData.character.crew_avatar, false, 0).then(({id, url}) => {
+			STTApi.imageProvider.getCrewImageUrl(STTApi.playerData.character.crew_avatar, false, 0).then(({ id, url }) => {
 				this.setState({ captainAvatarUrl: url });
-			}).catch((error) => {});
+			}).catch((error) => { });
 
-			STTApi.imageProvider.getCrewImageUrl(STTApi.playerData.character.crew_avatar, true, 0).then(({id, url}) => {
+			STTApi.imageProvider.getCrewImageUrl(STTApi.playerData.character.crew_avatar, true, 0).then(({ id, url }) => {
 				this.setState({ captainAvatarBodyUrl: url });
-			}).catch((error) => {});
+			}).catch((error) => { });
 		}
 	}
 }
