@@ -10,9 +10,7 @@ import { Image, ImageFit } from 'office-ui-fabric-react/lib/Image';
 
 import STTApi from 'sttapi';
 
-import {ipcRenderer} from 'electron';
-
-const CONFIG = require('../utils/config.js');
+import { ipcRenderer } from 'electron';
 
 export class LoginDialog extends React.Component {
 	constructor(props) {
@@ -151,6 +149,7 @@ export class LoginDialog extends React.Component {
 			this.props.onAccessToken();
 		})
 		.catch((error) => {
+			console.error(error);
 			this.setState({ showSpinner: false, hideDialog: false, errorMessage: error });
 		});
 	}

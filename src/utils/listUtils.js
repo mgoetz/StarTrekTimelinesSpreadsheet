@@ -1,5 +1,3 @@
-const CONFIG = require('./config.js');
-
 export function sortItems(items, sortBy, descending) {
 	if (descending) {
 		return items.sort((a, b) => {

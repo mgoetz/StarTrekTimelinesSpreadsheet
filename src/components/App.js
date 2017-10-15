@@ -30,6 +30,7 @@ import { SearchBox } from 'office-ui-fabric-react/lib/SearchBox';
 import { exportExcel } from '../utils/excelExporter.js';
 import { exportCsv } from '../utils/csvExporter.js';
 import { shareCrew } from '../utils/pastebin.js';
+import { FileImageCache } from '../utils/fileImageCache.js';
 
 import { LoginDialog } from './LoginDialog.js';
 import { ShipList } from './ShipList.js';
@@ -53,34 +54,6 @@ const compareSemver = require('compare-semver');
 const electron = require('electron');
 const app = electron.app || electron.remote.app;
 const shell = electron.shell;
-const fs = require('fs');
-
-const CONFIG = require('../utils/config.js');
-
-class FileImageCache {
-	formatUrl(url) {
-		return app.getPath('userData') + '/imagecache/' + url.substr(1).replace(new RegExp('/', 'g'), '_') + '.png';
-	}
-
-	getImage(url) {
-		console.log(this.formatUrl(url));
-		if (fs.existsSync(this.formatUrl(url))) {
-			return 'file://' + this.formatUrl(url);
-		}
-		else {
-			return undefined;
-		}
-	}
-
-	saveImage(url, data) {
-		if (!fs.existsSync(app.getPath('userData') + '/imagecache')) {
-			fs.mkdirSync(app.getPath('userData') + '/imagecache');
-		}
-
-		fs.writeFileSync(this.formatUrl(url), data);
-		return 'file://' + this.formatUrl(url);
-	}
-}
 
 class App extends React.Component {
 	constructor(props) {
@@ -99,8 +72,6 @@ class App extends React.Component {
 		};
 
 		this._captainButtonElement = null;
-
-
 		this._onAccessToken = this._onAccessToken.bind(this);
 		this._getCommandItems = this._getCommandItems.bind(this);
 		this._onShare = this._onShare.bind(this);
@@ -110,7 +81,7 @@ class App extends React.Component {
 		this._onDataError = this._onDataError.bind(this);
 		this._playerResync = this._playerResync.bind(this);
 
-		STTApi.setImageProvider(true, new FileImageCache())
+		STTApi.setImageProvider(true, new FileImageCache());
 
 		STTApi.loginWithCachedAccessToken().then((success) => {
 			if (success) {

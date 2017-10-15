@@ -6,8 +6,6 @@ import { Link } from 'office-ui-fabric-react/lib/Link';
 
 import { sortItems, columnClick } from '../utils/listUtils.js';
 
-const CONFIG = require('../utils/config.js');
-
 export class ItemList extends React.Component {
 	constructor(props) {
 		super(props);

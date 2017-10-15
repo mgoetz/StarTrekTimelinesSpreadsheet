@@ -9,9 +9,7 @@ import { Spinner, SpinnerSize } from 'office-ui-fabric-react/lib/Spinner';
 import { CollapsibleSection } from './CollapsibleSection.js';
 
 import STTApi from 'sttapi';
-import { mergeDeep } from 'sttapi';
-
-const CONFIG = require('../utils/config.js');
+import { CONFIG, mergeDeep } from 'sttapi';
 
 export class ShuttleAdventure extends React.Component {
     constructor(props) {
@@ -48,7 +46,7 @@ export class ShuttleAdventure extends React.Component {
                 <tbody>
                     <tr>
                         <td style={{ width: '150px' }} >
-                            <img src='https://stt.wiki/w/images/9/94/Shuttle_icon.png' />
+                            <img src={CONFIG.SPRITES['icon_shuttle_lg'].url} />
                         </td>
                         <td style={{ verticalAlign: 'center' }} >
                             <h3>{this.state.name}</h3>
@@ -91,7 +89,7 @@ export class VoyageLogEntry extends React.Component {
                     <span className='quest-mastery'>
                         {entry.skill_check && (
                             <span className='quest-mastery'>
-                                <Image src={CONFIG.skillRes[entry.skill_check.skill].url} height={18} />
+                                <Image src={CONFIG.SKILLS[entry.skill_check.skill].url} height={18} />
                                 {(entry.skill_check.passed == true)?<Icon iconName='Like' /> : <Icon iconName='Dislike' />} &nbsp;
                             </span>
                         )}
@@ -182,7 +180,7 @@ export class Voyage extends React.Component {
                                 {Object.values(this.state.voyage.skill_aggregates).map((skill) => {
                                     return (<li key={skill.skill}>
                                         <span className='quest-mastery'>
-                                            <Image src={CONFIG.skillRes[skill.skill].url} height={18} /> &nbsp; {skill.core} ({skill.range_min}-{skill.range_max})
+                                            <Image src={CONFIG.SKILLS[skill.skill].url} height={18} /> &nbsp; {skill.core} ({skill.range_min}-{skill.range_max})
                                         </span>
                                     </li>);
                                 })}
@@ -193,7 +191,7 @@ export class Voyage extends React.Component {
             </table>
             <CollapsibleSection title={'Pending rewards (' + this.state.voyage.pending_rewards.loot.length + ')'} background='#0078d7'>
                 {this.state.voyage.pending_rewards.loot.map((loot, index) => {
-                    return (<span key={index} style={{ color: loot.rarity && CONFIG.rarityRes[loot.rarity].color }}>{loot.quantity} {(loot.rarity == null) ? '' : CONFIG.rarityRes[loot.rarity].name} {loot.full_name}</span>);
+                    return (<span key={index} style={{ color: loot.rarity && CONFIG.RARITIES[loot.rarity].color }}>{loot.quantity} {(loot.rarity == null) ? '' : CONFIG.RARITIES[loot.rarity].name} {loot.full_name}</span>);
                 }).reduce((prev, curr) => [prev, ', ', curr])}
             </CollapsibleSection>
             <CollapsibleSection title={'Complete Captain\'s Log (' + Object.keys(this.state.voyageNarrative).length + ')'} background='#0078d7'>

@@ -5,6 +5,7 @@ import { Image, ImageFit } from 'office-ui-fabric-react/lib/Image';
 import { DefaultButton } from 'office-ui-fabric-react/lib/Button';
 
 import STTApi from 'sttapi';
+import { CONFIG } from 'sttapi';
 
 export class CaptainCard extends React.Component {
 	render() {
@@ -37,8 +38,8 @@ export class CaptainCard extends React.Component {
 							<li className="lcars-blue-bg">Level {STTApi.playerData.character.level}</li>
 							<li className="lcars-blue-bg">VIP {STTApi.playerData.vip_level} ({STTApi.playerData.vip_points} pts)</li>
 							<li className="lcars-tan-bg">XP {STTApi.playerData.character.xp}</li>
-							<li className="lcars-tan-bg"><img src='https://stt.wiki/w/images/thumb/1/1e/Ticket.png/18px-Ticket.png' /> {STTApi.playerData.character.cadet_tickets.current} / {STTApi.playerData.character.cadet_tickets.max} cadet</li>
-							<li className="lcars-tan-bg"><img src='https://stt.wiki/w/images/9/9f/ReplicatorRationBasic.png' height='18px' width='18px' /> {STTApi.playerData.replicator_uses_today} / {STTApi.playerData.replicator_limit} replicator</li>
+							<li className="lcars-tan-bg"><img src={CONFIG.SPRITES['cadet_icon'].url} height='22px' width='22px' /> {STTApi.playerData.character.cadet_tickets.current} / {STTApi.playerData.character.cadet_tickets.max} cadet</li>
+							<li className="lcars-tan-bg"><img src={CONFIG.SPRITES['victory_point_icon'].url} height='22px' width='22px' /> {STTApi.playerData.replicator_uses_today} / {STTApi.playerData.replicator_limit} replicator</li>
 						</ul>
 					</div>
 
@@ -52,11 +53,11 @@ export class CaptainCard extends React.Component {
 
 					<div className="lcars-column u-2-8">
 						<ul className="lcars-menu right">
-							<li className="lcars-salmon-bg"><img src='https://stt.wiki/w/images/thumb/1/12/Chroniton_icon.png/24px-Chroniton_icon.png' /> {Math.min(Math.floor(STTApi.playerData.character.seconds_from_replay_energy_basis / STTApi.playerData.character.replay_energy_rate), STTApi.playerData.character.replay_energy_max) + STTApi.playerData.character.replay_energy_overflow}</li>
-							<li className="lcars-salmon-bg"><img src='https://stt.wiki/w/images/thumb/1/1c/Dilithium_sm.png/19px-Dilithium_sm.png' /> {STTApi.playerData.premium_purchasable}</li>
-							<li className="lcars-salmon-bg"><img src='https://stt.wiki/w/images/thumb/2/20/Merit_icon.png/22px-Merit_icon.png' /> {STTApi.playerData.premium_earnable}</li>
-							<li className="lcars-salmon-bg"><img src='https://stt.wiki/w/images/thumb/d/d4/Honor.png/24px-Honor.png' /> {STTApi.playerData.honor}</li>
-							<li className="lcars-salmon-bg"><img src='https://stt.wiki/w/images/thumb/9/91/Credits_sm.png/24px-Credits_sm.png' /> {STTApi.playerData.money}</li>
+							<li className="lcars-salmon-bg"><img src={CONFIG.SPRITES['energy_icon'].url} height='22px' width='22px' /> {Math.min(Math.floor(STTApi.playerData.character.seconds_from_replay_energy_basis / STTApi.playerData.character.replay_energy_rate), STTApi.playerData.character.replay_energy_max) + STTApi.playerData.character.replay_energy_overflow}</li>
+							<li className="lcars-salmon-bg"><img src={CONFIG.SPRITES['images_currency_pp_currency_0'].url} height='22px' width='22px' /> {STTApi.playerData.premium_purchasable}</li>
+							<li className="lcars-salmon-bg"><img src={CONFIG.SPRITES['images_currency_pe_currency_0'].url} height='22px' width='22px' /> {STTApi.playerData.premium_earnable}</li>
+							<li className="lcars-salmon-bg"><img src={CONFIG.SPRITES['images_currency_honor_currency_0'].url} height='22px' width='22px' /> {STTApi.playerData.honor}</li>
+							<li className="lcars-salmon-bg"><img src={CONFIG.SPRITES['images_currency_sc_currency_0'].url} height='22px' width='22px' /> {STTApi.playerData.money}</li>
 						</ul>
 					</div>
 				</div>

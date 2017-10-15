@@ -7,8 +7,6 @@ import { Dropdown, DropdownMenuItemType } from 'office-ui-fabric-react/lib/Dropd
 import { Checkbox, ICheckboxStyles } from 'office-ui-fabric-react/lib/Checkbox';
 import { Image, ImageFit } from 'office-ui-fabric-react/lib/Image';
 
-const CONFIG = require('../utils/config.js');
-
 export class ShareDialog extends React.Component {
 	constructor(props) {
 		super(props);

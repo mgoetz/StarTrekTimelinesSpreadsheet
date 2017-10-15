@@ -1,8 +1,7 @@
 const fs = require('electron').remote.require('fs');
 
 import STTApi from 'sttapi';
-
-const CONFIG = require('./config.js');
+import { CONFIG } from 'sttapi';
 
 function pastebinPost(data, exportType) {
 	return STTApi.networkHelper.post('https://ptpb.pw/', { 'c': data }, undefined, false).then((data) => {
@@ -111,7 +110,7 @@ function shareCrewInternal(options, missionList) {
 				options: options,
 				roster:  STTApi.roster,
 				missionList: missionList,
-				skillRes: CONFIG.skillRes,
+				skillRes: CONFIG.SKILLS,
 				template: options.htmlColorTheme,
 				version: require('electron').remote.app.getVersion()
 			});

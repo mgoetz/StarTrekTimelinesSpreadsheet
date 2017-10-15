@@ -8,8 +8,7 @@ import vis from 'vis';
 import '!style-loader!css-loader!vis/dist/vis.css';
 
 import STTApi from 'sttapi';
-
-const CONFIG = require('../utils/config.js');
+import { CONFIG } from 'sttapi';
 
 export class MissionDetails extends React.Component {
 	constructor(props) {
@@ -197,7 +196,7 @@ export class MissionDetails extends React.Component {
                     }
                 }
 
-                nodes.push({ id: challenge.id, label: '(' + challenge.id + ') ' + challenge.name, level: challenge.grid_x, image: CONFIG.skillRes[challenge.skill].urlBig, shape: 'image', font: {color : color } });
+                nodes.push({ id: challenge.id, label: '(' + challenge.id + ') ' + challenge.name, level: challenge.grid_x, image: CONFIG.SKILLS[challenge.skill].urlBig, shape: 'image', font: {color : color } });
                 if (challenge.children) {
                     challenge.children.forEach(child => {
                         edges.push({ from: challenge.id, to: child });
@@ -272,7 +271,7 @@ export class MissionDetails extends React.Component {
         return (<div>
             <h4>{challenge.name}</h4>
             <span className='quest-mastery'>
-                Skill: <Image src={CONFIG.skillRes[challenge.skill].url} height={18} /> {CONFIG.skillRes[challenge.skill].name}
+                Skill: <Image src={CONFIG.SKILLS[challenge.skill].url} height={18} /> {CONFIG.SKILLS[challenge.skill].name}
             </span>
             <p>Trait bonuses: {(traitBonuses.length > 0) ? traitBonuses.reduce((prev, curr) => [prev, ', ', curr]) : 'none'}</p>
             <p>Locks: {(lockTraits.length > 0) ? lockTraits.reduce((prev, curr) => [prev, ', ', curr]) : 'none'}</p>
@@ -333,23 +332,23 @@ export class MissionDetails extends React.Component {
 
                     <div>
                         Mastery required: <span className='quest-mastery'>
-                            <Image src='https://stt.wiki/w/images/thumb/8/8f/Normal_64.png/48px-Normal_64.png' height={20} />({this.state.mission.difficulty_by_mastery[0]})
-                            <Image src='https://stt.wiki/w/images/thumb/3/38/Elite_64.png/48px-Elite_64.png' height={20} />({this.state.mission.difficulty_by_mastery[1]})
-                            <Image src='https://stt.wiki/w/images/thumb/5/57/Epic_64.png/48px-Epic_64.png' height={20} />({this.state.mission.difficulty_by_mastery[2]})
+                            <Image src={CONFIG.SPRITES['mastery_lowest_icon'].url} height={20} />({this.state.mission.difficulty_by_mastery[0]})
+                            <Image src={CONFIG.SPRITES['mastery_medium_icon'].url} height={20} />({this.state.mission.difficulty_by_mastery[1]})
+                            <Image src={CONFIG.SPRITES['mastery_highest_icon'].url} height={20} />({this.state.mission.difficulty_by_mastery[2]})
                         </span>
                     </div>
                     <div>
                         Completed: <span className='quest-mastery'>
-                            <Image src='https://stt.wiki/w/images/thumb/8/8f/Normal_64.png/48px-Normal_64.png' height={20} />({this.state.mission.mastery_levels[0].progress.goal_progress} / {this.state.mission.mastery_levels[0].progress.goals})
-                            <Image src='https://stt.wiki/w/images/thumb/3/38/Elite_64.png/48px-Elite_64.png' height={20} />({this.state.mission.mastery_levels[1].progress.goal_progress} / {this.state.mission.mastery_levels[1].progress.goals})
-                            <Image src='https://stt.wiki/w/images/thumb/5/57/Epic_64.png/48px-Epic_64.png' height={20} />({this.state.mission.mastery_levels[2].progress.goal_progress} / {this.state.mission.mastery_levels[2].progress.goals})
+                            <Image src={CONFIG.SPRITES['mastery_lowest_icon'].url} height={20} />({this.state.mission.mastery_levels[0].progress.goal_progress} / {this.state.mission.mastery_levels[0].progress.goals})
+                            <Image src={CONFIG.SPRITES['mastery_medium_icon'].url} height={20} />({this.state.mission.mastery_levels[1].progress.goal_progress} / {this.state.mission.mastery_levels[1].progress.goals})
+                            <Image src={CONFIG.SPRITES['mastery_highest_icon'].url} height={20} />({this.state.mission.mastery_levels[2].progress.goal_progress} / {this.state.mission.mastery_levels[2].progress.goals})
                         </span>
                     </div>
                     <div>
                         Trait bonuses: <span className='quest-mastery'>
-                            <Image src='https://stt.wiki/w/images/thumb/8/8f/Normal_64.png/48px-Normal_64.png' height={20} />({this.state.mission.trait_bonuses[0]})
-                            <Image src='https://stt.wiki/w/images/thumb/3/38/Elite_64.png/48px-Elite_64.png' height={20} />({this.state.mission.trait_bonuses[1]})
-                            <Image src='https://stt.wiki/w/images/thumb/5/57/Epic_64.png/48px-Epic_64.png' height={20} />({this.state.mission.trait_bonuses[2]})
+                            <Image src={CONFIG.SPRITES['mastery_lowest_icon'].url} height={20} />({this.state.mission.trait_bonuses[0]})
+                            <Image src={CONFIG.SPRITES['mastery_medium_icon'].url} height={20} />({this.state.mission.trait_bonuses[1]})
+                            <Image src={CONFIG.SPRITES['mastery_highest_icon'].url} height={20} />({this.state.mission.trait_bonuses[2]})
                         </span>
                     </div>
                     <div>

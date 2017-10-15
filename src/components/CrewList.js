@@ -11,7 +11,7 @@ import { ActiveCrewDialog } from './ActiveCrewDialog.js';
 
 import { sortItems, columnClick } from '../utils/listUtils.js';
 
-const CONFIG = require('../utils/config.js');
+import { CONFIG } from 'sttapi';
 
 function groupBy(items, fieldName) {
 	let groups = items.reduce((currentGroups, currentItem, index) => {
@@ -21,7 +21,7 @@ function groupBy(items, fieldName) {
 		if (!lastGroup || lastGroup.value !== fieldValue) {
 			currentGroups.push({
 				key: 'group' + fieldValue + index,
-				name: CONFIG.rarityRes[fieldValue].name + " crew",
+				name: CONFIG.RARITIES[fieldValue].name + " crew",
 				value: fieldValue,
 				startIndex: index,
 				level: 0,

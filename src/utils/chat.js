@@ -1,8 +1,6 @@
 const PubNub = require('electron').remote.require('pubnub');
 const uuidv4 = require('uuid/v4');
 
-const CONFIG = require('./config.js');
-
 import STTApi from 'sttapi';
 
 function loadSubscriberDetails() {

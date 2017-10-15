@@ -9,9 +9,8 @@ import '!style-loader!css-loader!vis/dist/vis.css';
 
 import { CollapsibleSection } from './CollapsibleSection.js';
 
-const CONFIG = require('../utils/config.js');
 import STTApi from 'sttapi';
-import { loadFullTree } from 'sttapi';
+import { CONFIG, loadFullTree } from 'sttapi';
 
 export class EquipmentSlot extends React.Component {
 	constructor(props) {
@@ -114,7 +113,7 @@ export class ItemDetails extends React.Component {
 	render() {
 		if (this.state.equipment) {
 			return (<div>
-				<span className='quest-mastery'><span style={{ paddingTop: '12px', color: CONFIG.rarityRes[this.state.equipment.rarity].color }}>{CONFIG.rarityRes[this.state.equipment.rarity].name} {this.state.equipment.name}</span></span>
+				<span className='quest-mastery'><span style={{ paddingTop: '12px', color: CONFIG.RARITIES[this.state.equipment.rarity].color }}>{CONFIG.RARITIES[this.state.equipment.rarity].name} {this.state.equipment.name}</span></span>
 
 				{this.state.equipment.item_sources && (this.state.equipment.item_sources.length > 0) &&
 					<div>Sources:
@@ -192,7 +191,7 @@ export class EquipmentDetails extends React.Component {
 		loadFullTree().then(() => {
 			let iconPromises = [];
 			STTApi.itemArchetypeCache.archetypes.forEach((equipment) => {
-				equipment.iconUrl = CONFIG.defaultItemIconUrl;
+				equipment.iconUrl = CONFIG.DEFAULT_ITEM_ICON;
 				iconPromises.push(STTApi.imageProvider.getItemImageUrl(equipment, equipment.id).then(({id, url}) => {
 					STTApi.itemArchetypeCache.archetypes.forEach(function (item) {
 						if ((item.id === id) && url)

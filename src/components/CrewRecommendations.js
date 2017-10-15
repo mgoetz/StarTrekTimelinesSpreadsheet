@@ -7,8 +7,7 @@ import { CrewList } from './CrewList.js';
 import { CollapsibleSection } from './CollapsibleSection.js';
 
 import STTApi from 'sttapi';
-
-const CONFIG = require('../utils/config.js');
+import { CONFIG } from 'sttapi';
 
 export class GuaranteedSuccess extends React.Component {
 	render() {
@@ -22,7 +21,7 @@ export class GuaranteedSuccess extends React.Component {
 					return (<div key={recommendation.mission.episode_title + ' - ' + recommendation.quest.name + ' - ' + recommendation.challenge.name}>
 						<h3>{recommendation.mission.episode_title + ' - ' + recommendation.quest.name + ' - ' + recommendation.challenge.name}</h3>
 						<span style={{ color: 'red' }}>No crew can complete this challenge!</span><br />
-						<span className='quest-mastery'>You need a crew with the <Image src={CONFIG.skillRes[recommendation.skill].url} height={18} /> {CONFIG.skillRes[recommendation.skill].name} skill of at least {recommendation.roll}
+						<span className='quest-mastery'>You need a crew with the <Image src={CONFIG.SKILLS[recommendation.skill].url} height={18} /> {CONFIG.SKILLS[recommendation.skill].name} skill of at least {recommendation.roll}
 							{(recommendation.lockedTraits.length > 0) &&
 								(<span>&nbsp;and one of these skills: {recommendation.lockedTraits.map(function (trait) { return (<span key={trait}>{STTApi.getTraitName(trait)}</span>); }.bind(this)).reduce((prev, curr) => [prev, ', ', curr])}
 								</span>)}.</span>
@@ -33,7 +32,7 @@ export class GuaranteedSuccess extends React.Component {
 					return (<div key={recommendation.mission.episode_title + ' - ' + recommendation.quest.name + ' - ' + recommendation.challenge.name}>
 						<h3>{recommendation.mission.episode_title + ' - ' + recommendation.quest.name + ' - ' + recommendation.challenge.name}</h3>
 						<span>Your best bet is {recommendation.crew[0].crew.name} with a {recommendation.crew[0].success.toFixed(2)}% success chance.</span><br />
-						<span className='quest-mastery'>You need a crew with the <Image src={CONFIG.skillRes[recommendation.skill].url} height={18} /> {CONFIG.skillRes[recommendation.skill].name} skill of at least {recommendation.roll}
+						<span className='quest-mastery'>You need a crew with the <Image src={CONFIG.SKILLS[recommendation.skill].url} height={18} /> {CONFIG.SKILLS[recommendation.skill].name} skill of at least {recommendation.roll}
 							{(recommendation.lockedTraits.length > 0) &&
 								(<span>&nbsp;and one of these skills: {recommendation.lockedTraits.map(function (trait) { return (<span key={trait}>{STTApi.getTraitName(trait)}</span>); }.bind(this)).reduce((prev, curr) => [prev, ', ', curr])}
 								</span>)}.</span>
