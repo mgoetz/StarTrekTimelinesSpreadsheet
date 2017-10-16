@@ -71,8 +71,7 @@ export function shareCrew(options) {
 
 		return shareCrewInternal(options, allChallenges);
 	}
-	else
-	{
+	else {
 		return shareCrewInternal(options, null);
 	}
 }
@@ -100,20 +99,84 @@ function sillyTemplatizer(html, options) {
 	return result;
 }
 
+function imageToDataUri(imgUrl, newEntry, resolve, wantedWidth, wantedHeight) {
+	// We create an image to receive the Data URI
+	var img = document.createElement('img');
+
+	// When the event "onload" is triggered we can resize the image.
+	img.onload = function () {
+		// We create a canvas and get its context.
+		var canvas = document.createElement('canvas');
+		var ctx = canvas.getContext('2d');
+
+		// We set the dimensions at the wanted size.
+		canvas.width = wantedWidth;
+		canvas.height = wantedHeight;
+
+		// We resize the image with the canvas method drawImage();
+		ctx.drawImage(this, 0, 0, wantedWidth, wantedHeight);
+
+		newEntry.iconUrl = canvas.toDataURL();
+		resolve();
+	};
+
+	// We put the Data URI in the image's src attribute
+	img.src = imgUrl;
+}
+
 function shareCrewInternal(options, missionList) {
 	var data = '';
 
 	if (options.exportType == 'html') {
 		var templateString = require('./exportTemplate.ttml');
-		data = sillyTemplatizer(templateString,
-			{
-				options: options,
-				roster:  STTApi.roster,
-				missionList: missionList,
-				skillRes: CONFIG.SKILLS,
-				template: options.htmlColorTheme,
-				version: require('electron').remote.app.getVersion()
+		let exportedRoster = [];
+		let iconPromises = [];
+		STTApi.roster.forEach(rosterEntry => {
+			var newEntry = {};
+			newEntry.name = rosterEntry.name;
+			newEntry.level = rosterEntry.level;
+			newEntry.rarity = rosterEntry.rarity;
+			newEntry.max_rarity = rosterEntry.max_rarity;
+			newEntry.frozen = rosterEntry.frozen;
+			newEntry.traits = rosterEntry.traits;
+
+			Object.keys(CONFIG.SKILLS).forEach(skill => {
+				newEntry[skill] = rosterEntry[skill];
+				newEntry[skill + "_core"] = rosterEntry[skill + "_core"];
 			});
+
+			iconPromises.push(new Promise(resolve => {
+				imageToDataUri(rosterEntry.iconUrl, newEntry, resolve, 48, 48);
+			}));
+
+			exportedRoster.push(newEntry);
+		});
+
+		return Promise.all(iconPromises).then(() => {
+			data = sillyTemplatizer(templateString,
+				{
+					options: options,
+					roster: exportedRoster,
+					missionList: missionList,
+					skillRes: CONFIG.SKILLS,
+					template: options.htmlColorTheme,
+					version: require('electron').remote.app.getVersion()
+				});
+
+			if (options.exportWhere == 'L') {
+				return new Promise(function (resolve, reject) {
+					fs.writeFile('export.' + options.exportType, data, function (err) {
+						if (err) { reject(err); }
+						else { resolve(); }
+					});
+				}).then(() => {
+					return Promise.resolve('export.' + options.exportType);
+				});
+			}
+			else {
+				return pastebinPost(data, options.exportType);
+			}
+		});
 	}
 	else if (options.exportType == 'json') {
 		data = JSON.stringify({
@@ -127,19 +190,19 @@ function shareCrewInternal(options, missionList) {
 			crew: STTApi.roster,
 			missions: missionList
 		});
-	}
 
-	if (options.exportWhere == 'L') {
-		return new Promise(function (resolve, reject) {
-			fs.writeFile('export.' + options.exportType, data, function (err) {
-				if (err) { reject(err); }
-				else { resolve(); }
+		if (options.exportWhere == 'L') {
+			return new Promise(function (resolve, reject) {
+				fs.writeFile('export.' + options.exportType, data, function (err) {
+					if (err) { reject(err); }
+					else { resolve(); }
+				});
+			}).then(() => {
+				return Promise.resolve('export.' + options.exportType);
 			});
-		}).then(() => {
-			return Promise.resolve('export.' + options.exportType);
-			});
-	}
-	else {
-		return pastebinPost(data, options.exportType);
+		}
+		else {
+			return pastebinPost(data, options.exportType);
+		}
 	}
 }
