@@ -4,6 +4,8 @@ import { Image, ImageFit } from 'office-ui-fabric-react/lib/Image';
 import { Rating, RatingSize } from 'office-ui-fabric-react/lib/Rating';
 import { Link } from 'office-ui-fabric-react/lib/Link';
 
+import { ItemDisplay } from './ItemDisplay.js';
+
 import { sortItems, columnClick } from '../utils/listUtils.js';
 
 export class ItemList extends React.Component {
@@ -22,7 +24,7 @@ export class ItemList extends React.Component {
 					maxWidth: 50,
 					fieldName: 'name',
 					onRender: (item) => {
-						return (<Image src={item.iconUrl} width={50} height={50} imageFit={ImageFit.contain} />);
+						return (<ItemDisplay src={item.iconUrl} size={50} maxRarity={item.rarity} rarity={item.rarity} />);
 					}
 				},
 				{
