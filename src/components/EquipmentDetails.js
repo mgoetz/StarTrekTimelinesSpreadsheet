@@ -3,7 +3,7 @@ import { Image, ImageFit } from 'office-ui-fabric-react/lib/Image';
 import { Rating, RatingSize } from 'office-ui-fabric-react/lib/Rating';
 import { ChoiceGroup, IChoiceGroupOption } from 'office-ui-fabric-react/lib/ChoiceGroup';
 import { Spinner, SpinnerSize } from 'office-ui-fabric-react/lib/Spinner';
-import uuid from 'uuid';
+import uuidv4 from 'uuid/v4';
 import vis from 'vis';
 import '!style-loader!css-loader!vis/dist/vis.css';
 
@@ -61,7 +61,7 @@ export class ItemDetails extends React.Component {
 
 		var result = [];
 		equipment.recipe.demands.forEach((item) => {
-			let ceqid = uuid.v4();
+			let ceqid = uuidv4();
 			let childEquipment = STTApi.itemArchetypeCache.archetypes.find(equipment => equipment.id == item.archetype_id);
 			if (!childEquipment) {
 				console.error('Could not find equipment information for id ' + item.archetype_id + ' in the cache!');
@@ -90,7 +90,7 @@ export class ItemDetails extends React.Component {
 	changeEquipment(slot) {
 		let equipment = STTApi.itemArchetypeCache.archetypes.find(equipment => equipment.id == this.props.crew.equipment_slots[slot].archetype);
 
-		let eqid = uuid.v4();
+		let eqid = uuidv4();
 		this.visNodes = [{id: eqid, label: equipment.name, image: equipment.iconUrl, shape: 'image'}];
 		this.visEdges = [];
 		this.loadRecipeTree(equipment, eqid, 1);
