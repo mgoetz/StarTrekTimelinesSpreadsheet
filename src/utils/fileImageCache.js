@@ -8,20 +8,29 @@ export class FileImageCache {
 	}
 
 	getImage(url) {
-		if (fs.existsSync(this.formatUrl(url))) {
-			return 'file://' + this.formatUrl(url);
-		}
-		else {
-			return undefined;
-		}
+		return new Promise((resolve, reject) => {
+			fs.exists(this.formatUrl(url), (exists) => {
+				if (exists) {
+					resolve('file://' + this.formatUrl(url));
+				}
+				else {
+					resolve(undefined);
+				}
+			});
+		});
 	}
 
 	saveImage(url, data) {
-		if (!fs.existsSync(app.getPath('userData') + '/imagecache')) {
-			fs.mkdirSync(app.getPath('userData') + '/imagecache');
-		}
+		return new Promise((resolve, reject) => {
+			fs.exists(app.getPath('userData') + '/imagecache', (exists) => {
+				if (!exists) {
+					fs.mkdirSync(app.getPath('userData') + '/imagecache');
+				}
 
-		fs.writeFileSync(this.formatUrl(url), data);
-		return 'file://' + this.formatUrl(url);
+				fs.writeFile(this.formatUrl(url), data, (err) => {
+					resolve('file://' + this.formatUrl(url));
+				});
+			});
+		});
 	}
 }
