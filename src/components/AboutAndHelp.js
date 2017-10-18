@@ -38,7 +38,7 @@ export class AboutAndHelp extends React.Component {
 
 			<p><b>DISCLAIMER</b> This tool is provided "as is", without warranty of any kind. Use at your own risk! It should be understood that <i>Star Trek Timelines</i> content and materials are trademarks and copyrights of <Link href='https://www.disruptorbeam.com/tos/' target='_blank'>Disruptor Beam, Inc.</Link> or its licensors. All rights reserved. This tool is neither endorsed by nor affiliated with Disruptor Beam, Inc..</p>
 
-			<Label>For feedback, bugs and other issues please use the <Link href='https://github.com/IAmPicard/StarTrekTimelinesSpreadsheet/issues' target='_blank'>GitHub page</Link>.</Label>
+			<Label>For feedback, bugs and other issues please use the <Link href='https://github.com/IAmPicard/StarTrekTimelinesSpreadsheet/issues' target='_blank'>GitHub page</Link>. For information about other tools for Star Trek Timelines, see <Link href='https://iampicard.github.io/' target='_blank'>here</Link>.</Label>
 		</div>;
 	}
 }

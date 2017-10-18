@@ -132,6 +132,11 @@ function shareCrewInternal(options, missionList) {
 		let exportedRoster = [];
 		let iconPromises = [];
 		STTApi.roster.forEach(rosterEntry => {
+			if (rosterEntry.buyback) {
+				// Skip buy-back crew
+				return;
+			}
+
 			var newEntry = {};
 			newEntry.name = rosterEntry.name;
 			newEntry.level = rosterEntry.level;
@@ -154,8 +159,10 @@ function shareCrewInternal(options, missionList) {
 
 		return Promise.all(iconPromises).then(() => {
 			let iconPromises = [];
-			let skillRes = CONFIG.SKILLS;
+			let skillRes = {};
 			Object.keys(CONFIG.SKILLS).forEach(skill => {
+				skillRes[skill] = {};
+				skillRes[skill].name = CONFIG.SKILLS[skill];
 				iconPromises.push(new Promise(resolve => {
 					imageToDataUri(CONFIG.SPRITES['icon_' + skill].url, skillRes[skill], resolve, 18, 18);
 				}));
