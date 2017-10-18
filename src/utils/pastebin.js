@@ -153,29 +153,39 @@ function shareCrewInternal(options, missionList) {
 		});
 
 		return Promise.all(iconPromises).then(() => {
-			data = sillyTemplatizer(templateString,
-				{
-					options: options,
-					roster: exportedRoster,
-					missionList: missionList,
-					skillRes: CONFIG.SKILLS,
-					template: options.htmlColorTheme,
-					version: require('electron').remote.app.getVersion()
-				});
+			let iconPromises = [];
+			let skillRes = CONFIG.SKILLS;
+			Object.keys(CONFIG.SKILLS).forEach(skill => {
+				iconPromises.push(new Promise(resolve => {
+					imageToDataUri(CONFIG.SPRITES['icon_' + skill].url, skillRes[skill], resolve, 18, 18);
+				}));
+			});
 
-			if (options.exportWhere == 'L') {
-				return new Promise(function (resolve, reject) {
-					fs.writeFile('export.' + options.exportType, data, function (err) {
-						if (err) { reject(err); }
-						else { resolve(); }
+			return Promise.all(iconPromises).then(() => {
+				data = sillyTemplatizer(templateString,
+					{
+						options: options,
+						roster: exportedRoster,
+						missionList: missionList,
+						skillRes: skillRes,
+						template: options.htmlColorTheme,
+						version: require('electron').remote.app.getVersion()
 					});
-				}).then(() => {
-					return Promise.resolve('export.' + options.exportType);
-				});
-			}
-			else {
-				return pastebinPost(data, options.exportType);
-			}
+
+				if (options.exportWhere == 'L') {
+					return new Promise(function (resolve, reject) {
+						fs.writeFile('export.' + options.exportType, data, function (err) {
+							if (err) { reject(err); }
+							else { resolve(); }
+						});
+					}).then(() => {
+						return Promise.resolve('export.' + options.exportType);
+					});
+				}
+				else {
+					return pastebinPost(data, options.exportType);
+				}
+			});
 		});
 	}
 	else if (options.exportType == 'json') {

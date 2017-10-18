@@ -191,7 +191,7 @@ export class EquipmentDetails extends React.Component {
 		loadFullTree().then(() => {
 			let iconPromises = [];
 			STTApi.itemArchetypeCache.archetypes.forEach((equipment) => {
-				equipment.iconUrl = CONFIG.DEFAULT_ITEM_ICON;
+				equipment.iconUrl = '';
 				iconPromises.push(STTApi.imageProvider.getItemImageUrl(equipment, equipment.id).then(({id, url}) => {
 					STTApi.itemArchetypeCache.archetypes.forEach(function (item) {
 						if ((item.id === id) && url)

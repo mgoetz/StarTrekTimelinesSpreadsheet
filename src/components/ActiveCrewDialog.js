@@ -89,7 +89,7 @@ export class VoyageLogEntry extends React.Component {
                     <span className='quest-mastery'>
                         {entry.skill_check && (
                             <span className='quest-mastery'>
-                                <Image src={CONFIG.SKILLS[entry.skill_check.skill].url} height={18} />
+                                <Image src={CONFIG.SPRITES['icon_' + entry.skill_check.skill].url} height={18} />
                                 {(entry.skill_check.passed == true)?<Icon iconName='Like' /> : <Icon iconName='Dislike' />} &nbsp;
                             </span>
                         )}
@@ -180,7 +180,7 @@ export class Voyage extends React.Component {
                                 {Object.values(this.state.voyage.skill_aggregates).map((skill) => {
                                     return (<li key={skill.skill}>
                                         <span className='quest-mastery'>
-                                            <Image src={CONFIG.SKILLS[skill.skill].url} height={18} /> &nbsp; {skill.core} ({skill.range_min}-{skill.range_max})
+                                            <Image src={CONFIG.SPRITES['icon_' + skill.skill].url} height={18} /> &nbsp; {skill.core} ({skill.range_min}-{skill.range_max})
                                         </span>
                                     </li>);
                                 })}

@@ -14,6 +14,14 @@ module.exports = `
 		body {
 			margin: 5px;
 		}
+
+<% if (true) Object.keys(skillRes).forEach(function (skill) { %>
+		img.<%skill%>  {
+    		content: url(<%skillRes[skill].iconUrl%>);
+    		height: 18px;
+    		width: 18px;
+		}
+<% }); %>
 	</style>
 </head>
 <body>
@@ -63,7 +71,7 @@ module.exports = `
 				title: "<%skillRes[skill].name%>", field: "<%skill%>_core", width: 120, responsive: 4, align: "center", formatter: function (cell, formatterParams) {
 					var crew = cell.getRow().getData();
 					if (crew.<%skill %>.core > 0)
-						return "<img src='<%skillRes[skill].url%>' /> <b>" + crew.<%skill %>.core + "</b><br/>+(" + crew.<%skill %>.min + " - " + crew.<%skill %>.max + ")";
+						return "<img class='<%skill%>' /> <b>" + crew.<%skill %>.core + "</b><br/>+(" + crew.<%skill %>.min + " - " + crew.<%skill %>.max + ")";
 					else
 						return "";
 				}
@@ -93,7 +101,7 @@ module.exports = `
 					},
 					{
 						title: "Skill", field: "skill", width: 110, align: "left", responsive: 1, formatter: function (cell, formatterParams) {
-							return "<img src='" + skillRes[cell.getValue()].url + "'/>" + skillRes[cell.getValue()].name;
+							return "<img class='" + cell.getValue() + "'/>" + skillRes[cell.getValue()].name;
 						}
 					},
 					{ title: "Roll", field: "roll", width: 80, align: "center", responsive: 1 },

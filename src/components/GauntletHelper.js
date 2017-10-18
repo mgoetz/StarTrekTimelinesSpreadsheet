@@ -36,7 +36,7 @@ class GauntletCrew extends React.Component {
 					<td>
 						{this.props.crew.skills.map(function (skill) {
 							return <span className='gauntletCrew-statline' key={skill.skill}>
-								<Image src={CONFIG.SKILLS[skill.skill].url} height={18} /> {CONFIG.SKILLS[skill.skill].name} ({skill.min} - {skill.max})
+								<Image src={CONFIG.SPRITES['icon_' + skill.skill].url} height={18} /> {CONFIG.SKILLS[skill.skill]} ({skill.min} - {skill.max})
 							</span>;
 						})}
 						<span className='gauntletCrew-statline'>Crit chance {this.props.crew.crit_chance}%</span>
@@ -202,7 +202,7 @@ export class GauntletHelper extends React.Component {
 			return (
 				<div>
 					<Label>Next gauntlet starts in {this.state.startsIn} minutes.</Label>
-					<span className='quest-mastery'>Featured skill: <Image src={CONFIG.SKILLS[this.state.featuredSkill].url} height={18} /> {CONFIG.SKILLS[this.state.featuredSkill].name}</span>
+					<span className='quest-mastery'>Featured skill: <Image src={CONFIG.SPRITES['icon_' + this.state.featuredSkill].url} height={18} /> {CONFIG.SKILLS[this.state.featuredSkill]}</span>
 					<Label>Featured traits: {this.state.traits.join(', ')}</Label>
 					<h2>Recommeded crew selection:</h2>
 					<CrewList data={this.state.recommendations} grouped={false} ref='recommendedCrew' />

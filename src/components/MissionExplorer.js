@@ -196,7 +196,7 @@ export class MissionDetails extends React.Component {
                     }
                 }
 
-                nodes.push({ id: challenge.id, label: '(' + challenge.id + ') ' + challenge.name, level: challenge.grid_x, image: CONFIG.SKILLS[challenge.skill].urlBig, shape: 'image', font: {color : color } });
+                nodes.push({ id: challenge.id, label: '(' + challenge.id + ') ' + challenge.name, level: challenge.grid_x, image: CONFIG.SPRITES['icon_' + challenge.skill].url, shape: 'image', font: {color : color } });
                 if (challenge.children) {
                     challenge.children.forEach(child => {
                         edges.push({ from: challenge.id, to: child });
@@ -271,7 +271,7 @@ export class MissionDetails extends React.Component {
         return (<div>
             <h4>{challenge.name}</h4>
             <span className='quest-mastery'>
-                Skill: <Image src={CONFIG.SKILLS[challenge.skill].url} height={18} /> {CONFIG.SKILLS[challenge.skill].name}
+                Skill: <Image src={CONFIG.SPRITES['icon_' + challenge.skill].url} height={18} /> {CONFIG.SKILLS[challenge.skill]}
             </span>
             <p>Trait bonuses: {(traitBonuses.length > 0) ? traitBonuses.reduce((prev, curr) => [prev, ', ', curr]) : 'none'}</p>
             <p>Locks: {(lockTraits.length > 0) ? lockTraits.reduce((prev, curr) => [prev, ', ', curr]) : 'none'}</p>

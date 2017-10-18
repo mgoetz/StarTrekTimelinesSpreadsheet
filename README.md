@@ -5,7 +5,6 @@ A tool to help with crew management in Star Trek Timelines
 
 **DISCLAIMER** This tool is provided "as is", without warranty of any kind. Use at your own risk!
 It should be understood that *Star Trek Timelines* content and materials are trademarks and copyrights of [Disruptor Beam, Inc.](https://www.disruptorbeam.com/tos/) or its licensors. All rights reserved. This tool is neither endorsed by nor affiliated with Disruptor Beam, Inc..
-All images (crew portraits, items) displayed in the tool are references to [stt.wiki](https://stt.wiki/wiki/Main_Page).
 
 [More tools and information here](https://iampicard.github.io/)
 
