@@ -11,6 +11,5 @@
     "skipLibCheck": true,
     "allowJs": true,
     "jsx": "preserve"
-  },
-  "exclude": ["mobile"]
+  }
 }

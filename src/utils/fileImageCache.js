@@ -1,10 +1,15 @@
 const fs = require('fs');
 const electron = require('electron');
-const app = electron.app || electron.remote.app;
 
 export class FileImageCache {
+	basePath;
+	constructor() {
+		const app = electron.app || electron.remote.app;
+		this.basePath = app.getPath('userData') + '/imagecache/';
+	}
+
 	formatUrl(url) {
-		return app.getPath('userData') + '/imagecache/' + url.substr(1).replace(new RegExp('/', 'g'), '_') + '.png';
+		return this.basePath + url.substr(1).replace(new RegExp('/', 'g'), '_') + '.png';
 	}
 
 	getImage(url) {
@@ -20,16 +25,41 @@ export class FileImageCache {
 		});
 	}
 
+	bitmapToPng(data, callback) {
+		var canvas = document.createElement('canvas');
+		canvas.height = data.height;
+		canvas.width = data.width;
+
+		var ctx = canvas.getContext('2d');
+		var myImageData = new ImageData(new Uint8ClampedArray(data.data), data.width, data.height);
+		ctx.putImageData(myImageData, 0, 0);
+
+		canvas.toBlob((blob) => {
+			let fileReader = new FileReader();
+			fileReader.onload = function (progressEvent) {
+				callback(new Uint8Array(progressEvent.target.result));
+			};
+			fileReader.readAsArrayBuffer(blob);
+		});
+	}
+
 	saveImage(url, data) {
 		return new Promise((resolve, reject) => {
-			fs.exists(app.getPath('userData') + '/imagecache', (exists) => {
+			fs.exists(this.basePath, (exists) => {
 				if (!exists) {
-					fs.mkdirSync(app.getPath('userData') + '/imagecache');
+					fs.mkdirSync(this.basePath);
 				}
 
-				fs.writeFile(this.formatUrl(url), data, (err) => {
-					resolve('file://' + this.formatUrl(url));
-				});
+				if (data.data.length > 0) {
+					this.bitmapToPng(data, (pngData) => {
+						fs.writeFile(this.formatUrl(url), pngData, (err) => {
+							resolve('file://' + this.formatUrl(url));
+						});
+					});
+				}
+				else {
+					reject('Invalid data');
+				}
 			});
 		});
 	}
