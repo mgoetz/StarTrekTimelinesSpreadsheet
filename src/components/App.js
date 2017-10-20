@@ -317,7 +317,8 @@ class App extends React.Component {
 	}
 
 	_onLogout() {
-		this.setState({ showLoginDialog: true, dataLoaded: false });
+		// TODO: Implement a logout in STTApi itself to clear out any old data before proceeding
+		this.setState({ showLoginDialog: true, dataLoaded: false, captainName: 'Welcome!', spinnerLabel: 'Loading...', secondLine: ''});
 	}
 
 	_onDataError(reason) {
@@ -344,11 +345,11 @@ class App extends React.Component {
 		if (STTApi.playerData.character.crew_avatar) {
 			STTApi.imageProvider.getCrewImageUrl(STTApi.playerData.character.crew_avatar, false, 0).then(({ id, url }) => {
 				this.setState({ captainAvatarUrl: url });
-			}).catch((error) => { });
+			}).catch((error) => { this.setState({ captainAvatarUrl: '' }); });
 
 			STTApi.imageProvider.getCrewImageUrl(STTApi.playerData.character.crew_avatar, true, 0).then(({ id, url }) => {
 				this.setState({ captainAvatarBodyUrl: url });
-			}).catch((error) => { });
+			}).catch((error) => { this.setState({ captainAvatarBodyUrl: '' }); });
 		}
 
 		this.refs.crewList.filter('');
