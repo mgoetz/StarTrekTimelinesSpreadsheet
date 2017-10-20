@@ -216,7 +216,7 @@ export class GauntletHelper extends React.Component {
 					<Label>Crew refeshes in {Math.floor(this.state.gauntlet.seconds_to_next_crew_refresh / 60)} minutes and the gauntlet ends in {Math.floor(this.state.gauntlet.seconds_to_end / 60)} minutes</Label>
 					<Label>Your rank is {this.state.roundOdds.rank} and you have {this.state.roundOdds.consecutive_wins} consecutive wins</Label>
 					<span><h3>Your crew stats <DefaultButton onClick={this._reloadGauntletData} text='Reload data' iconProps={{ iconName: 'Refresh' }} /></h3></span>
-					<div style={{ display: 'flex' }} >
+					<div style={{ display: 'flex', width: '95%' }} >
 						{this.state.gauntlet.contest_data.selected_crew.map(function (crew) {
 							return <GauntletCrew key={crew.crew_id} crew={crew} />;
 						})}

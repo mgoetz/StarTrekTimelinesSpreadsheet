@@ -9,6 +9,10 @@ import { CONFIG } from 'sttapi';
 
 export class CaptainCard extends React.Component {
 	render() {
+		if (!STTApi.loggedIn) {
+			return <span/>;
+		}
+
 		return (<div className="ui inverted segment">
 			<div className="ui two column grid">
 			<div className="row">
@@ -57,11 +61,7 @@ export class CaptainCard extends React.Component {
 						</div>
 					</div>
 					<button className="ui primary button" onClick={() => this.props.onLogout()}><i className="icon sign out"></i>Logout</button>
-					<button className="ui primary button" onClick={() => this.setState({ loggedIn: false })}><i className="icon refresh"></i>Refresh inventory</button>
-					<br />
-					<div className="ui">
-						<i>Note:</i> refershing the inventory will <b>not</b> recalculate crew recommendations. Please restart the app for that!
-					</div>
+					<button className="ui primary button" onClick={() => this.props.onRefresh()}><i className="icon refresh"></i>Refresh everything</button>
 				</div>
 			</div>
 		</div>

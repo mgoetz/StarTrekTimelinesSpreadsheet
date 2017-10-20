@@ -74,6 +74,7 @@ class App extends React.Component {
 		this._captainButtonElement = null;
 		this._onAccessToken = this._onAccessToken.bind(this);
 		this._onLogout = this._onLogout.bind(this);
+		this._onRefresh = this._onRefresh.bind(this);
 		this._getCommandItems = this._getCommandItems.bind(this);
 		this._onShare = this._onShare.bind(this);
 		this._onCaptainClicked = this._onCaptainClicked.bind(this);
@@ -96,6 +97,11 @@ class App extends React.Component {
 	}
 
 	_onCaptainClicked() {
+		if (!STTApi.loggedIn) {
+			this._onLogout();
+			return;
+		}
+
 		if (!this.state.showSpinner)
 			this.setState({ isCaptainCalloutVisible: !this.state.isCaptainCalloutVisible });
 	}
@@ -140,7 +146,7 @@ class App extends React.Component {
 								onDismiss={this._onCaptainCalloutDismiss}
 								setInitialFocus={true}
 							>
-								<CaptainCard captainAvatarBodyUrl={this.state.captainAvatarBodyUrl} onLogout={this._onLogout} />
+								<CaptainCard captainAvatarBodyUrl={this.state.captainAvatarBodyUrl} onLogout={this._onLogout} onRefresh={this._onRefresh} />
 							</Callout>
 						)}
 					</div>
@@ -317,8 +323,17 @@ class App extends React.Component {
 	}
 
 	_onLogout() {
-		// TODO: Implement a logout in STTApi itself to clear out any old data before proceeding
+		this.setState({ isCaptainCalloutVisible: false });
+		STTApi.refreshEverything(true);
 		this.setState({ showLoginDialog: true, dataLoaded: false, captainName: 'Welcome!', spinnerLabel: 'Loading...', secondLine: ''});
+		this.refs.loginDialog._showDialog('');
+	}
+
+	_onRefresh() {
+		this.setState({ isCaptainCalloutVisible: false });
+		STTApi.refreshEverything(false);
+		this.setState({ dataLoaded: false, spinnerLabel: 'Refreshing...'});
+		this._onAccessToken();
 	}
 
 	_onDataError(reason) {
