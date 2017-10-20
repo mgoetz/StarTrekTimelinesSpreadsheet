@@ -1,4 +1,4 @@
-import '../assets/css/lcars.css';
+import '../assets/css/semantic.min.css';
 
 import React, { Component } from 'react';
 import { Image, ImageFit } from 'office-ui-fabric-react/lib/Image';
@@ -9,72 +9,63 @@ import { CONFIG } from 'sttapi';
 
 export class CaptainCard extends React.Component {
 	render() {
-		return (
-			<div className='lcars-container'>
-				<div className="lcars-row spaced">
-					<div className="lcars-column u-2-8 lcars-elbow left bottom lcars-blue-bg">
-						<a style={{ fontSize: 'x-small', color: 'black' }} >DBID: {STTApi.playerData.dbid}</a>
-					</div>
+		return (<div className="ui inverted segment">
+			<div className="ui two column grid">
+			<div className="row">
+				<div className="column four wide center aligned">
+					<img className="ui image small" src={this.props.captainAvatarBodyUrl} />
+				</div>
+				<div className="column twelve wide">
+					<div className="ui raised inverted segment">
+						<div className="ui black medium label">
+							DBID {STTApi.playerData.dbid}
+						</div>
+						<div className="ui black medium label">
+							Location {STTApi.playerData.character.navmap.places.find((place) => { return place.symbol == STTApi.playerData.character.location.place; }).display_name}
+						</div>
 
-					<div className="lcars-column u-4-8 lcars-divider lcars-blue-tan-divide">
-						<div className="lcars-row">
-							<div className="lcars-column u-1-2">
-								<h3 className="right">{STTApi.playerData.character.display_name}</h3>
-							</div>
-							<div className="lcars-column u-1-2">
-								<span className="right"><DefaultButton text='Logout' /></span>
-							</div>
+						<div className="ui black large image label">
+							<img src={CONFIG.SPRITES['energy_icon'].url} className="ui" />
+							{Math.min(Math.floor(STTApi.playerData.character.seconds_from_replay_energy_basis / STTApi.playerData.character.replay_energy_rate), STTApi.playerData.character.replay_energy_max) + STTApi.playerData.character.replay_energy_overflow}
+
+						</div>
+
+						<div className="ui black large image label">
+							<img src={CONFIG.SPRITES['images_currency_pp_currency_0'].url} className="ui" />
+							{STTApi.playerData.premium_purchasable}
+						</div>
+
+						<div className="ui black large image label">
+							<img src={CONFIG.SPRITES['images_currency_pe_currency_0'].url} className="ui" />
+							{STTApi.playerData.premium_earnable}
+
+						</div>
+
+						<div className="ui black large image label">
+							<img src={CONFIG.SPRITES['images_currency_honor_currency_0'].url} className="ui" />
+							{STTApi.playerData.honor}
+						</div>
+
+						<div className="ui black large image label">
+							<img src={CONFIG.SPRITES['images_currency_sc_currency_0'].url} className="ui" />
+							{STTApi.playerData.money}
+						</div>
+
+						<div className="ui black large image label">
+							<img src={CONFIG.SPRITES['cadet_icon'].url} className="ui" />
+							{STTApi.playerData.character.cadet_tickets.current} / {STTApi.playerData.character.cadet_tickets.max}
 						</div>
 					</div>
-
-					<div className="lcars-column u-2-8 lcars-elbow right bottom lcars-tan-bg">
-						<a style={{ fontSize: 'x-small', color: 'black' }} >&nbsp;&nbsp; {STTApi.playerData.character.navmap.places.find(function (place) { return place.symbol == STTApi.playerData.character.location.place; }.bind(this)).display_name}</a>
+					<button className="ui primary button" onClick={() => this.props.onLogout()}><i className="icon sign out"></i>Logout</button>
+					<button className="ui primary button" onClick={() => this.setState({ loggedIn: false })}><i className="icon refresh"></i>Refresh inventory</button>
+					<br />
+					<div className="ui">
+						<i>Note:</i> refershing the inventory will <b>not</b> recalculate crew recommendations. Please restart the app for that!
 					</div>
 				</div>
-
-				<div className="lcars-row">
-					<div className="lcars-column u-2-8">
-						<ul className="lcars-menu left">
-							<li className="lcars-blue-bg">Level {STTApi.playerData.character.level}</li>
-							<li className="lcars-blue-bg">VIP {STTApi.playerData.vip_level} ({STTApi.playerData.vip_points} pts)</li>
-							<li className="lcars-tan-bg">XP {STTApi.playerData.character.xp}</li>
-							<li className="lcars-tan-bg"><img src={CONFIG.SPRITES['cadet_icon'].url} height='22px' width='22px' /> {STTApi.playerData.character.cadet_tickets.current} / {STTApi.playerData.character.cadet_tickets.max} cadet</li>
-							<li className="lcars-tan-bg"><img src={CONFIG.SPRITES['victory_point_icon'].url} height='22px' width='22px' /> {STTApi.playerData.replicator_uses_today} / {STTApi.playerData.replicator_limit} replicator</li>
-						</ul>
-					</div>
-
-					<div className="lcars-column u-4-8 lcars-middle">
-						<div className="lcars-row">
-							<div className="lcars-column u-1-1">
-								<Image src={this.props.captainAvatarBodyUrl} height={180} />
-							</div>
-						</div>
-					</div>
-
-					<div className="lcars-column u-2-8">
-						<ul className="lcars-menu right">
-							<li className="lcars-salmon-bg"><img src={CONFIG.SPRITES['energy_icon'].url} height='22px' width='22px' /> {Math.min(Math.floor(STTApi.playerData.character.seconds_from_replay_energy_basis / STTApi.playerData.character.replay_energy_rate), STTApi.playerData.character.replay_energy_max) + STTApi.playerData.character.replay_energy_overflow}</li>
-							<li className="lcars-salmon-bg"><img src={CONFIG.SPRITES['images_currency_pp_currency_0'].url} height='22px' width='22px' /> {STTApi.playerData.premium_purchasable}</li>
-							<li className="lcars-salmon-bg"><img src={CONFIG.SPRITES['images_currency_pe_currency_0'].url} height='22px' width='22px' /> {STTApi.playerData.premium_earnable}</li>
-							<li className="lcars-salmon-bg"><img src={CONFIG.SPRITES['images_currency_honor_currency_0'].url} height='22px' width='22px' /> {STTApi.playerData.honor}</li>
-							<li className="lcars-salmon-bg"><img src={CONFIG.SPRITES['images_currency_sc_currency_0'].url} height='22px' width='22px' /> {STTApi.playerData.money}</li>
-						</ul>
-					</div>
-				</div>
-
-				<div className="lcars-row spaced">
-					<div className="lcars-column u-2-8 lcars-elbow left top lcars-tan-bg">
-					</div>
-
-					<div className="lcars-column u-4-8 lcars-divider bottom lcars-tan-blue-divide">
-						<div className="lcars-row">
-							<div className="lcars-column u-1-1">&nbsp;</div>
-						</div>
-					</div>
-
-					<div className="lcars-column u-2-8 lcars-elbow right top lcars-blue-bg">
-					</div>
-				</div>
-			</div>);
+			</div>
+		</div>
+		<br />
+		</div>);
 	}
 }

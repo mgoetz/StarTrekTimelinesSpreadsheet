@@ -73,6 +73,7 @@ class App extends React.Component {
 
 		this._captainButtonElement = null;
 		this._onAccessToken = this._onAccessToken.bind(this);
+		this._onLogout = this._onLogout.bind(this);
 		this._getCommandItems = this._getCommandItems.bind(this);
 		this._onShare = this._onShare.bind(this);
 		this._onCaptainClicked = this._onCaptainClicked.bind(this);
@@ -139,7 +140,7 @@ class App extends React.Component {
 								onDismiss={this._onCaptainCalloutDismiss}
 								setInitialFocus={true}
 							>
-								<CaptainCard captainAvatarBodyUrl={this.state.captainAvatarBodyUrl} />
+								<CaptainCard captainAvatarBodyUrl={this.state.captainAvatarBodyUrl} onLogout={this._onLogout} />
 							</Callout>
 						)}
 					</div>
@@ -315,6 +316,10 @@ class App extends React.Component {
 			.catch(this._onDataError);
 	}
 
+	_onLogout() {
+		this.setState({ showLoginDialog: true, dataLoaded: false });
+	}
+
 	_onDataError(reason) {
 		this.setState({ showSpinner: false });
 		this.refs.loginDialog._showDialog('Network error:' + reason);
@@ -345,6 +350,8 @@ class App extends React.Component {
 				this.setState({ captainAvatarBodyUrl: url });
 			}).catch((error) => { });
 		}
+
+		this.refs.crewList.filter('');
 	}
 }
 

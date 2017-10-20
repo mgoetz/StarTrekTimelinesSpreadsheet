@@ -390,6 +390,7 @@ export class MissionExplorer extends React.Component {
     loadOptions(onlyIncomplete) {
         let options = [];
         STTApi.missions.forEach(function (mission) {
+            if (mission.quests.length == 0) return;
             if (onlyIncomplete && (mission.stars_earned == mission.total_stars)) return;
 
             var missionLabel = (mission.quests[0].cadet ? 'CADET - ' : '') + mission.episode_title;
