@@ -107,9 +107,3 @@ There is no server associated with this tool, all state stays on your device. He
 The tool never stores your username or password and it only sends it to DisruptorBeam's official servers for login purposes. If you check the "Stay logged in" checkbox in the login dialog, the tool will store an access_token on your local device in the IndexedDB database.
 
 I encourage you to only use a version of the tool from a trusted source (such as the [Releases](https://github.com/IAmPicard/StarTrekTimelinesSpreadsheet/releases) page on GitHub). If a "well intentioned" person online offers to send you a modified version with "extra features" ask for the source code and manually compare against what's here in the repo to ensure no malicious functionality was added.
-
-## Command line version of the tool
-**NOTE: The command-line version of the tool is deprecated, all new development happens in the GUI version!**
-
-
-[See details here for the command line version of the tool](/docs/CLI.MD)
