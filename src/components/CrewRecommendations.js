@@ -115,7 +115,7 @@ export class VoyageCrew extends React.Component {
 		super(props);
 
 		let voyage = STTApi.playerData.character.voyage[0];
-		if (voyage.state != 'unstarted') {
+		if (voyage.state == 'unstarted') {
 			// Best ship
 			let consideredShips = [];
 			STTApi.ships.forEach(ship => {
@@ -221,7 +221,6 @@ export class VoyageCrew extends React.Component {
 
 	render() {
 		if (this.state.voyageRecommendations) {
-
 			let shipSpans = [];
 			this.state.voyageRecommendations.consideredShips.forEach(entry => {
 				shipSpans.push(<span key={entry.ship.id}>{entry.score} - {entry.ship.name}</span>);
