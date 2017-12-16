@@ -7,6 +7,8 @@ import { DefaultButton } from 'office-ui-fabric-react/lib/Button';
 import STTApi from 'sttapi';
 import { CONFIG } from 'sttapi';
 
+import { ipcRenderer } from 'electron';
+
 export class CaptainCard extends React.Component {
 	render() {
 		if (!STTApi.loggedIn) {
@@ -61,7 +63,8 @@ export class CaptainCard extends React.Component {
 						</div>
 					</div>
 					<button className="ui primary button" onClick={() => this.props.onLogout()}><i className="icon sign out"></i>Logout</button>
-					<button className="ui primary button" onClick={() => this.props.onRefresh()}><i className="icon refresh"></i>Refresh everything</button>
+					<button className="ui primary button" onClick={() => this.props.onRefresh()}><i className="icon refresh"></i>Refresh</button>
+					<button className="ui icon button" onClick={() => ipcRenderer.send("open-dev-tools", "")}><i className="icon bug"></i></button>
 				</div>
 			</div>
 		</div>

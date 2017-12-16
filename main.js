@@ -81,6 +81,10 @@ function createWindow() {
   });
 }
 
+ipcMain.on("open-dev-tools",function (event, arg) {
+  mainWindow.webContents.openDevTools();
+});
+
 ipcMain.on("fb-authenticate",function (event, arg) {
   var options = {
     client_id: "322613001274224",
