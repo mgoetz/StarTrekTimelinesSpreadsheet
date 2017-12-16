@@ -359,8 +359,8 @@ export class MissionDetails extends React.Component {
                             Cadet requirements: <span dangerouslySetInnerHTML={this.htmlDecode(this.state.mission.crew_requirement.description)} />
                         </div>
                     )}
-                </td><td style={{ width: '50%', height:'100%' }}>
-                        <div ref='visGraph' style={{ border: '1px solid lightgray', height:'100%' }} />
+                </td><td style={{ width: '50%', minHeight:'280px' }}>
+                        <div ref='visGraph' style={{ border: '1px solid lightgray' }} />
                 </td></tr>
                 <tr><td colSpan={2}>
                     {crewSelectionLog}
