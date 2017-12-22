@@ -77,7 +77,17 @@ You can inspect the active state of crew by clicking on the little "baloon" icon
 ## Development environment
 
 ### To get started:
+* Initialize the submodules with `git submodule init` and `git submodule update`
 * Run `npm install`
+
+#### Manual hacks required
+After running npm install, go into node_modules\binary-parser\lib\binary_parser.js, at line 221, and comment out these 3 lines of code:
+```
+    /*ctx.pushCode('if (!Buffer.isBuffer(buffer)) {');
+    ctx.generateError('"argument buffer is not a Buffer object"');
+    ctx.pushCode('}');*/
+```
+Then go into node_modules\vis\dist\vis.css and replace `url("img` with `url("/img`.
 
 ##### Development
 * Run `npm run dev` to start webpack-dev-server. Electron will launch automatically after compilation.
