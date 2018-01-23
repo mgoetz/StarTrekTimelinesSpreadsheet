@@ -263,7 +263,6 @@ class App extends React.Component {
 								shell.openItem(filePath);
 							});
 						}.bind(this));
-
 				}.bind(this)
 			},
 			{

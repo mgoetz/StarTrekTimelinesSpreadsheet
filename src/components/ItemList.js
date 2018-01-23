@@ -1,10 +1,10 @@
 import React, { Component } from 'react';
 import { DetailsList, DetailsListLayoutMode, SelectionMode } from 'office-ui-fabric-react/lib/DetailsList';
 import { Image, ImageFit } from 'office-ui-fabric-react/lib/Image';
-import { Rating, RatingSize } from 'office-ui-fabric-react/lib/Rating';
 import { Link } from 'office-ui-fabric-react/lib/Link';
 
 import { ItemDisplay } from './ItemDisplay.js';
+import { RarityStars } from './RarityStars';
 
 import { sortItems, columnClick } from '../utils/listUtils.js';
 
@@ -46,10 +46,10 @@ export class ItemList extends React.Component {
 					fieldName: 'rarity',
 					onRender: (item) => {
 						return (
-							<Rating
+							<RarityStars
 								min={1}
 								max={item.rarity}
-								rating={item.rarity}
+								value={item.rarity}
 							/>
 						);
 					},

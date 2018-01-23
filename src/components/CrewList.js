@@ -1,13 +1,13 @@
 import React, { Component } from 'react';
 import { DetailsList, DetailsListLayoutMode, SelectionMode } from 'office-ui-fabric-react/lib/DetailsList';
 import { Image, ImageFit } from 'office-ui-fabric-react/lib/Image';
-import { Rating, RatingSize } from 'office-ui-fabric-react/lib/Rating';
 import { Link } from 'office-ui-fabric-react/lib/Link';
 import { Icon } from 'office-ui-fabric-react/lib/Icon';
 import { IconButton, IButtonProps } from 'office-ui-fabric-react/lib/Button';
 
-import { SkillCell } from './SkillCell.js';
-import { ActiveCrewDialog } from './ActiveCrewDialog.js';
+import { SkillCell } from './SkillCell';
+import { ActiveCrewDialog } from './ActiveCrewDialog';
+import { RarityStars } from './RarityStars';
 
 import { sortItems, columnClick } from '../utils/listUtils.js';
 
@@ -95,10 +95,10 @@ export class CrewList extends React.Component {
 				isResizable: true,
 				onRender: (item) => {
 					return (
-						<Rating
+						<RarityStars
 							min={1}
 							max={item.max_rarity}
-							rating={item.rarity ? item.rarity : null}
+							value={item.rarity ? item.rarity : null}
 						/>
 					);
 				},

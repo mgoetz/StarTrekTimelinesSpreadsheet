@@ -4,9 +4,10 @@ import { Link } from 'office-ui-fabric-react/lib/Link';
 import { Icon } from 'office-ui-fabric-react/lib/Icon';
 import { DetailsList, DetailsListLayoutMode, SelectionMode } from 'office-ui-fabric-react/lib/DetailsList';
 import { Image, ImageFit } from 'office-ui-fabric-react/lib/Image';
-import { Rating, RatingSize } from 'office-ui-fabric-react/lib/Rating';
+import { PrimaryButton } from 'office-ui-fabric-react/lib/Button';
 
 import { CollapsibleSection } from './CollapsibleSection.js';
+import { RarityStars } from './RarityStars';
 
 import { loginPubNub } from '../utils/chat.js';
 import { sortItems, columnClick } from '../utils/listUtils.js';
@@ -103,10 +104,40 @@ export class MemberList extends React.Component {
 		};
 
 		this._onColumnClick = this._onColumnClick.bind(this);
+		this._exportCSV = this._exportCSV.bind(this);
 	}
 
 	_onColumnClick(ev, column) {
 		this.setState(columnClick(this.state.members, this.state.columns, column));
+	}
+
+	_exportCSV() {
+		const { dialog } = require('electron').remote;
+		const { shell } = require('electron');
+		let today = new Date();
+		dialog.showSaveDialog(
+			{
+				filters: [{ name: 'Comma separated file (*.csv)', extensions: ['csv'] }],
+				title: 'Export fleet member list',
+				defaultPath: STTApi.fleetData.name + '-' + (today.getUTCMonth() + 1) + '-' + (today.getUTCDate())+ '.csv',
+				buttonLabel: 'Export'
+			},
+			function (fileName) {
+				if (fileName === undefined)
+					return;
+
+				const json2csv = require('json2csv');
+				const fs = require('fs');
+
+				var fields = ['display_name', 'rank', 'squad_name', 'squad_rank', 'last_active', 'event_rank', 'starbase_activity', 'daily_activity'];
+				var csv = json2csv({ data: this.state.members, fields: fields });
+
+				fs.writeFile(fileName, csv, function (err) {
+					if (!err) {
+						shell.openItem(fileName);
+					}
+				});
+			}.bind(this));
 	}
 
 	render() {
@@ -119,6 +150,7 @@ export class MemberList extends React.Component {
 				layoutMode={DetailsListLayoutMode.justified}
 				onColumnHeaderClick={this._onColumnClick}
 			/>
+			<PrimaryButton onClick={this._exportCSV} text='Export member list as CSV...' />
 		</CollapsibleSection>);
 	}
 }
@@ -129,7 +161,7 @@ export class Starbase extends React.Component {
 			<ul>
 				{STTApi.starbaseRooms.map(function (room) {
 					return <li key={room.id}>
-						<span className='starbase-room'><span className='starbase-room-name'>{room.name}</span><Rating size={RatingSize.Small} min={1} max={room.max_level} rating={(room.level > 0) ? room.level : null} /></span>
+						<span className='starbase-room'><span className='starbase-room-name'>{room.name}</span><RarityStars min={1} max={room.max_level} value={(room.level > 0) ? room.level : null} /></span>
 						{(room.level > 0) &&
 							<ul>
 								{room.upgrades.slice(0, room.level + 1).map(function (upgrade) {

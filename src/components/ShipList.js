@@ -1,7 +1,8 @@
 import React, { Component } from 'react';
 import { DetailsList, DetailsListLayoutMode, SelectionMode } from 'office-ui-fabric-react/lib/DetailsList';
-import { Rating, RatingSize } from 'office-ui-fabric-react/lib/Rating';
 import { Image, ImageFit } from 'office-ui-fabric-react/lib/Image';
+
+import { RarityStars } from './RarityStars';
 
 import { sortItems, columnClick } from '../utils/listUtils.js';
 import STTApi from 'sttapi';
@@ -45,10 +46,10 @@ export class ShipList extends React.Component {
 					isResizable: true,
 					onRender: (item) => {
 						return (
-							<Rating
+							<RarityStars
 								min={1}
 								max={item.max_level}
-								rating={(item.level > 0) ? item.level : null}
+								value={(item.level > 0) ? item.level : null}
 							/>
 						);
 					},
@@ -63,10 +64,10 @@ export class ShipList extends React.Component {
 					fieldName: 'rarity',
 					onRender: (item) => {
 						return (
-							<Rating
+							<RarityStars
 								min={1}
 								max={item.rarity}
-								rating={item.rarity}
+								value={item.rarity}
 							/>
 						);
 					},

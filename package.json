@@ -1,6 +1,6 @@
 {
   "name": "startrektimelinestool",
-  "version": "0.6.0",
+  "version": "0.6.1",
   "description": "Tool for managing Star Trek Timelines crew",
   "author": "IAmPicard",
   "homepage": "https://github.com/IAmPicard/StarTrekTimelinesSpreadsheet",
@@ -25,11 +25,11 @@
     "babel-preset-es2015-node": "latest",
     "babel-preset-react": "latest",
     "css-loader": "latest",
-    "electron": "1.7.9",
+    "electron": "1.7.11",
     "electron-builder": "latest",
     "electron-packager": "latest",
     "extract-text-webpack-plugin": "latest",
-    "file-loader": "^1.1.6",
+    "file-loader": "latest",
     "html-webpack-plugin": "latest",
     "react": "latest",
     "react-dom": "latest",
@@ -39,7 +39,7 @@
     "tslint-config-standard": "latest",
     "tslint-loader": "latest",
     "typescript": "latest",
-    "url-loader": "^0.6.2",
+    "url-loader": "latest",
     "webpack": "latest",
     "webpack-dev-server": "latest",
     "worker-loader": "latest"
@@ -52,9 +52,9 @@
     "json2csv": "latest",
     "office-ui-fabric-react": "^4.0.0",
     "pubnub": "latest",
-    "sttapi": "file:./STTApi",
+    "sttapi": "file:sttapi",
     "url-search-params-polyfill": "latest",
-    "uuid": "latest",
-    "vis": "^4.20.1"
+    "uuid": "^3.2.1",
+    "vis": "^4.21.0"
   }
 }

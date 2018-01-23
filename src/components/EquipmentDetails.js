@@ -1,6 +1,5 @@
 import React, { Component } from 'react';
 import { Image, ImageFit } from 'office-ui-fabric-react/lib/Image';
-import { Rating, RatingSize } from 'office-ui-fabric-react/lib/Rating';
 import { ChoiceGroup, IChoiceGroupOption } from 'office-ui-fabric-react/lib/ChoiceGroup';
 import { Spinner, SpinnerSize } from 'office-ui-fabric-react/lib/Spinner';
 import uuidv4 from 'uuid/v4';
