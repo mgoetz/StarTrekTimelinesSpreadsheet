@@ -244,7 +244,7 @@ export class MissionDetails extends React.Component {
                 lockTraits.push(<span key={lock.trait}>{STTApi.getTraitName(lock.trait)}</span>);
             }
             else {
-                lockTraits.push(<span key='s{lock.success_on_node_id}'>Success on {mission.challenges.find(item => item.id == lock.success_on_node_id).name}</span>);
+                lockTraits.push(<span key={lock.success_on_node_id}>Success on {mission.challenges.find(item => item.id == lock.success_on_node_id).name}</span>);
             }
         });
 
