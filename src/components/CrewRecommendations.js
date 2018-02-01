@@ -3,6 +3,7 @@ import { Spinner, SpinnerSize } from 'office-ui-fabric-react/lib/Spinner';
 import { Icon } from 'office-ui-fabric-react/lib/Icon';
 import { Image, ImageFit } from 'office-ui-fabric-react/lib/Image';
 import { Persona, PersonaSize, PersonaPresence } from 'office-ui-fabric-react/lib/Persona';
+import { PrimaryButton, DefaultButton } from 'office-ui-fabric-react/lib/Button';
 
 import { CrewList } from './CrewList.js';
 import { CollapsibleSection } from './CollapsibleSection.js';
@@ -136,6 +137,8 @@ export class VoyageCrew extends React.Component {
 				this.setState({ voyageRecommendations: result, state: 'done' });
 			});
 		}
+
+		this._exportVoyageData = this._exportVoyageData.bind(this);
 	}
 
 	render() {
@@ -178,8 +181,33 @@ export class VoyageCrew extends React.Component {
                 	{crewSpans}
             	</div>
 				<p>Estimated duration: <b>{this.state.voyageRecommendations.estimatedDuration.toFixed(2)} hours</b></p>
+				<PrimaryButton onClick={this._exportVoyageData} text='Export for external tool' />
 			</CollapsibleSection>);
 		}
+	}
+
+	_exportVoyageData() {
+		let dataToExport = {
+			crew: STTApi.roster.map(crew => new Object({
+				id: crew.id,
+				name: crew.name,
+				frozen: crew.frozen,
+				traits: crew.rawTraits,
+				command_skill: crew.command_skill,
+				science_skill: crew.science_skill,
+				security_skill: crew.security_skill,
+				engineering_skill: crew.engineering_skill,
+				diplomacy_skill: crew.diplomacy_skill,
+				medicine_skill: crew.medicine_skill,
+				iconUrl: crew.iconUrl
+			})),
+			voyage_skills: STTApi.playerData.character.voyage_descriptions[0].skills,
+			voyage_crew_slots: STTApi.playerData.character.voyage_descriptions[0].crew_slots
+		}
+
+		const fs = require('fs');
+		fs.writeFile('voyageRecommendations.json', JSON.stringify(dataToExport), function (err) {
+		});
 	}
 }
 
