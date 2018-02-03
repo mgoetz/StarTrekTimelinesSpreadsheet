@@ -1,0 +1,16 @@
+{
+  "main": "index.js",
+  "scripts": {
+    "configure": "node-gyp configure",
+    "build": "node-gyp build",
+    "test": "mocha"
+  },
+  "devDependencies": {
+    "nan": "latest",
+    "mocha": "latest",
+    "node-gyp": "latest"
+  },
+  "dependencies": {
+    "bindings": "latest"
+  }
+}
